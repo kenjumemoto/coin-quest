@@ -1,0 +1,1510 @@
+<meta charset="utf-8">
+<title>コインクエスト</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="コインクエスト">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=M+PLUS+Rounded+1c:wght@500;800&family=Fredoka:wght@500;700&family=DotGothic16&family=Press+Start+2P&display=swap">
+<style>
+  :root {
+    --sky: #8fd3f4;
+    --sky-deep: #5db4e6;
+    --grass: #63c74d;
+    --grass-dark: #3e8e41;
+    --dirt: #8b5a2b;
+    --dirt-dark: #5c3a1b;
+    --stone: #9aa0a6;
+    --stone-dark: #5f6368;
+    --gold: #f6c343;
+    --gold-dark: #c98a12;
+    --paper: #fffaf0;
+    --ink: #2b2118;
+    --ink-soft: #6b5b4e;
+    --ok: #4cbb3a;
+    --ok-dark: #2f8a25;
+    --oops: #f28b3b;
+    --oops-dark: #c25f12;
+    --blue: #3f8fe0;
+    --blue-dark: #235e9c;
+    --font-ja: "M PLUS Rounded 1c", "Hiragino Maru Gothic ProN", "Hiragino Sans", sans-serif;
+    --font-en: "Fredoka", "M PLUS Rounded 1c", "Arial Rounded MT Bold", sans-serif;
+    --font-pixel: "DotGothic16", "M PLUS Rounded 1c", monospace;
+  }
+  html, body { height: 100%; }
+  [hidden] { display: none !important; }
+  body {
+    margin: 0;
+    background: var(--sky);
+    background-image: linear-gradient(180deg, var(--sky) 0%, #bfe9fb 100%);
+    color: var(--ink);
+    font-family: var(--font-ja);
+    font-weight: 500;
+    -webkit-user-select: none; user-select: none;
+    -webkit-tap-highlight-color: transparent;
+    overflow: hidden;
+    touch-action: manipulation;
+  }
+  #app {
+    position: relative;
+    height: 100%;
+    display: flex; flex-direction: column;
+    padding-inline: 16px;
+    padding-block: 12px;
+    box-sizing: border-box;
+    max-width: 760px;
+    margin: 0 auto;
+  }
+  /* ground strip */
+  .ground {
+    position: fixed; left: 0; right: 0; bottom: 0; height: 56px;
+    background:
+      linear-gradient(180deg, var(--grass) 0 14px, var(--grass-dark) 14px 18px, var(--dirt) 18px 100%);
+    background-size: 100% 100%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .ground::before {
+    content: ""; position: absolute; inset: 0;
+    background-image:
+      repeating-linear-gradient(90deg, transparent 0 28px, rgba(0,0,0,.08) 28px 32px);
+    opacity: .6;
+  }
+  .cloud {
+    position: fixed; top: 6%; width: 120px; height: 36px; background: #fff; opacity: .85;
+    border-radius: 0; z-index: 0; pointer-events: none;
+    box-shadow: 24px -18px 0 0 #fff, 56px -12px 0 0 #fff, 76px 6px 0 0 #fff;
+    animation: drift 60s linear infinite;
+  }
+  .cloud.c2 { top: 16%; left: 70%; animation-duration: 85s; animation-delay: -30s; transform: scale(.7); }
+  @keyframes drift { from { left: -160px; } to { left: 110%; } }
+  .cloud.c2 { animation-name: drift2; }
+  @keyframes drift2 { from { left: -160px; } to { left: 110%; } }
+  @media (prefers-reduced-motion: reduce) { .cloud { animation: none; left: 10%; } .cloud.c2 { left: 70%; } }
+
+  .screen {
+    position: relative; z-index: 1;
+    flex: 1; display: flex; flex-direction: column; min-height: 0; overflow-y: auto;
+  }
+
+  /* --- top bar --- */
+  .topbar {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    min-height: 44px;
+  }
+  .wallet {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--paper); border: 3px solid var(--dirt-dark);
+    padding: 4px 12px 4px 6px; font-family: var(--font-en); font-weight: 700; font-size: 22px;
+    font-variant-numeric: tabular-nums;
+    box-shadow: 0 4px 0 var(--dirt-dark);
+  }
+  .coin {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 30px; height: 30px; border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #fff3b0, var(--gold) 55%, var(--gold-dark));
+    border: 2px solid var(--gold-dark); color: #7a4c00;
+    font-family: var(--font-en); font-weight: 700; font-size: 15px; line-height: 1;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,.15);
+  }
+  .coin.sm { width: 24px; height: 24px; font-size: 12px; }
+
+  /* --- blocks (buttons) --- */
+  .btn {
+    appearance: none; border: 0; cursor: pointer; font-family: var(--font-ja); font-weight: 800;
+    color: #fff; background: var(--blue); border: 3px solid var(--blue-dark);
+    box-shadow: 0 6px 0 var(--blue-dark);
+    padding: 14px 24px; font-size: 22px; line-height: 1.2;
+    transition: transform .05s ease, box-shadow .05s ease;
+    text-shadow: 0 2px 0 rgba(0,0,0,.25);
+  }
+  .btn:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--blue-dark); }
+  .btn:focus-visible { outline: 4px solid #fff; outline-offset: 2px; }
+  .btn.big { font-size: 30px; padding: 20px 40px; }
+  .btn.green { background: var(--grass); border-color: var(--grass-dark); box-shadow: 0 6px 0 var(--grass-dark); }
+  .btn.green:active { box-shadow: 0 1px 0 var(--grass-dark); }
+  .btn.gold { background: var(--gold); border-color: var(--gold-dark); box-shadow: 0 6px 0 var(--gold-dark); color: #5a3a00; text-shadow: none; }
+  .btn.gold:active { box-shadow: 0 1px 0 var(--gold-dark); }
+  .btn.ghost { background: var(--paper); border-color: var(--stone-dark); box-shadow: 0 6px 0 var(--stone-dark); color: var(--ink); text-shadow: none; }
+  .btn.ghost:active { box-shadow: 0 1px 0 var(--stone-dark); }
+  .btn.small { font-size: 16px; padding: 8px 14px; box-shadow: 0 4px 0 var(--stone-dark); }
+  .btn.small:active { box-shadow: 0 1px 0 var(--stone-dark); }
+  /* the "next" block: pressed after a miss, so make it the easiest thing to hit */
+  .btn.next {
+    background: var(--grass); border-color: var(--grass-dark); color: #fff;
+    box-shadow: 0 7px 0 var(--grass-dark); text-shadow: 0 2px 0 rgba(0,0,0,.25);
+    font-size: clamp(24px, 5vw, 32px); padding: 18px 36px;
+    min-height: 68px; min-width: 220px;
+  }
+  .btn.next:active { transform: translateY(6px); box-shadow: 0 1px 0 var(--grass-dark); }
+  .btn[disabled] { opacity: .55; cursor: default; }
+
+  /* --- home --- */
+  .home-center {
+    margin-block: auto; display: flex; flex-direction: column; align-items: center; gap: 22px;
+    text-align: center; padding-block: 8px;
+  }
+  /* --- Minecraft-style logo --- */
+  .logo-wrap { position: relative; display: inline-block; padding-bottom: 30px; }
+  .logo {
+    position: relative; display: inline-block; margin: 0;
+    font-family: "Press Start 2P", var(--font-pixel);
+    font-weight: 400; font-size: clamp(28px, 8.7vw, 68px); line-height: 1;
+    white-space: nowrap; letter-spacing: 0;
+    color: #b9b9b9;                       /* face colour, covered by the gradient layer */
+    padding: 0.10em 0.26em 0.30em 0.06em; /* room for the extrusion */
+    text-shadow:
+      /* black outline hugging the face */
+      0 -0.055em 0 #0d0d0d, 0 0.055em 0 #0d0d0d, -0.055em 0 0 #0d0d0d, 0.055em 0 0 #0d0d0d,
+      -0.055em -0.055em 0 #0d0d0d, 0.055em -0.055em 0 #0d0d0d,
+      -0.055em 0.055em 0 #0d0d0d, 0.055em 0.055em 0 #0d0d0d,
+      /* extruded side, stepping back and darkening */
+      0.075em 0.075em 0 #9a9a9a, 0.095em 0.095em 0 #8d8d8d, 0.115em 0.115em 0 #808080,
+      0.135em 0.135em 0 #737373, 0.155em 0.155em 0 #666666, 0.175em 0.175em 0 #595959,
+      /* outline of the extrusion, then the shadow it casts */
+      0.215em 0.215em 0 #0d0d0d, 0.275em 0.275em 0 rgba(13, 13, 13, .32);
+  }
+  .logo::after {          /* the two-tone stone face, sitting exactly on the letters */
+    content: attr(data-text);
+    position: absolute; left: 0; top: 0; padding: inherit;
+    background: linear-gradient(180deg, #ececec 0%, #dcdcdc 47%, #a2a2a2 47%, #8e8e8e 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent; text-shadow: none; pointer-events: none;
+  }
+  .splash {
+    position: absolute; right: 0.4em; bottom: 0.6em; margin: 0;
+    font-family: "Press Start 2P", var(--font-pixel);
+    font-size: clamp(9px, 2.3vw, 15px); line-height: 1.3;
+    color: #ffef4a; text-shadow: 0.14em 0.14em 0 #3d3000;
+    transform: rotate(-10deg); white-space: nowrap; pointer-events: none;
+    animation: splash 1.1s ease-in-out infinite;
+  }
+  @keyframes splash { 50% { transform: rotate(-10deg) scale(1.09); } }
+  @media (prefers-reduced-motion: reduce) { .splash { animation: none; } }
+  .purse {
+    background: var(--paper); border: 3px solid var(--dirt-dark); box-shadow: 0 6px 0 var(--dirt-dark);
+    padding: 12px 16px; width: min(100%, 520px); box-sizing: border-box;
+  }
+  .purse-head { display: flex; align-items: baseline; justify-content: center; gap: 10px; font-family: var(--font-en); font-weight: 700; }
+  .purse-head .num { font-size: 40px; line-height: 1; font-variant-numeric: tabular-nums; }
+  .purse-head .unit { font-family: var(--font-ja); font-weight: 800; font-size: 18px; color: var(--ink-soft); }
+  .yen-row { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 10px; min-height: 30px; }
+  .yen {
+    display: inline-flex; align-items: center; justify-content: center; position: relative;
+    width: 34px; height: 34px; border-radius: 50%; font-family: var(--font-en); font-weight: 700; font-size: 12px;
+    box-shadow: inset 0 -2px 0 rgba(0,0,0,.18), 0 1px 0 rgba(0,0,0,.2);
+  }
+  .yen.y500 { background: radial-gradient(circle at 35% 30%, #fff1b8, #e0b84a 60%, #a97c12); color: #5a3a00; border: 2px solid #a97c12; }
+  .yen.y100 { background: radial-gradient(circle at 35% 30%, #ffffff, #d9dde2 60%, #8f969e); color: #3a3f45; border: 2px solid #8f969e; }
+  .yen.y50  { background: radial-gradient(circle at 35% 30%, #ffffff, #d9dde2 60%, #8f969e); color: #3a3f45; border: 2px solid #8f969e; }
+  .yen.y10  { background: radial-gradient(circle at 35% 30%, #f6c9a0, #c47a3a 60%, #7a4416); color: #fff; border: 2px solid #7a4416; }
+  .yen.y5   { background: radial-gradient(circle at 35% 30%, #fff5c4, #dcbb4c 60%, #9e7d14); color: #5a3a00; border: 2px solid #9e7d14; }
+  .yen.y1   { background: radial-gradient(circle at 35% 30%, #ffffff, #eef0f2 60%, #b9bec4); color: #555; border: 2px solid #b9bec4; }
+  .yen.y50::after, .yen.y5::after { content: ""; position: absolute; width: 8px; height: 8px; border-radius: 50%; background: var(--paper); box-shadow: inset 0 1px 2px rgba(0,0,0,.3); top: 4px; right: 4px; }
+  .yen .x { position: absolute; bottom: -8px; right: -8px; background: var(--ink); color: #fff; font-size: 11px; padding: 1px 4px; border-radius: 3px; font-family: var(--font-en); }
+  .purse-note { margin: 8px 0 0; font-size: 13px; color: var(--ink-soft); }
+
+  /* up to BANK_MAX slots can pile up, so this row has to wrap */
+  .day-row { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; justify-content: center; max-width: min(100%, 520px); }
+  .day-row .lbl { width: 100%; text-align: center; }
+  .day-row .lbl { font-weight: 800; color: var(--dirt-dark); font-size: 16px; }
+  .slot {
+    width: 30px; height: 30px; border: 3px solid var(--dirt-dark); background: var(--paper);
+    box-shadow: inset 0 -3px 0 rgba(0,0,0,.08);
+  }
+  .slot.on { background: linear-gradient(180deg, var(--grass) 0 40%, var(--dirt) 40% 100%); }
+
+  .purse { -webkit-touch-callout: none; }
+  .pin-box input { font-family: var(--font-en); font-size: 28px; letter-spacing: .3em; width: 8ch; text-align: center; padding: 6px; border: 3px solid var(--dirt-dark); }
+
+  /* --- play --- */
+  /* a row of stone blocks: every answer mines one away */
+  .progress {
+    --blk: clamp(34px, 6vw, 48px);
+    display: grid; grid-template-columns: repeat(10, var(--blk));
+    gap: 6px; justify-content: center; margin-top: 12px;
+  }
+  @media (max-width: 560px) { .progress { grid-template-columns: repeat(5, var(--blk)); } }
+  .pblock {
+    position: relative;
+    width: var(--blk); height: var(--blk);
+    border: 2px solid #56565a; image-rendering: pixelated;
+    background-color: #9d9d9d; background-size: 100% 100%;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3e%3crect width='16' height='16' fill='%239d9d9d'/%3e%3cg fill='%23888888'%3e%3crect x='2' y='1' width='3' height='2'/%3e%3crect x='9' y='2' width='4' height='2'/%3e%3crect x='1' y='6' width='2' height='3'/%3e%3crect x='6' y='5' width='3' height='2'/%3e%3crect x='11' y='7' width='3' height='2'/%3e%3crect x='4' y='10' width='4' height='2'/%3e%3crect x='10' y='12' width='3' height='2'/%3e%3crect x='1' y='13' width='2' height='2'/%3e%3c/g%3e%3cg fill='%23b4b4b4'%3e%3crect x='6' y='1' width='2' height='1'/%3e%3crect x='13' y='5' width='2' height='1'/%3e%3crect x='3' y='8' width='2' height='1'/%3e%3crect x='8' y='9' width='2' height='1'/%3e%3crect x='5' y='13' width='3' height='1'/%3e%3c/g%3e%3c/svg%3e");
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.25), inset 0 -2px 0 rgba(0,0,0,.25);
+  }
+  .pblock.now { border-color: var(--gold-dark); box-shadow: inset 0 2px 0 rgba(255,255,255,.25), inset 0 -2px 0 rgba(0,0,0,.25), 0 0 0 2px var(--gold); }
+  .pblock.now::after {            /* the block you are digging right now */
+    content: ""; position: absolute; inset: 0; background-size: 100% 100%;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' shape-rendering='crispEdges'%3e%3cg fill='%23000000'%3e%3crect x='7' y='1' width='1' height='4'/%3e%3crect x='8' y='5' width='1' height='2'/%3e%3crect x='4' y='7' width='4' height='1'/%3e%3crect x='9' y='7' width='4' height='1'/%3e%3crect x='3' y='4' width='1' height='3'/%3e%3crect x='8' y='8' width='1' height='4'/%3e%3crect x='11' y='9' width='1' height='4'/%3e%3crect x='5' y='9' width='1' height='4'/%3e%3crect x='2' y='11' width='3' height='1'/%3e%3crect x='12' y='3' width='1' height='3'/%3e%3c/g%3e%3c/svg%3e");
+    animation: mine 1.1s steps(1) infinite;
+  }
+  @keyframes mine { 0%, 49% { opacity: .3; } 50%, 100% { opacity: .8; } }
+  .pblock.done {                  /* mined out: an empty slot */
+    background-image: none; background-color: rgba(13,13,13,.09);
+    border-color: rgba(13,13,13,.13); box-shadow: none;
+  }
+  .pblock.breaking { animation: shatter .3s ease-out; }
+  @keyframes shatter {
+    0%   { transform: scale(1); background-color: rgba(255,255,255,.75); }
+    45%  { transform: scale(1.3) rotate(6deg); }
+    100% { transform: scale(1) rotate(0); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .pblock.now::after { animation: none; opacity: .6; }
+    .pblock.breaking { animation: none; }
+  }
+
+  .card {
+    background: var(--paper); border: 3px solid var(--dirt-dark); box-shadow: 0 6px 0 var(--dirt-dark);
+    padding: 18px 16px; margin-top: 14px;
+    display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  }
+  .kind { font-size: clamp(17px, 3.2vw, 24px); font-weight: 800; color: var(--ink-soft); letter-spacing: .08em; margin: 0; }
+  .prompt-en { font-family: var(--font-en); font-weight: 700; font-size: clamp(34px, 8vw, 56px); line-height: 1.15; margin: 0; color: var(--ink); text-wrap: balance; }
+  .prompt-ja { font-weight: 800; font-size: clamp(30px, 7vw, 44px); line-height: 1.2; margin: 0; }
+  .prompt-sent { font-family: var(--font-en); font-weight: 500; font-size: clamp(22px, 5vw, 32px); line-height: 1.4; margin: 0; text-wrap: balance; max-width: 34ch; }
+  .nb { white-space: nowrap; }   /* keeps the blank and the punctuation after it together */
+  .blank.tight { margin-right: 0; }   /* no gap before a full stop */
+  .blank { display: inline-block; min-width: 3.2em; border-bottom: 4px solid var(--blue); margin: 0 .15em; vertical-align: baseline; color: var(--blue); font-weight: 700; }
+  .blank.filled { border-bottom-color: var(--ok-dark); color: var(--ok-dark); }
+  .speak {
+    appearance: none; border: 3px solid var(--blue-dark); background: var(--blue); color: #fff; width: 56px; height: 56px;
+    font-size: 26px; cursor: pointer; box-shadow: 0 4px 0 var(--blue-dark); line-height: 1;
+  }
+  .speak:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--blue-dark); }
+
+  .choices { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 14px; }
+  @media (max-width: 420px) { .choices { grid-template-columns: 1fr; gap: 10px; } }
+  .choice {
+    appearance: none; cursor: pointer; min-height: 72px; padding: 12px 10px;
+    background: var(--paper); border: 3px solid var(--stone-dark); box-shadow: 0 6px 0 var(--stone-dark);
+    font-family: var(--font-ja); font-weight: 800; font-size: clamp(20px, 5vw, 28px); color: var(--ink); line-height: 1.2;
+    transition: transform .05s ease, box-shadow .05s ease;
+    overflow-wrap: anywhere;
+  }
+  .choice.en { font-family: var(--font-en); font-weight: 700; font-size: clamp(22px, 5.5vw, 30px); }
+  .choice:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--stone-dark); }
+  .choice:focus-visible { outline: 4px solid var(--blue); outline-offset: 2px; }
+  .choice.right { background: #dff5d6; border-color: var(--ok-dark); box-shadow: 0 6px 0 var(--ok-dark); }
+  .choice.wrong { background: #ffe6d1; border-color: var(--oops-dark); box-shadow: 0 6px 0 var(--oops-dark); }
+  .choice.dim { opacity: .45; }
+  .choice[disabled] { cursor: default; }
+
+  .after { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 18px; margin-top: 16px; min-height: 76px; padding-bottom: 64px; }
+  .verdict { font-weight: 800; font-size: clamp(28px, 6vw, 44px); line-height: 1.2; margin: 0; }
+  .verdict.ok { color: var(--ok-dark); }
+  .verdict.oops { color: var(--oops-dark); }
+
+  /* --- result --- */
+  .result { margin-block: auto; display: flex; flex-direction: column; align-items: center; gap: 18px; text-align: center; padding-block: 8px; }
+  .big-word { font-family: var(--font-pixel); font-size: clamp(40px, 10vw, 72px); color: #fff; text-shadow: 4px 4px 0 var(--dirt-dark); margin: 0; line-height: 1; }
+  .gain { display: inline-flex; align-items: center; gap: 10px; font-family: var(--font-en); font-weight: 700; font-size: 40px; background: var(--paper); border: 3px solid var(--gold-dark); box-shadow: 0 6px 0 var(--gold-dark); padding: 8px 22px; }
+  .review { background: var(--paper); border: 3px solid var(--dirt-dark); box-shadow: 0 6px 0 var(--dirt-dark); padding: 10px 14px; width: min(100%, 520px); box-sizing: border-box; }
+  .review h3 { margin: 0 0 6px; font-size: 15px; color: var(--ink-soft); font-weight: 800; }
+  .review-list { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+  .chip { appearance: none; cursor: pointer; border: 2px solid var(--blue-dark); background: #eaf3fd; color: var(--ink); font-family: var(--font-en); font-weight: 700; font-size: 18px; padding: 6px 12px; box-shadow: 0 3px 0 var(--blue-dark); }
+  .chip small { font-family: var(--font-ja); font-weight: 800; font-size: 13px; color: var(--ink-soft); margin-left: 6px; }
+  .chip:active { transform: translateY(2px); box-shadow: 0 1px 0 var(--blue-dark); }
+
+  .rain { position: fixed; inset: 0; pointer-events: none; overflow: hidden; z-index: 5; }
+  .rain .coin { position: absolute; top: -40px; animation: fall 1.8s ease-in forwards; }
+  @keyframes fall { to { transform: translateY(110vh) rotate(720deg); } }
+  @media (prefers-reduced-motion: reduce) { .rain { display: none; } }
+
+  /* --- parent panel --- */
+  .panel { position: fixed; inset: 0; background: rgba(20,14,8,.55); z-index: 10; display: flex; align-items: center; justify-content: center; padding: 16px; }
+  .panel-box { background: var(--paper); border: 3px solid var(--dirt-dark); box-shadow: 0 6px 0 var(--dirt-dark); padding: 16px; width: min(100%, 420px); max-height: 90%; overflow: auto; box-sizing: border-box; }
+  .panel-box h2 { margin: 0 0 10px; font-size: 18px; }
+  .panel-box p { margin: 6px 0; font-size: 14px; color: var(--ink-soft); }
+  .panel-box .row { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; align-items: center; }
+  .panel-box label { font-size: 14px; font-weight: 800; }
+  .panel-box select { font-family: var(--font-ja); font-size: 16px; padding: 6px; }
+  .panel-box .amt { font-family: var(--font-en); font-size: 16px; padding: 6px; width: 6ch; text-align: right; }
+  .stat { font-variant-numeric: tabular-nums; }
+
+  /* --- quest picker & kanji mode --- */
+  .pick-list { display: flex; flex-direction: column; gap: 16px; width: min(100%, 460px); }
+  .pick {
+    appearance: none; cursor: pointer; text-align: left;
+    background: var(--paper); border: 3px solid var(--dirt-dark); box-shadow: 0 6px 0 var(--dirt-dark);
+    padding: 16px 18px; font-family: var(--font-ja); color: var(--ink);
+    display: flex; align-items: center; gap: 14px;
+  }
+  .pick:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--dirt-dark); }
+  .pick .ico { font-size: 34px; line-height: 1; }
+  .pick .ttl { display: block; font-weight: 800; font-size: 24px; line-height: 1.2; }
+  .pick .sub { display: block; font-size: 14px; color: var(--ink-soft); margin-top: 2px; }
+  .backline { display: flex; justify-content: center; }
+
+  .due { font-family: var(--font-ja); font-weight: 800; font-size: 18px; color: var(--dirt-dark); }
+  .due.soon { color: var(--oops-dark); }
+  /* the wall you build: one block per kanji learned */
+  .wall {
+    display: grid; grid-template-columns: repeat(10, 1fr); gap: 4px;
+    width: min(100%, 520px); background: var(--paper);
+    border: 3px solid var(--dirt-dark); box-shadow: 0 6px 0 var(--dirt-dark); padding: 8px;
+    box-sizing: border-box;
+  }
+  @media (max-width: 480px) { .wall { grid-template-columns: repeat(8, 1fr); } }
+  .wcell {
+    aspect-ratio: 1; display: flex; align-items: center; justify-content: center;
+    font-size: clamp(13px, 3.4vw, 22px); font-weight: 800; font-family: var(--font-ja);
+    background: rgba(13,13,13,.07); border: 2px solid rgba(13,13,13,.10); color: transparent;
+  }
+  .wcell.on {
+    background: linear-gradient(180deg, #ffe9a8 0%, var(--gold) 55%, var(--gold-dark) 100%);
+    border-color: var(--gold-dark); color: #5a3a00;
+    box-shadow: inset 0 2px 0 rgba(255,255,255,.4), inset 0 -2px 0 rgba(0,0,0,.18);
+  }
+  .wcell.just { animation: place .45s ease-out; }
+  @keyframes place { 0% { transform: translateY(-18px) scale(1.25); } 100% { transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .wcell.just { animation: none; } }
+
+  .kanji-big { font-family: var(--font-ja); font-weight: 800; font-size: clamp(90px, 26vw, 170px); line-height: 1; margin: 0; }
+  .yomi-big { font-family: var(--font-ja); font-weight: 800; font-size: clamp(34px, 8vw, 56px); line-height: 1.2; margin: 0; }
+  .choice.kanji { font-size: clamp(38px, 10vw, 54px); font-weight: 800; min-height: 96px; }
+  /* single characters do not need a full-width row, so keep 2x2 even on a phone */
+  @media (max-width: 420px) { #kChoices { grid-template-columns: 1fr 1fr; } .choice.kanji { min-height: 84px; } }
+  .hint { font-size: 12px; color: var(--ink-soft); }
+</style>
+
+<div class="cloud"></div>
+<div class="cloud c2"></div>
+<div class="ground"></div>
+
+<div id="app">
+  <!-- HOME -->
+  <section id="home" class="screen">
+    <div class="home-center">
+      <div class="logo-wrap">
+        <h1 class="logo" data-text="COINQUEST">COINQUEST</h1>
+        <p class="splash" id="splash">Dig for words!</p>
+      </div>
+      <div class="purse" id="purse"></div>
+      <div class="day-row" id="dayRow"></div>
+      <button class="btn green big" id="startBtn">スタート</button>
+      <p id="doneMsg" class="hint" hidden></p>
+      <div class="backline"><button class="btn ghost small" id="eBack">&#9664; メニュー</button></div>
+    </div>
+  </section>
+
+  <!-- QUEST PICKER -->
+  <section id="pick" class="screen" hidden>
+    <div class="home-center">
+      <div class="logo-wrap">
+        <h1 class="logo" data-text="COINQUEST">COINQUEST</h1>
+        <p class="splash" id="splash2">Pick a quest!</p>
+      </div>
+      <div class="purse" id="purse2"></div>
+      <div class="pick-list" id="pickList"></div>
+    </div>
+  </section>
+
+  <!-- KANJI HOME -->
+  <section id="khome" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="kWallet">0</span></div>
+      <button class="btn ghost small" id="kBack">&#9664; もどる</button>
+    </div>
+    <div class="home-center">
+      <h2 class="big-word" id="kTitle" style="font-family:var(--font-ja);font-size:clamp(28px,7vw,44px)"></h2>
+      <p class="due" id="kDue"></p>
+      <div class="wall" id="kWall"></div>
+      <p class="due" id="kCount"></p>
+      <div class="day-row" id="kDayRow"></div>
+      <button class="btn green big" id="kStart">スタート</button>
+      <p id="kDone" class="hint" hidden></p>
+    </div>
+  </section>
+
+  <!-- KANJI PLAY -->
+  <section id="kplay" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="kWallet2">0</span></div>
+      <button class="btn ghost small" id="kQuit">やめる</button>
+    </div>
+    <div class="progress" id="kProgress"></div>
+    <div class="card" id="kCard"></div>
+    <div class="choices" id="kChoices"></div>
+    <div class="after" id="kAfter"></div>
+  </section>
+
+  <!-- KANJI RESULT -->
+  <section id="kresult" class="screen" hidden>
+    <div class="result" id="kResultBody"></div>
+  </section>
+
+  <!-- PLAY -->
+  <section id="play" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">¥</span><span id="walletNum">0</span></div>
+      <button class="btn ghost small" id="quitBtn">やめる</button>
+    </div>
+    <div class="progress" id="progress"></div>
+    <div class="card" id="card"></div>
+    <div class="choices" id="choices"></div>
+    <div class="after" id="after"></div>
+  </section>
+
+  <!-- RESULT -->
+  <section id="result" class="screen" hidden>
+    <div class="result" id="resultBody"></div>
+  </section>
+</div>
+
+<div class="rain" id="rain"></div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ---------------------------------------------------------------
+  // CONTENT
+  // ---------------------------------------------------------------
+  // [english, japanese(hiragana), level, pos]  level 4 = 英検4級ライン, 3 = 3級ライン
+  const WORDS = [
+    // ---- level 4 nouns
+    ["apple","りんご",4,"n"],["water","みず",4,"n"],["stone","いし",4,"n"],["tree","き",4,"n"],["house","いえ",4,"n"],
+    ["garden","にわ",4,"n"],["kitchen","だいどころ",4,"n"],["window","まど",4,"n"],["animal","どうぶつ",4,"n"],["bird","とり",4,"n"],
+    ["fish","さかな",4,"n"],["horse","うま",4,"n"],["cow","うし",4,"n"],["pig","ぶた",4,"n"],["sheep","ひつじ",4,"n"],
+    ["chicken","にわとり",4,"n"],["wolf","おおかみ",4,"n"],["egg","たまご",4,"n"],["bread","パン",4,"n"],["milk","ぎゅうにゅう",4,"n"],
+    ["rice","ごはん",4,"n"],["meat","にく",4,"n"],["vegetable","やさい",4,"n"],["carrot","にんじん",4,"n"],["potato","じゃがいも",4,"n"],
+    ["sugar","さとう",4,"n"],["morning","あさ",4,"n"],["night","よる",4,"n"],["evening","ゆうがた",4,"n"],["afternoon","ごご",4,"n"],
+    ["today","きょう",4,"n"],["tomorrow","あした",4,"n"],["yesterday","きのう",4,"n"],["week","1しゅうかん",4,"n"],["year","1ねん",4,"n"],
+    ["summer","なつ",4,"n"],["winter","ふゆ",4,"n"],["spring","はる",4,"n"],["fall","あき",4,"n"],["rain","あめ",4,"n"],
+    ["snow","ゆき",4,"n"],["cloud","くも(そら)",4,"n"],["sun","たいよう",4,"n"],["moon","つき(よる)",4,"n"],["river","かわ",4,"n"],
+    ["mountain","やま",4,"n"],["sea","うみ",4,"n"],["forest","もり",4,"n"],["island","しま",4,"n"],["cave","ほらあな",4,"n"],
+    ["school","がっこう",4,"n"],["teacher","せんせい",4,"n"],["friend","ともだち",4,"n"],["family","かぞく",4,"n"],["mother","おかあさん",4,"n"],
+    ["father","おとうさん",4,"n"],["doctor","おいしゃさん",4,"n"],["farmer","のうか",4,"n"],["color","いろ",4,"n"],["money","おかね",4,"n"],
+    ["shop","みせ",4,"n"],["station","えき",4,"n"],["hospital","びょういん",4,"n"],["library","としょかん",4,"n"],["park","こうえん",4,"n"],
+    ["map","ちず",4,"n"],["key","かぎ",4,"n"],["box","はこ",4,"n"],["ship","ふね",4,"n"],["bridge","はし(かわ)",4,"n"],
+    ["road","みち",4,"n"],["wall","かべ",4,"n"],["floor","ゆか",4,"n"],["roof","やね",4,"n"],["hand","て",4,"n"],
+    ["grass","くさ",4,"n"],["fire","ひ",4,"n"],["gold","きん",4,"n"],["iron","てつ",4,"n"],["sword","けん",4,"n"],
+    ["shovel","スコップ",4,"n"],["torch","たいまつ",4,"n"],["ladder","はしご",4,"n"],["bucket","バケツ",4,"n"],["weather","てんき",4,"n"],
+    ["letter","てがみ",4,"n"],["tower","たかいとう",4,"n"],["flower","はな",4,"n"],["dinner","ばんごはん",4,"n"],["breakfast","あさごはん",4,"n"],
+    ["lunch","ひるごはん",4,"n"],["umbrella","かさ",4,"n"],["homework","しゅくだい",4,"n"],["room","へや",4,"n"],["picture","え",4,"n"],
+    ["song","うた",4,"n"],["sky","そら",4,"n"],["door","ドア",4,"n"],["bed","ベッド",4,"n"],["cookie","クッキー",4,"n"],
+    // ---- level 4 verbs
+    ["run","はしる",4,"v"],["walk","あるく",4,"v"],["jump","ジャンプする",4,"v"],["swim","およぐ",4,"v"],["fly","そらをとぶ",4,"v"],
+    ["eat","たべる",4,"v"],["drink","のむ",4,"v"],["sleep","ねる",4,"v"],["read","よむ",4,"v"],["write","かく",4,"v"],
+    ["sing","うたう",4,"v"],["dance","おどる",4,"v"],["cook","りょうりする",4,"v"],["buy","かう",4,"v"],["sell","うる",4,"v"],
+    ["open","あける",4,"v"],["close","しめる",4,"v"],["make","つくる",4,"v"],["build","たてる",4,"v"],["find","みつける",4,"v"],
+    ["help","たすける",4,"v"],["wait","まつ",4,"v"],["wash","あらう",4,"v"],["clean","そうじする",4,"v"],["climb","のぼる",4,"v"],
+    ["catch","つかまえる",4,"v"],["throw","なげる",4,"v"],["cut","きる",4,"v"],["dig","ほる",4,"v"],["look","みる",4,"v"],
+    ["listen","きく",4,"v"],["talk","はなす",4,"v"],["play","あそぶ",4,"v"],["sit","すわる",4,"v"],["stand","たつ",4,"v"],
+    ["give","あげる",4,"v"],["bring","もってくる",4,"v"],["come","くる",4,"v"],["go","いく",4,"v"],["want","ほしい",4,"v"],
+    ["like","すき",4,"v"],["know","しっている",4,"v"],["think","かんがえる",4,"v"],["learn","ならう",4,"v"],["use","つかう",4,"v"],
+    // ---- level 4 adjectives
+    ["big","おおきい",4,"a"],["small","ちいさい",4,"a"],["fast","スピードがはやい",4,"a"],["slow","ゆっくり",4,"a"],["hot","あつい",4,"a"],
+    ["cold","つめたい",4,"a"],["new","あたらしい",4,"a"],["old","ふるい",4,"a"],["happy","うれしい",4,"a"],["sad","かなしい",4,"a"],
+    ["hungry","おなかがすいた",4,"a"],["tired","つかれた",4,"a"],["strong","つよい",4,"a"],["weak","よわい",4,"a"],["dark","くらい",4,"a"],
+    ["bright","あかるい",4,"a"],["easy","かんたん",4,"a"],["tall","せがたかい",4,"a"],["high","たかい",4,"a"],["long","ながい",4,"a"],
+    ["short","みじかい",4,"a"],["beautiful","うつくしい",4,"a"],["sweet","あまい",4,"a"],["busy","いそがしい",4,"a"],["early","あさはやい",4,"a"],
+    ["late","おくれた",4,"a"],["sleepy","ねむい",4,"a"],["dirty","きたない",4,"a"],["kind","しんせつ",4,"a"],["angry","おこっている",4,"a"],
+    // ---- level 3 nouns
+    ["village","むら",3,"n"],["castle","おしろ",3,"n"],["temple","おてら",3,"n"],["museum","はくぶつかん",3,"n"],["factory","こうじょう",3,"n"],
+    ["farm","のうじょう",3,"n"],["field","はたけ",3,"n"],["explorer","たんけんか",3,"n"],["adventure","ぼうけん",3,"n"],["treasure","たからもの",3,"n"],
+    ["journey","ながいたび",3,"n"],["trip","りょこう",3,"n"],["enemy","てき",3,"n"],["monster","かいぶつ",3,"n"],["ghost","おばけ",3,"n"],
+    ["giant","きょじん",3,"n"],["king","おうさま",3,"n"],["queen","じょおうさま",3,"n"],["prince","おうじさま",3,"n"],["space","うちゅう",3,"n"],
+    ["planet","わくせい",3,"n"],["earth","ちきゅう",3,"n"],["lake","みずうみ",3,"n"],["hill","おか",3,"n"],["rock","いわ",3,"n"],
+    ["sand","すな",3,"n"],["ice","こおり",3,"n"],["lava","ようがん",3,"n"],["light","ひかり",3,"n"],["shadow","かげ",3,"n"],
+    ["danger","きけん",3,"n"],["luck","うん",3,"n"],["health","けんこう",3,"n"],["season","きせつ",3,"n"],["future","みらい",3,"n"],
+    ["past","むかし",3,"n"],["mistake","まちがい",3,"n"],["problem","もんだい",3,"n"],["reason","りゆう",3,"n"],["idea","かんがえ",3,"n"],
+    ["rule","きまり",3,"n"],["prize","しょうひん",3,"n"],["ticket","きっぷ",3,"n"],["gift","おくりもの",3,"n"],["tool","どうぐ",3,"n"],
+    ["machine","きかい",3,"n"],["message","でんごん",3,"n"],["newspaper","しんぶん",3,"n"],["neighbor","となりのひと",3,"n"],["stranger","しらないひと",3,"n"],
+    ["guest","おきゃくさん",3,"n"],["crowd","ひとごみ",3,"n"],["police","けいさつ",3,"n"],["scientist","かがくしゃ",3,"n"],["coast","かいがん",3,"n"],
+    ["desert","さばく",3,"n"],["arrow","や",3,"n"],["pickaxe","つるはし",3,"n"],["wool","ひつじのけ",3,"n"],["bone","ほね",3,"n"],
+    ["spider","くも(むし)",3,"n"],["wheat","こむぎ",3,"n"],["seed","たね",3,"n"],["potion","ふしぎなくすり",3,"n"],["armor","よろい",3,"n"],
+    ["minecart","トロッコ",3,"n"],["chest","たからばこ",3,"n"],["noise","さわがしいおと",3,"n"],["storm","あらし",3,"n"],["wind","かぜ",3,"n"],
+    // ---- level 3 verbs
+    ["collect","あつめる",3,"v"],["protect","まもる",3,"v"],["attack","こうげきする",3,"v"],["escape","にげる",3,"v"],["hide","かくれる",3,"v"],
+    ["search","さがす",3,"v"],["discover","はっけんする",3,"v"],["explore","たんけんする",3,"v"],["destroy","こわす",3,"v"],["repair","なおす",3,"v"],
+    ["create","つくりだす",3,"v"],["invent","はつめいする",3,"v"],["decide","きめる",3,"v"],["remember","おぼえている",3,"v"],["forget","わすれる",3,"v"],
+    ["believe","しんじる",3,"v"],["hope","ねがう",3,"v"],["worry","しんぱいする",3,"v"],["arrive","つく",3,"v"],["leave","でかける",3,"v"],
+    ["return","もどる",3,"v"],["follow","ついていく",3,"v"],["carry","はこぶ",3,"v"],["hold","もつ",3,"v"],["push","おす",3,"v"],
+    ["pull","ひく",3,"v"],["fall","おちる",3,"v"],["hurt","けがをする",3,"v"],["save","すくう",3,"v"],["share","わける",3,"v"],
+    ["borrow","かりる",3,"v"],["lend","かす",3,"v"],["choose","えらぶ",3,"v"],["travel","たびをする",3,"v"],["cross","わたる",3,"v"],
+    ["enter","はいる",3,"v"],["lose","なくす",3,"v"],["grow","そだてる",3,"v"],["plant","うえる",3,"v"],["feed","えさをあげる",3,"v"],
+    ["tame","なつかせる",3,"v"],["trade","こうかんする",3,"v"],["melt","とける",3,"v"],["freeze","こおる",3,"v"],["shine","ひかる",3,"v"],
+    ["appear","あらわれる",3,"v"],["disappear","きえる",3,"v"],["fight","たたかう",3,"v"],["win","かつ",3,"v"],["break","こわれる",3,"v"],
+    // ---- level 3 adjectives
+    ["brave","ゆうかん",3,"a"],["careful","ちゅういぶかい",3,"a"],["dangerous","あぶない",3,"a"],["safe","あんぜん",3,"a"],["quiet","しずか",3,"a"],
+    ["noisy","うるさい",3,"a"],["wild","やせいの",3,"a"],["huge","とてもおおきい",3,"a"],["tiny","とてもちいさい",3,"a"],["empty","からっぽ",3,"a"],
+    ["full","いっぱい",3,"a"],["heavy","おもい",3,"a"],["wet","ぬれた",3,"a"],["dry","かわいた",3,"a"],["sharp","するどい",3,"a"],
+    ["soft","やわらかい",3,"a"],["expensive","ねだんがたかい",3,"a"],["cheap","やすい",3,"a"],["rich","おかねもち",3,"a"],["poor","まずしい",3,"a"],
+    ["lucky","うんがいい",3,"a"],["famous","ゆうめい",3,"a"],["useful","やくにたつ",3,"a"],["special","とくべつ",3,"a"],["secret","ひみつの",3,"a"],
+    ["strange","へん",3,"a"],["delicious","とてもおいしい",3,"a"],["broken","こわれた",3,"a"],["deep","ふかい",3,"a"],["wide","ひろい",3,"a"],
+    ["narrow","せまい",3,"a"],["thick","ぶあつい",3,"a"],["thin","うすい",3,"a"],["alive","いきている",3,"a"],["afraid","こわがっている",3,"a"],
+    ["friendly","なかよくしてくれる",3,"a"],["smart","かしこい",3,"a"],["lonely","さびしい",3,"a"],["proud","ほこらしい",3,"a"],["ready","じゅんびできた",3,"a"]
+  ];
+
+  // {t: sentence with ___, a: answer, d: 3 distractors, l: level}
+  const SENTS = [
+    {l:4,t:"I ___ milk every morning.",a:"drink",d:["eat","read","run"]},
+    {l:4,t:"Let's ___ a house with wood.",a:"build",d:["eat","sleep","sing"]},
+    {l:4,t:"Zombies come out at ___.",a:"night",d:["lunch","summer","breakfast"]},
+    {l:4,t:"The cow gives us ___.",a:"milk",d:["stone","snow","sand"]},
+    {l:4,t:"I use a ___ to dig the ground.",a:"shovel",d:["bucket","torch","key"]},
+    {l:4,t:"It is very ___ in winter.",a:"cold",d:["hot","tall","sweet"]},
+    {l:4,t:"Please ___ the door. It's cold outside.",a:"close",d:["eat","sing","drink"]},
+    {l:4,t:"I ___ books in the library.",a:"read",d:["eat","swim","fly"]},
+    {l:4,t:"Fish ___ in the river.",a:"swim",d:["fly","walk","sing"]},
+    {l:4,t:"Birds ___ in the sky.",a:"fly",d:["swim","cook","sleep"]},
+    {l:4,t:"Let's ___ diamonds in the cave!",a:"find",d:["eat","drink","sleep"]},
+    {l:4,t:"The tower is very ___.",a:"tall",d:["hungry","sweet","tired"]},
+    {l:4,t:"I am ___. I want to eat bread.",a:"hungry",d:["tall","new","fast"]},
+    {l:4,t:"We have carrots in the ___.",a:"garden",d:["sky","moon","sun"]},
+    {l:4,t:"Wash your ___ before dinner.",a:"hands",d:["eggs","maps","keys"]},
+    {l:4,t:"My brother can ___ very fast.",a:"run",d:["sleep","sit","eat"]},
+    {l:4,t:"The sun is very ___.",a:"bright",d:["hungry","slow","sad"]},
+    {l:4,t:"I ___ eggs and bread for breakfast.",a:"eat",d:["build","wash","fly"]},
+    {l:4,t:"We go to ___ on Monday.",a:"school",d:["moon","snow","milk"]},
+    {l:4,t:"There is a lot of ___ today. Let's make a snowman.",a:"snow",d:["rain","sun","fire"]},
+    {l:4,t:"A ___ says \"moo\".",a:"cow",d:["sheep","pig","chicken"]},
+    {l:4,t:"Put the apples in the ___.",a:"box",d:["sky","sun","moon"]},
+    {l:4,t:"I can't see. It is too ___.",a:"dark",d:["bright","sweet","tall"]},
+    {l:4,t:"Let's ___ a song together.",a:"sing",d:["eat","dig","wash"]},
+    {l:4,t:"The wolf is big and ___.",a:"strong",d:["easy","sweet","late"]},
+    {l:4,t:"My ___ is a doctor. She helps sick people.",a:"mother",d:["cat","box","key"]},
+    {l:4,t:"I ___ my room every Sunday.",a:"clean",d:["eat","drink","swim"]},
+    {l:4,t:"There are many trees in the ___.",a:"forest",d:["sea","kitchen","sky"]},
+    {l:4,t:"Sheep eat ___.",a:"grass",d:["stone","iron","gold"]},
+    {l:4,t:"Look at the ___! Take an umbrella.",a:"rain",d:["sun","key","egg"]},
+    {l:4,t:"Please ___ me! I am in the water!",a:"help",d:["eat","cook","buy"]},
+    {l:4,t:"It is ___ today. Let's swim in the sea.",a:"hot",d:["cold","dark","sad"]},
+    {l:4,t:"The creeper is ___. Run!",a:"fast",d:["sweet","easy","new"]},
+    {l:4,t:"I ___ a torch. Now the cave is bright.",a:"use",d:["eat","drink","wash"]},
+    {l:4,t:"We ___ dinner at seven.",a:"eat",d:["sing","jump","read"]},
+    {l:4,t:"The water is ___. Don't swim today.",a:"cold",d:["sweet","tall","easy"]},
+    {l:4,t:"I ___ a new sword at the shop.",a:"buy",d:["sleep","swim","fly"]},
+    {l:4,t:"The ___ is white. It is in the sky at night.",a:"moon",d:["egg","milk","snow"]},
+    {l:4,t:"I want to ___ the mountain and see the top.",a:"climb",d:["eat","drink","cook"]},
+    {l:4,t:"Chickens give us ___.",a:"eggs",d:["stones","keys","maps"]},
+
+    {l:3,t:"The ___ lives in the dark cave.",a:"monster",d:["ticket","gift","mistake"]},
+    {l:3,t:"We must ___ the village from zombies.",a:"protect",d:["forget","borrow","eat"]},
+    {l:3,t:"Be ___. The lava is very hot.",a:"careful",d:["hungry","sleepy","empty"]},
+    {l:3,t:"The chest is ___. There is nothing in it.",a:"empty",d:["full","heavy","wet"]},
+    {l:3,t:"I ___ my sword in the forest. Where is it?",a:"lost",d:["found","made","ate"]},
+    {l:3,t:"Let's ___ the mountain and find treasure.",a:"explore",d:["forget","wash","sleep"]},
+    {l:3,t:"This diamond is very ___. I can't buy it.",a:"expensive",d:["cheap","wet","quiet"]},
+    {l:3,t:"The zombie is coming! Let's ___!",a:"hide",d:["sleep","cook","sing"]},
+    {l:3,t:"I ___ we can find diamonds today.",a:"hope",d:["eat","hide","carry"]},
+    {l:3,t:"The ___ was very long. We walked for ten days.",a:"journey",d:["egg","bucket","ticket"]},
+    {l:3,t:"Don't ___ to close the door. Zombies will come in.",a:"forget",d:["sleep","throw","eat"]},
+    {l:3,t:"I can't ___ this box. It is too heavy.",a:"carry",d:["eat","believe","forget"]},
+    {l:3,t:"The ___ has many rooms and a big wall.",a:"castle",d:["carrot","egg","umbrella"]},
+    {l:3,t:"Let's ___ the river. The boat is here.",a:"cross",d:["eat","forget","sleep"]},
+    {l:3,t:"The iron golem is ___. It is three blocks tall.",a:"huge",d:["tiny","wet","empty"]},
+    {l:3,t:"Please ___ your cookie with your brother.",a:"share",d:["attack","forget","worry"]},
+    {l:3,t:"We found a ___ in the desert temple!",a:"treasure",d:["breakfast","homework","umbrella"]},
+    {l:3,t:"The ___ in the desert is very hot.",a:"sand",d:["ice","snow","milk"]},
+    {l:3,t:"It is ___ in the library. Please don't talk.",a:"quiet",d:["noisy","hungry","wet"]},
+    {l:3,t:"I ___ the map. Now we can find the village.",a:"remember",d:["forget","lose","hurt"]},
+    {l:3,t:"Skeletons ___ you with arrows.",a:"attack",d:["borrow","wash","collect"]},
+    {l:3,t:"Let's ___ wood and stone for the house.",a:"collect",d:["forget","hurt","worry"]},
+    {l:3,t:"My sword is broken. Let's ___ it.",a:"repair",d:["eat","hide","lose"]},
+    {l:3,t:"The lake is ___. Don't fall in.",a:"deep",d:["tiny","cheap","famous"]},
+    {l:3,t:"Don't ___. We will find the way home.",a:"worry",d:["dance","eat","jump"]},
+    {l:3,t:"The dragon is a ___ monster. Everyone knows it.",a:"famous",d:["wet","cheap","quiet"]},
+    {l:3,t:"This potion is ___. It makes you fly!",a:"special",d:["empty","poor","heavy"]},
+    {l:3,t:"Let's ___ for diamonds under the mountain.",a:"search",d:["sleep","carry","forget"]},
+    {l:3,t:"The boat will ___ at the island soon.",a:"arrive",d:["forget","borrow","eat"]},
+    {l:3,t:"The old bridge is ___. Let's build a new one.",a:"broken",d:["delicious","famous","lucky"]},
+    {l:3,t:"Can I ___ your pickaxe? I will give it back tomorrow.",a:"borrow",d:["eat","forget","sleep"]},
+    {l:3,t:"Take this torch. It is ___ in the cave.",a:"dangerous",d:["delicious","cheap","famous"]},
+    {l:3,t:"The ___ told us the way to the castle.",a:"king",d:["sand","ice","egg"]},
+    {l:3,t:"We were ___. We found ten diamonds!",a:"lucky",d:["wet","dry","empty"]},
+    {l:3,t:"The ice will ___ in the sun.",a:"melt",d:["freeze","hide","worry"]},
+    {l:3,t:"Give the wolf a bone. It will ___ you.",a:"follow",d:["forget","borrow","melt"]},
+    {l:3,t:"Zombies ___ when the sun comes up.",a:"disappear",d:["arrive","borrow","collect"]},
+    {l:3,t:"Plant the ___ and water it. Wheat will grow.",a:"seed",d:["rock","bone","ticket"]},
+    {l:3,t:"Put on your ___ before the fight.",a:"armor",d:["ticket","wheat","seed"]},
+    {l:3,t:"Let's ___ five emeralds for a book.",a:"trade",d:["freeze","melt","hurt"]}
+  ];
+
+  // ---------------------------------------------------------------
+  // QUESTS: a fixed set of items with a deadline. Add a new block to the
+  // end of QUESTS when the next 出題表 arrives; nothing above is touched.
+  // ---------------------------------------------------------------
+  // [漢字, [よみ...], 二年生で習う(☆)]
+  const KANJI_3 = [
+    ["手",["シュ","て"],false],            ["耳",["みみ"],false],
+    ["白",["ハク","しろ","しろい","しら"],false], ["聞",["ブン","きく","きこえる"],true],
+    ["父",["フ","ちち"],true],             ["姉",["あね"],true],
+    ["友",["ユウ","とも"],true],           ["春",["シュン","はる"],true],
+    ["風",["フウ","かぜ","かざ"],true],     ["雲",["ウン","くも"],true],
+    ["足",["ソク","あし","たりる","たす"],false], ["玉",["ギョク","たま"],false],
+    ["青",["セイ","あお","あおい"],false],  ["話",["ワ","はなす","はなし"],true],
+    ["母",["ボ","はは"],true],             ["妹",["いもうと"],true],
+    ["才",["サイ"],true],                  ["夏",["カ","なつ"],true],
+    ["雪",["セツ","ゆき"],true],           ["明",["メイ","ミョウ","あかり","あかるい","あきらか","あく"],true],
+    ["口",["コウ","ク","くち"],false],      ["糸",["シ","いと"],false],
+    ["読",["ドク","トク","トウ","よむ"],true], ["国",["コク","くに"],true],
+    ["兄",["キョウ","あに"],true],         ["家",["カ","ケ","いえ","や"],true],
+    ["楽",["ガク","ラク","たのしい","たのしむ"],true], ["秋",["シュウ","あき"],true],
+    ["星",["セイ","ほし"],true],           ["光",["コウ","ひかる","ひかり"],true],
+    ["目",["モク","め"],false],            ["赤",["セキ","あか","あかい"],false],
+    ["書",["ショ","かく"],true],           ["語",["ゴ","かたる"],true],
+    ["弟",["ダイ","おとうと"],true],       ["親",["シン","したしい","おや"],true],
+    ["戸",["コ","と"],true],               ["冬",["トウ","ふゆ"],true],
+    ["晴",["セイ","はらす","はれる"],true], ["記",["キ","しるす"],true]
+  ];
+  // wrong answers that actually look like the right one
+  const LOOKALIKE = {
+    "手":["毛","水","牛"], "耳":["目","日","月"], "白":["百","自","日"], "聞":["開","間","門"],
+    "父":["交","文","支"], "姉":["妹","始","好"], "友":["右","左","反"], "春":["夏","秦","奏"],
+    "風":["雨","凰","同"], "雲":["雪","雷","電"], "足":["走","是","早"], "玉":["王","主","生"],
+    "青":["晴","静","清"], "話":["語","読","記"], "母":["毎","海","女"], "妹":["姉","味","未"],
+    "才":["寸","木","土"], "夏":["春","百","貝"], "雪":["雲","雨","電"], "明":["朋","目","日"],
+    "口":["日","中","四"], "糸":["紙","系","糸"], "読":["語","話","記"], "国":["回","図","園"],
+    "兄":["只","元","足"], "家":["冬","字","安"], "楽":["薬","栄","米"], "秋":["秒","科","利"],
+    "星":["晴","早","是"], "光":["先","当","兄"], "目":["自","耳","日"], "赤":["亦","赤","市"],
+    "書":["昼","晝","畫"], "語":["読","話","記"], "弟":["第","兄","弔"], "親":["新","観","視"],
+    "戸":["尸","屋","石"], "冬":["夏","各","名"], "晴":["清","静","青"], "記":["語","話","紀"]
+  };
+  const QUESTS = [
+    { id: "kanji-2026-3", type: "kanji", name: "だい3かい かんじ",
+      due: "2026-09-20", items: KANJI_3 }
+    // 次の出題表が来たら、ここに1ブロック足すだけ。上は触らない
+  ];
+  const MASTER_HITS = 3;         // これだけ正解すると「おぼえた」
+  const KSTAGE_SIZE = 10;
+  const KCOINS_STAGE = 5;        // 1かい あそんだ
+  const KCOINS_LEARN = 2;        // 1字 はじめて おぼえた
+  const KCOINS_ALL = 100;        // ぜんぶ そろえた(1回だけ)
+  const KDAILY_MIN = 2;          // 1日にコインがもらえる回数の下限
+  const KDAILY_MAX = 5;          // 同じく上限。あとは期限までの日数から逆算する
+
+  // ---------------------------------------------------------------
+  // SETTINGS
+  // ---------------------------------------------------------------
+  const STAGE_SIZE = 10;
+  const CLEAR_LINE = 6;          // 6/10 でクリア
+  const COINS_PER_CLEAR = 20;
+  const DAILY_STAGES = 5;        // 1日ぶんとして たまる回数
+  const BANK_MAX = 15;           // ためられるのは3日ぶんまで
+  const GIVE_DEFAULT = 100;      // 親メニューの わたす/つかう の初期値
+  const STORE_KEY = "coin-quest-v1";
+  const OLD_STORE_KEY = "kotoba-craft-v1";
+  const BACKUP_KEY = "coin-quest-v1-bak";
+  const UNDO_KEY = "coin-quest-v1-undo";
+  const SAVE_VER = 3;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
+  const PLAYERS = { taiga: "たいが", gaku: "がく" };
+
+  // ---------------------------------------------------------------
+  // STATE
+  // ---------------------------------------------------------------
+  function freshPlayer() {
+    return { coins: 0, level: 0, stagesCleared: 0, stagesPlayed: 0,
+             today: { date: todayKey(), cleared: 0, played: 0, coins: 0, kplayed: 0 },
+             left: DAILY_STAGES,
+             retry: [], seen: {}, wrong: {}, quests: {} };
+  }
+  const DEFAULT_PIN = "4649";
+  function freshState() { return { player: "taiga", voice: true, pin: DEFAULT_PIN, quest: QUESTS[0].id, dues: {}, players: { taiga: freshPlayer(), gaku: freshPlayer() } }; }
+  let state = freshState();
+  // A copy of the last known-good save, kept so that neither an update nor a
+  // save we cannot parse can quietly cost him the coins he has earned.
+  let brokenSave = false, bornNow = false;
+  // Keep the copy with the most coins: a save that is already damaged must not
+  // be allowed to replace a good one.
+  function writeBackup(raw, why) {
+    if (!raw) return;
+    const cur = readBackup();
+    if (cur) {
+      const a = backupCoins({ raw: raw }), b = backupCoins(cur);
+      if (b !== null && (a === null || a < b)) return;
+    }
+    try { localStorage.setItem(BACKUP_KEY, JSON.stringify({ at: todayKey(), why: why, raw: raw })); } catch (e) { /* ignore */ }
+  }
+  function readBackup() {
+    try { const b = localStorage.getItem(BACKUP_KEY); return b ? JSON.parse(b) : null; } catch (e) { return null; }
+  }
+  function readUndo() {
+    try { const b = localStorage.getItem(UNDO_KEY); return b ? JSON.parse(b) : null; } catch (e) { return null; }
+  }
+  function backupOk(b) { try { const s = JSON.parse(b.raw); return !!(s && s.players); } catch (e) { return false; } }
+  function backupCoins(b) {
+    try { const s = JSON.parse(b.raw); return s.players[s.player || "taiga"].coins; } catch (e) { /* fall through */ }
+    const m = /"coins"\s*:\s*(\d+)/.exec(b.raw || "");   // 壊れていても、数字だけは拾えることが多い
+    return m ? Number(m[1]) : null;
+  }
+  function load() {
+    let raw = null;
+    try { raw = localStorage.getItem(STORE_KEY) || localStorage.getItem(OLD_STORE_KEY); } catch (e) { /* storage unavailable */ }
+    if (raw) {
+      let s = null;
+      try { s = JSON.parse(raw); } catch (e) { s = null; }
+      if (s && s.players) {
+        if (s.ver !== SAVE_VER) writeBackup(raw, "こうしんの まえ");   // 更新でこわれても戻せるように
+        state = Object.assign(freshState(), s);
+      } else {
+        writeBackup(raw, "よみこめなかった");   // 読めない保存は、消さずに取っておく
+        brokenSave = true;
+      }
+    }
+    for (const k of Object.keys(PLAYERS)) if (!state.players[k]) state.players[k] = freshPlayer();
+    if (!state.pin) state.pin = DEFAULT_PIN;
+    if (!state.quest || !QUESTS.some(q => q.id === state.quest)) state.quest = QUESTS[0].id;
+    if (!state.dues) state.dues = {};
+    for (const k of Object.keys(PLAYERS)) if (!state.players[k].quests) state.players[k].quests = {};   // 古い保存データを拾う
+    state.ver = SAVE_VER;
+    if (!state.born) { state.born = stamp(); bornNow = true; }   // 保存には入れない(入れると次の起動でも残る)
+  }
+  let saveError = "";
+  function stamp() { const d = new Date(); return d.getMonth() + 1 + "/" + d.getDate() + " " + d.getHours() + ":" + String(d.getMinutes()).padStart(2, "0"); }
+  function save() {
+    state.savedAt = stamp();
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); saveError = ""; }
+    catch (e) { saveError = (e && e.name) || "エラー"; }
+  }
+  // Can this browser keep anything at all between launches? The parent panel
+  // shows the answer, because a save that vanishes looks identical to a reset.
+  function storageProbe() {
+    try {
+      localStorage.setItem("coin-quest-probe", "1");
+      const ok = localStorage.getItem("coin-quest-probe") === "1";
+      localStorage.removeItem("coin-quest-probe");
+      return ok ? "つかえる" : "かきこめない";
+    } catch (e) { return "つかえない(" + ((e && e.name) || "?") + ")"; }
+  }
+  function P() { return state.players[state.player]; }
+  function todayKey() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
+  function keyToDate(k) { const a = String(k).split("-").map(Number); return new Date(a[0], (a[1] || 1) - 1, a[2] || 1); }
+  function daysSince(k) {
+    const t = keyToDate(todayKey()) - keyToDate(k);
+    return isFinite(t) ? Math.max(1, Math.round(t / 86400000)) : 1;
+  }
+  function freshToday() { return { date: todayKey(), cleared: 0, played: 0, coins: 0, kplayed: 0 }; }
+  // The daily allowance is not use-it-or-lose-it: what is left over banks up
+  // (to BANK_MAX) so a busy day does not cost anything.
+  function rollDay() {
+    const p = P();
+    if (!p.today) p.today = freshToday();
+    if (p.left === undefined || p.left === null) p.left = Math.max(0, DAILY_STAGES - (p.today.cleared || 0));
+    if (p.today.date !== todayKey()) {
+      try { writeBackup(localStorage.getItem(STORE_KEY), "きのうまで"); } catch (e) { /* ignore */ }
+      p.left = Math.min(BANK_MAX, p.left + DAILY_STAGES * daysSince(p.today.date));
+      p.today = freshToday();
+      save();
+    }
+    if (p.today.kplayed === undefined) p.today.kplayed = 0;
+  }
+
+  // ---------------------------------------------------------------
+  // AUDIO (TTS + tiny sound effects)
+  // ---------------------------------------------------------------
+  let voice = null, actx = null;
+  function pickVoice() {
+    if (!("speechSynthesis" in window)) return;
+    const vs = speechSynthesis.getVoices();
+    if (!vs.length) return;
+    const prefer = ["Samantha", "Ava", "Allison", "Nicky", "Google US English", "Karen", "Daniel"];
+    for (const name of prefer) { const v = vs.find(v => v.name.indexOf(name) === 0 && /en/i.test(v.lang)); if (v) { voice = v; return; } }
+    voice = vs.find(v => v.lang === "en-US") || vs.find(v => /^en/i.test(v.lang)) || null;
+  }
+  if ("speechSynthesis" in window) { pickVoice(); speechSynthesis.onvoiceschanged = pickVoice; }
+
+  function utter(text, rate) {
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = "en-US"; u.rate = rate || 0.85; u.pitch = 1.05;
+    if (voice) u.voice = voice;
+    return u;
+  }
+  function speak(text, rate) {
+    if (!state.voice || !("speechSynthesis" in window)) return;
+    try { speechSynthesis.cancel(); speechSynthesis.speak(utter(text, rate)); } catch (e) { /* ignore */ }
+  }
+  // sentence with a blank: say the first half, a little chime, then the rest
+  function speakBlank(before, after) {
+    if (!state.voice || !("speechSynthesis" in window)) return;
+    try {
+      speechSynthesis.cancel();
+      const u1 = utter(before.trim() || "hmm", 0.85);
+      u1.onend = function () { beep(880, .12); setTimeout(function () { if (after.trim()) speechSynthesis.speak(utter(after, 0.85)); }, 260); };
+      speechSynthesis.speak(u1);
+    } catch (e) { /* ignore */ }
+  }
+  function unlockAudio() {
+    try {
+      if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)();
+      if (actx.state === "suspended") actx.resume();
+    } catch (e) { /* ignore */ }
+    if ("speechSynthesis" in window) { try { const u = utter(" "); u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ } }
+  }
+  function beep(freq, dur, type, vol) {
+    if (!actx) return;
+    try {
+      const o = actx.createOscillator(), g = actx.createGain();
+      o.type = type || "square"; o.frequency.value = freq;
+      g.gain.value = vol || 0.06;
+      o.connect(g); g.connect(actx.destination);
+      const t = actx.currentTime;
+      g.gain.setValueAtTime(vol || 0.06, t);
+      g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+      o.start(t); o.stop(t + dur);
+    } catch (e) { /* ignore */ }
+  }
+  function sfxRight() { beep(660, .1); setTimeout(() => beep(990, .16), 90); }
+  function sfxOops() { beep(220, .18, "triangle", .05); }
+  function sfxCoins() { [523, 659, 784, 1047].forEach((f, i) => setTimeout(() => beep(f, .18, "square", .07), i * 110)); }
+
+  // ---------------------------------------------------------------
+  // HELPERS
+  // ---------------------------------------------------------------
+  const $ = id => document.getElementById(id);
+  const rnd = n => Math.floor(Math.random() * n);
+  function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
+  function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
+  const WORD_BY_EN = {}; WORDS.forEach(w => { WORD_BY_EN[w[0]] = w; });
+  function jaOf(en) { const w = WORD_BY_EN[en] || WORD_BY_EN[en.replace(/s$/, "")]; return w ? w[1] : ""; }
+  function itemById(id) {
+    if (id.startsWith("w:")) return { kind: "word", w: WORD_BY_EN[id.slice(2)], id };
+    if (id.startsWith("s:")) return { kind: "sent", s: SENTS[+id.slice(2)], id };
+    return null;
+  }
+
+  // ---------------------------------------------------------------
+  // STAGE BUILDING
+  // ---------------------------------------------------------------
+  function ratioL3() { return Math.min(0.6, 0.1 + P().level * 0.05); }
+  function pickLeastSeen(pool, exclude) {
+    const seen = P().seen;
+    const cands = pool.filter(id => !exclude.has(id));
+    if (!cands.length) return null;
+    shuffle(cands);
+    cands.sort((a, b) => (seen[a] || 0) - (seen[b] || 0));
+    // pick randomly among the least-seen bucket for variety
+    const min = seen[cands[0]] || 0;
+    const bucket = cands.filter(id => (seen[id] || 0) === min);
+    return bucket[rnd(bucket.length)];
+  }
+  function buildStage() {
+    const p = P();
+    const ids = [];
+    const used = new Set();
+    // 1) everything missed last time comes back first
+    for (const id of p.retry.slice(0, STAGE_SIZE)) { if (itemById(id) && (itemById(id).w || itemById(id).s)) { ids.push(id); used.add(id); } }
+    const need = STAGE_SIZE - ids.length;
+    const sentTarget = Math.round(need * 0.4);
+    const wordTarget = need - sentTarget;
+    const r3 = ratioL3();
+    const wordPool = lvl => WORDS.filter(w => w[2] === lvl).map(w => "w:" + w[0]);
+    const sentPool = lvl => SENTS.map((s, i) => s.l === lvl ? "s:" + i : null).filter(Boolean);
+    for (let i = 0; i < wordTarget; i++) {
+      const lvl = Math.random() < r3 ? 3 : 4;
+      const id = pickLeastSeen(wordPool(lvl), used) || pickLeastSeen(wordPool(lvl === 3 ? 4 : 3), used);
+      if (id) { ids.push(id); used.add(id); }
+    }
+    for (let i = 0; i < sentTarget; i++) {
+      const lvl = Math.random() < r3 ? 3 : 4;
+      const id = pickLeastSeen(sentPool(lvl), used) || pickLeastSeen(sentPool(lvl === 3 ? 4 : 3), used);
+      if (id) { ids.push(id); used.add(id); }
+    }
+    return shuffle(ids).map(makeQuestion);
+  }
+  function distractorsFor(w) {
+    const same = WORDS.filter(x => x[0] !== w[0] && x[3] === w[3] && x[1] !== w[1] && x[2] === w[2]);
+    const any = WORDS.filter(x => x[0] !== w[0] && x[3] === w[3] && x[1] !== w[1]);
+    const pool = same.length >= 3 ? same : any;
+    const out = []; const usedJa = new Set([w[1]]);
+    shuffle(pool.slice());
+    for (const x of shuffle(pool.slice())) { if (out.length === 3) break; if (usedJa.has(x[1])) continue; usedJa.add(x[1]); out.push(x); }
+    return out;
+  }
+  function makeQuestion(id) {
+    const it = itemById(id);
+    if (it.kind === "word") {
+      const w = it.w; const ds = distractorsFor(w);
+      const ja2en = P().level >= 2 && Math.random() < 0.3;
+      const opts = shuffle([w].concat(ds).map(x => ({ en: x[0], ja: x[1], ok: x[0] === w[0] })));
+      return { id, kind: "word", mode: ja2en ? "ja2en" : "en2ja", en: w[0], ja: w[1], opts };
+    }
+    const s = it.s;
+    const opts = shuffle([s.a].concat(s.d).map(x => ({ en: x, ja: jaOf(x), ok: x === s.a })));
+    return { id, kind: "sent", text: s.t, answer: s.a, opts };
+  }
+
+  // ---------------------------------------------------------------
+  // SCREENS
+  // ---------------------------------------------------------------
+  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult"].forEach(s => { $(s).hidden = s !== id; }); }
+
+  function renderYen(total) {
+    const denoms = [500, 100, 50, 10, 5, 1];
+    let rest = total; const parts = [];
+    for (const d of denoms) { const n = Math.floor(rest / d); rest -= n * d; if (n) parts.push([d, n]); }
+    if (!parts.length) return '<p class="purse-note">クリアすると コインが たまるよ</p>';
+    let html = '<div class="yen-row">';
+    for (const [d, n] of parts) {
+      const shown = Math.min(n, 8);
+      for (let i = 0; i < shown; i++) {
+        const extra = (i === shown - 1 && n > shown) ? '<span class="x">×' + n + '</span>' : "";
+        html += '<span class="yen y' + d + '">' + d + extra + '</span>';
+      }
+    }
+    html += '</div>';
+    return html;
+  }
+  const SPLASHES = ["Dig for words!", "100% blocky!", "Now with cows!", "Diamonds!",
+    "Sheep say baa!", "Free to play!", "So many coins!", "Creepers!",
+    "Made of stone!", "Craft English!", "Watch the lava!", "Zombies!"];
+  function renderHome() {
+    rollDay();
+    const p = P();
+    $("splash").textContent = SPLASHES[rnd(SPLASHES.length)];
+    $("purse").innerHTML =
+      '<div class="purse-head"><span class="coin">¥</span><span class="num">' + p.coins.toLocaleString() + '</span><span class="unit">コイン</span></div>' +
+      renderYen(p.coins);
+    let slots = '<span class="lbl">のこり</span>';
+    for (let i = 0; i < Math.min(p.left, BANK_MAX); i++) slots += '<span class="slot on"></span>';
+    if (p.left <= 0) slots += '<span class="slot"></span>';
+    $("dayRow").innerHTML = slots;
+    const done = p.left <= 0;
+    const btn = $("startBtn");
+    btn.textContent = done ? "コインなしで あそぶ" : (p.retry.length ? "つづきから" : "スタート");
+    btn.className = "btn big " + (done ? "ghost" : "green");
+    $("doneMsg").hidden = !done;
+    $("doneMsg").textContent = "コインは つかいきった! でも まだ あそべるよ。あしたに なると また たまる。";
+    show("home");
+  }
+
+  // ---- play
+  let stage = null, qi = 0, results = [];
+  function startStage() {
+    unlockAudio();
+    rollDay();
+    stage = buildStage(); qi = 0; results = [];
+    P().stagesPlayed++; P().today.played++; save();
+    show("play");
+    renderQuestion();
+  }
+  function renderProgress() {
+    let h = "";
+    for (let i = 0; i < stage.length; i++) h += '<span class="pblock' + (i < qi ? " done" : i === qi ? " now" : "") + '"></span>';
+    $("progress").innerHTML = h;
+    $("walletNum").textContent = P().coins.toLocaleString();
+  }
+  function renderQuestion() {
+    const q = stage[qi];
+    renderProgress();
+    $("after").innerHTML = "";
+    const card = $("card");
+    if (q.kind === "word" && q.mode === "en2ja") {
+      card.innerHTML = '<p class="kind">どういう いみ?</p><p class="prompt-en">' + esc(q.en) + '</p><button class="speak" id="spk" aria-label="もういちど きく">🔊</button>';
+      $("spk").onclick = () => speak(q.en);
+      speak(q.en);
+    } else if (q.kind === "word") {
+      card.innerHTML = '<p class="kind">えいごで なんて いう?</p><p class="prompt-ja">' + esc(q.ja) + '</p>';
+    } else {
+      const [before, after] = q.text.split("___");
+      const cut = after.match(/^([.,!?;:'"]*)([\s\S]*)$/);   // punctuation must not start a new line
+      card.innerHTML = '<p class="kind">___ に はいるのは?</p><p class="prompt-sent" id="sent">' + esc(before) +
+        '<span class="nb"><span class="blank' + (cut[1] ? ' tight' : '') + '" id="blank">&nbsp;</span>' + esc(cut[1]) + '</span>' + esc(cut[2]) +
+        '</p><button class="speak" id="spk" aria-label="もういちど きく">🔊</button>';
+      $("spk").onclick = () => speakBlank(before, after);
+      speakBlank(before, after);
+    }
+    const ch = $("choices"); ch.innerHTML = "";
+    q.opts.forEach((o, i) => {
+      const b = document.createElement("button");
+      const showEn = q.kind !== "word" || q.mode === "ja2en";
+      b.className = "choice" + (showEn ? " en" : "");
+      b.textContent = showEn ? o.en : o.ja;
+      b.id = "choice" + i;
+      b.onclick = () => answer(q, o, b);
+      ch.appendChild(b);
+    });
+  }
+  function answer(q, o, btn) {
+    const buttons = Array.from($("choices").children);
+    buttons.forEach(b => { b.disabled = true; });
+    const blk = $("progress").children[qi];
+    if (blk) blk.className = "pblock done breaking";
+    const seen = P().seen; seen[q.id] = (seen[q.id] || 0) + 1;
+    results.push({ id: q.id, ok: o.ok, q });
+    if (o.ok) {
+      btn.classList.add("right");
+      buttons.forEach(b => { if (b !== btn) b.classList.add("dim"); });
+      sfxRight();
+    } else {
+      btn.classList.add("wrong");
+      buttons.forEach(b => { if (b.textContent === (q.kind === "word" && q.mode === "en2ja" ? correctJa(q) : correctEn(q))) b.classList.add("right"); else if (b !== btn) b.classList.add("dim"); });
+      const wrong = P().wrong; wrong[q.id] = (wrong[q.id] || 0) + 1;
+      sfxOops();
+    }
+    // say the right english, and show the filled sentence
+    if (q.kind === "sent") {
+      const bl = $("blank"); bl.textContent = q.answer; bl.classList.add("filled");
+      setTimeout(() => speak(q.text.replace("___", q.answer), 0.9), 350);
+    } else if (q.mode === "ja2en") {
+      setTimeout(() => speak(q.en), 250);
+    } else if (!o.ok) {
+      setTimeout(() => speak(q.en), 350);
+    }
+    const after = $("after");
+    const msg = o.ok ? pickOk() : "こたえは " + (q.kind === "word" && q.mode === "en2ja" ? correctJa(q) : correctEn(q));
+    after.innerHTML = '<p class="verdict ' + (o.ok ? "ok" : "oops") + '">' + esc(msg) + '</p><button class="btn next" id="nextBtn">' + (qi + 1 < stage.length ? "つぎへ ▶" : "けっか ▶") + '</button>';
+    $("nextBtn").onclick = next;
+    // on a miss the kid has to press it, so bring it into view on short screens
+    if (!o.ok) setTimeout(() => { const n = $("nextBtn"); if (n) n.scrollIntoView({ block: "end", behavior: "smooth" }); }, 60);
+    const myQi = qi, myStage = stage;   // timer only advances the question it belongs to
+    if (o.ok) setTimeout(() => { if (stage === myStage && qi === myQi && $("nextBtn")) next(); }, 1400);
+    save();
+  }
+  function correctJa(q) { return q.opts.find(x => x.ok).ja; }
+  function correctEn(q) { return q.opts.find(x => x.ok).en; }
+  function pickOk() { const m = ["ナイス!", "やったね!", "いいね!", "そのちょうし!", "すごい!", "ばっちり!"]; return m[rnd(m.length)]; }
+  function next() {
+    if (!stage || qi >= stage.length) return;
+    qi++;
+    if (qi < stage.length) renderQuestion(); else finishStage();
+  }
+
+  // ---- result
+  function finishStage() {
+    const p = P();
+    const nOk = results.filter(r => r.ok).length;
+    const cleared = nOk >= CLEAR_LINE;
+    const wrongIds = results.filter(r => !r.ok).map(r => r.id);
+    p.retry = wrongIds;                             // 次のステージで必ずもう1回
+    const dayDone = p.left <= 0;
+    let gained = 0;
+    if (cleared) {
+      p.stagesCleared++;
+      if (!dayDone) { gained = COINS_PER_CLEAR; p.coins += gained; p.today.coins += gained; p.today.cleared++; p.left--; }
+      if (nOk >= 9) p.level = Math.min(10, p.level + 1);
+    } else {
+      p.level = Math.max(0, p.level - 1);
+    }
+    save();
+    show("result");
+    const body = $("resultBody");
+    let html = "";
+    if (cleared) {
+      html += '<h2 class="big-word">クリア!</h2>';
+      if (gained) html += '<div class="gain"><span class="coin">¥</span>+' + gained + '</div>';
+      else html += '<p class="hint" style="color:#fff;font-size:16px">コインは つかいきったけど、あそんでくれて ありがとう!</p>';
+      html += '<div class="wallet"><span class="coin sm">¥</span><span>' + p.coins.toLocaleString() + '</span></div>';
+    } else {
+      html += '<h2 class="big-word">おしい!</h2><p style="color:#fff;font-weight:800;font-size:22px;margin:0;text-shadow:2px 2px 0 var(--dirt-dark)">もういっかい やってみよう</p>';
+    }
+    if (wrongIds.length) {
+      html += '<div class="review"><h3>つぎも でてくる ことば(タップで きける)</h3><div class="review-list" id="reviewList"></div></div>';
+    }
+    const dayNowDone = p.left <= 0;
+    html += '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">';
+    if (cleared && dayNowDone && gained) html += '<button class="btn gold" id="homeBtn">きょうは ここまで!</button>';
+    else { html += '<button class="btn green" id="againBtn">' + (cleared ? "つぎの ステージ" : "もういっかい") + '</button><button class="btn ghost" id="homeBtn">おわる</button>'; }
+    html += '</div>';
+    body.innerHTML = html;
+    if (wrongIds.length) {
+      const list = $("reviewList");
+      results.filter(r => !r.ok).forEach(r => {
+        const q = r.q; const b = document.createElement("button"); b.className = "chip";
+        const en = q.kind === "word" ? q.en : q.answer; const ja = q.kind === "word" ? q.ja : jaOf(q.answer);
+        b.innerHTML = esc(en) + (ja ? '<small>' + esc(ja) + '</small>' : "");
+        b.onclick = () => speak(q.kind === "sent" ? q.text.replace("___", q.answer) : en);
+        list.appendChild(b);
+      });
+    }
+    if ($("againBtn")) $("againBtn").onclick = startStage;
+    $("homeBtn").onclick = renderHome;
+    if (cleared) { sfxCoins(); if (gained) coinRain(); }
+  }
+  function coinRain() {
+    const r = $("rain"); r.innerHTML = "";
+    for (let i = 0; i < 26; i++) {
+      const c = document.createElement("span"); c.className = "coin"; c.textContent = "¥";
+      c.style.left = Math.random() * 100 + "%"; c.style.animationDelay = (Math.random() * 0.9) + "s";
+      c.style.transform = "scale(" + (0.8 + Math.random() * 0.8) + ")";
+      r.appendChild(c);
+    }
+    setTimeout(() => { r.innerHTML = ""; }, 3200);
+  }
+
+  // ---------------------------------------------------------------
+  // KANJI QUEST  (a fixed set + a deadline: done only when ALL are learned)
+  // ---------------------------------------------------------------
+  function quest() { return QUESTS.find(q => q.id === state.quest) || QUESTS[0]; }
+  function qprog() {                       // per-player, per-quest progress
+    const p = P();
+    if (!p.quests) p.quests = {};
+    const id = quest().id;
+    if (!p.quests[id]) p.quests[id] = { hits: {}, sawB: {}, paid: {}, done: false };
+    if (!p.quests[id].paid) p.quests[id].paid = {};
+    return p.quests[id];
+  }
+  function isLearned(k) { const g = qprog(); return (g.hits[k] || 0) >= MASTER_HITS && !!g.sawB[k]; }
+  function learnedCount() { return quest().items.filter(it => isLearned(it[0])).length; }
+  function questDue(q) { const t = q || quest(); return (state.dues && state.dues[t.id]) || t.due || ""; }
+  function daysLeft() {
+    const due = questDue(); if (!due) return null;
+    const d = new Date(due + "T00:00:00"), now = new Date();
+    const t = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    return Math.round((d - t) / 86400000);
+  }
+
+  // Memorising works by coming back on a different day, so the number of
+  // coin-earning rounds per day is worked back from the days still left.
+  function kRoundsNeeded() {
+    const g = qprog();
+    let hits = 0;
+    for (const it of quest().items) {
+      const k = it[0];
+      hits += Math.max(0, MASTER_HITS - (g.hits[k] || 0));
+      if (!g.sawB[k] && (g.hits[k] || 0) >= MASTER_HITS) hits += 1;
+    }
+    return Math.ceil(hits / KSTAGE_SIZE);
+  }
+  const KCAP_FREE = 99;                               // 実質「上限なし」
+  function computeKCap() {
+    const need = kRoundsNeeded();
+    if (need <= 0) return KDAILY_MIN;                 // 達成後も少しは遊べる
+    const dl = daysLeft();
+    if (dl !== null && dl <= 1) return KCAP_FREE;     // テストが今日か明日なら、ぜんぶ おぼえるまで
+    const d = dl === null ? 1 : dl;
+    return Math.min(KDAILY_MAX, Math.max(KDAILY_MIN, Math.ceil(need / d)));
+  }
+  // Worked out once a day and then held: if it were recomputed as he learns,
+  // the allowance would shrink under him halfway through the day.
+  function kDailyCap() {
+    const t = P().today;
+    if (t.kcap === undefined || t.kcap === null) { t.kcap = computeKCap(); save(); }
+    return t.kcap;
+  }
+  function kLeftToday() { return Math.max(0, kDailyCap() - (P().today.kplayed || 0)); }
+
+  function renderKHome() {
+    rollDay();
+    const p = P(), q = quest(), items = q.items;
+    $("kWallet").textContent = p.coins.toLocaleString();
+    $("kTitle").textContent = q.name;
+    const dl = daysLeft(), due = $("kDue");
+    if (dl === null) { due.textContent = ""; }
+    else if (dl > 1) { due.textContent = "テストまで あと " + dl + " にち"; due.className = "due"; }
+    else if (dl === 1) { due.textContent = "テストは あした!"; due.className = "due soon"; }
+    else if (dl === 0) { due.textContent = "テストは きょう!"; due.className = "due soon"; }
+    else { due.textContent = "テストは おわったよ"; due.className = "due"; }
+    let w = "";
+    for (const it of items) w += '<span class="wcell' + (isLearned(it[0]) ? " on" : "") + '">' + esc(it[0]) + '</span>';
+    $("kWall").innerHTML = w;
+    const n = learnedCount();
+    $("kCount").textContent = "おぼえた " + n + " / " + items.length;
+    const all = n >= items.length;
+    const left = kLeftToday(), cap = kDailyCap(), free = cap >= KCAP_FREE;
+    let slots = "";
+    if (!all && free) slots = '<span class="lbl">ぜんぶ そろうまで やろう!</span>';
+    else if (!all) { slots = '<span class="lbl">のこり</span>';
+      for (let i = 0; i < cap; i++) slots += '<span class="slot' + (i < left ? " on" : "") + '"></span>'; }
+    $("kDayRow").innerHTML = slots;
+    $("kDone").hidden = !(all || (!free && left <= 0));
+    $("kDone").textContent = all
+      ? "ぜんぶ そろった! かんぺき!"
+      : "きょうの コインは ここまで。あしたに なると また もらえるよ。";
+    $("kStart").textContent = left <= 0 ? "コインなしで あそぶ" : (all ? "もういちど たしかめる" : "スタート");
+    $("kStart").className = "btn big " + (left <= 0 ? "ghost" : all ? "gold" : "green");
+    show("khome");
+  }
+
+  let kStage = null, kQi = 0, kGained = [];
+  function pickKQuestion(it, kind) {
+    const items = quest().items, k = it[0], yomis = it[1];
+    if (kind === "A") {                                   // 漢字 -> よみ
+      const ans = yomis[rnd(yomis.length)];
+      const mine = new Set(yomis), opts = [{ t: ans, ok: true }];
+      const pool = shuffle(items.filter(x => x[0] !== k).slice());
+      for (const x of pool) {
+        if (opts.length === 4) break;
+        const cand = x[1][rnd(x[1].length)];
+        if (mine.has(cand) || opts.some(o => o.t === cand)) continue;
+        opts.push({ t: cand, ok: false });
+      }
+      return { kind: "A", k, ans, opts: shuffle(opts) };
+    }
+    // よみ -> 漢字.
+    // Only this quest's own kanji may be wrong answers: their readings are known,
+    // so we can guarantee the shown reading fits exactly one of the four.
+    const others = items.filter(x => x[0] !== k);
+    const shared = y => others.some(x => x[1].indexOf(y) >= 0);
+    const unique = yomis.filter(y => !shared(y));
+    const ans = unique.length ? unique[rnd(unique.length)] : yomis[rnd(yomis.length)];
+    const opts = [{ t: k, ok: true }];
+    const ok = x => x[1].indexOf(ans) < 0 && !opts.some(o => o.t === x[0]);   // 同じよみの字は入れない
+    const look = (LOOKALIKE[k] || []);
+    const near = shuffle(others.filter(x => look.indexOf(x[0]) >= 0));        // 形が似ている字を優先
+    for (const x of near) { if (opts.length === 4) break; if (ok(x)) opts.push({ t: x[0], ok: false }); }
+    for (const x of shuffle(others.slice())) { if (opts.length === 4) break; if (ok(x)) opts.push({ t: x[0], ok: false }); }
+    return { kind: "B", k, ans, opts: shuffle(opts) };
+  }
+  function buildKStage() {
+    const g = qprog(), items = quest().items;
+    const rest = items.filter(it => !isLearned(it[0]));
+    const pool = (rest.length ? rest : items).slice();
+    shuffle(pool);
+    pool.sort((a, b) => (g.hits[a[0]] || 0) - (g.hits[b[0]] || 0));   // 苦手な字から
+    const chosen = pool.slice(0, KSTAGE_SIZE);
+    while (chosen.length < KSTAGE_SIZE && items.length) chosen.push(items[rnd(items.length)]);
+    return shuffle(chosen.map((it, i) => pickKQuestion(it, (i % 2 === 0 || !g.sawB[it[0]]) ? "B" : "A")));
+  }
+  let kPaid = false;
+  function startKStage() {
+    unlockAudio(); rollDay();
+    kPaid = kLeftToday() > 0 && kRoundsNeeded() > 0;   // 上限をこえた回と、覚えきったあとはコインなし
+    P().today.kplayed = (P().today.kplayed || 0) + 1; save();
+    kStage = buildKStage(); kQi = 0; kGained = [];
+    show("kplay"); renderKQuestion();
+  }
+  function renderKQuestion() {
+    const q = kStage[kQi];
+    let h = "";
+    for (let i = 0; i < kStage.length; i++) h += '<span class="pblock' + (i < kQi ? " done" : i === kQi ? " now" : "") + '"></span>';
+    $("kProgress").innerHTML = h;
+    $("kWallet2").textContent = P().coins.toLocaleString();
+    $("kAfter").innerHTML = "";
+    if (q.kind === "A") {
+      $("kCard").innerHTML = '<p class="kind">なんて よむ?</p><p class="kanji-big">' + esc(q.k) + '</p>';
+    } else {
+      $("kCard").innerHTML = '<p class="kind">どの かんじ?</p><p class="yomi-big">' + esc(q.ans) + '</p>';
+    }
+    const ch = $("kChoices"); ch.innerHTML = "";
+    q.opts.forEach((o, i) => {
+      const b = document.createElement("button");
+      b.className = "choice" + (q.kind === "B" ? " kanji" : "");
+      b.textContent = o.t; b.id = "kchoice" + i;
+      b.onclick = () => kAnswer(q, o, b);
+      ch.appendChild(b);
+    });
+  }
+  function kAnswer(q, o, btn) {
+    const buttons = Array.from($("kChoices").children);
+    buttons.forEach(b => { b.disabled = true; });
+    const blk = $("kProgress").children[kQi];
+    if (blk) blk.className = "pblock done breaking";
+    const g = qprog();
+    const wasLearned = isLearned(q.k);
+    if (o.ok) {
+      btn.classList.add("right");
+      buttons.forEach(b => { if (b !== btn) b.classList.add("dim"); });
+      g.hits[q.k] = (g.hits[q.k] || 0) + 1;
+      if (q.kind === "B") g.sawB[q.k] = true;
+      sfxRight();
+    } else {
+      btn.classList.add("wrong");
+      buttons.forEach(b => { if (b.textContent === (q.kind === "A" ? q.ans : q.k)) b.classList.add("right"); else if (b !== btn) b.classList.add("dim"); });
+      g.hits[q.k] = Math.max(0, (g.hits[q.k] || 0) - 1);   // 減るだけ。ゼロ止まり
+      const wrong = P().wrong; wrong["k:" + q.k] = (wrong["k:" + q.k] || 0) + 1;
+      sfxOops();
+    }
+    if (!wasLearned && isLearned(q.k) && !g.paid[q.k]) { g.paid[q.k] = true; kGained.push(q.k); }
+    const msg = o.ok ? pickOk() : "こたえは " + (q.kind === "A" ? q.ans : q.k);
+    $("kAfter").innerHTML = '<p class="verdict ' + (o.ok ? "ok" : "oops") + '">' + esc(msg) + '</p>' +
+      '<button class="btn next" id="kNextBtn">' + (kQi + 1 < kStage.length ? "つぎへ &#9654;" : "けっか &#9654;") + '</button>';
+    $("kNextBtn").onclick = kNext;
+    if (!o.ok) setTimeout(() => { const n = $("kNextBtn"); if (n) n.scrollIntoView({ block: "end", behavior: "smooth" }); }, 60);
+    const myQi = kQi, myStage = kStage;
+    if (o.ok) setTimeout(() => { if (kStage === myStage && kQi === myQi && $("kNextBtn")) kNext(); }, 1400);
+    save();
+  }
+  function kNext() {
+    if (!kStage || kQi >= kStage.length) return;
+    kQi++;
+    if (kQi < kStage.length) renderKQuestion(); else finishKStage();
+  }
+  function finishKStage() {
+    const p = P(), g = qprog(), items = quest().items;
+    let coins = (kPaid ? KCOINS_STAGE : 0) + kGained.length * KCOINS_LEARN;   // おぼえた分は上限に関係なく出す
+    const all = learnedCount() >= items.length;
+    const firstAll = all && !g.done;
+    if (firstAll) { g.done = true; coins += KCOINS_ALL; }   // 達成のごほうびは上限に関係なく1回だけ出す
+    p.coins += coins; save();
+    show("kresult");
+    let html = '<h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(34px,9vw,60px)">' +
+      (firstAll ? "ぜんぶ そろった!" : kGained.length ? "ブロック ゲット!" : "おつかれさま!") + '</h2>';
+    if (kGained.length) {
+      html += '<div class="review"><h3>あたらしく おぼえた かんじ</h3><div class="review-list">' +
+        kGained.map(k => '<span class="wcell on" style="width:52px;height:52px;font-size:30px">' + esc(k) + '</span>').join("") +
+        '</div></div>';
+    }
+    html += coins
+      ? '<div class="gain"><span class="coin">&#165;</span>+' + coins + '</div>'
+      : '<p class="hint" style="color:#fff;font-size:16px">きょうの コインは ここまで。あそんでくれて ありがとう!</p>';
+    html += '<div class="wallet"><span class="coin sm">&#165;</span><span>' + p.coins.toLocaleString() + '</span></div>';
+    html += '<p class="hint" style="color:#fff;font-size:16px">おぼえた ' + learnedCount() + ' / ' + items.length + '</p>';
+    html += '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">' +
+      '<button class="btn green" id="kAgain">つづける</button>' +
+      '<button class="btn ghost" id="kHomeBtn">おわる</button></div>';
+    $("kResultBody").innerHTML = html;
+    $("kAgain").onclick = startKStage;
+    $("kHomeBtn").onclick = renderKHome;
+    if (kGained.length || firstAll) { sfxCoins(); coinRain(); }
+  }
+
+  // ---- the quest picker: the only thing 泰河 sees at the top
+  function renderPick() {
+    rollDay();
+    const p = P();
+    $("splash2").textContent = SPLASHES[rnd(SPLASHES.length)];
+    $("purse2").innerHTML =
+      '<div class="purse-head"><span class="coin">&#165;</span><span class="num">' + p.coins.toLocaleString() + '</span><span class="unit">コイン</span></div>' +
+      renderYen(p.coins);
+    const q = quest(), n = learnedCount(), dl = daysLeft();
+    const sub = "おぼえた " + n + " / " + q.items.length + (dl !== null && dl >= 0 ? "・あと " + dl + " にち" : "");
+    const esub = "コインが もらえる のこり " + p.left + " かい";
+    $("pickList").innerHTML =
+      '<button class="pick" id="goEn"><span class="ico">&#127760;</span><span><span class="ttl">えいご</span>' +
+      '<span class="sub">' + esc(esub) + '</span></span></button>' +
+      '<button class="pick" id="goKa"><span class="ico">&#128220;</span><span><span class="ttl">' + esc(q.name) + '</span>' +
+      '<span class="sub">' + esc(sub) + '</span></span></button>';
+    $("goEn").onclick = renderHome;
+    $("goKa").onclick = renderKHome;
+    show("pick");
+  }
+
+  // ---- parent gate: hold the purse for 3 seconds, then type the PIN
+  function askPin() {
+    if ($("panel")) return;
+    const div = document.createElement("div"); div.className = "panel"; div.id = "panel";
+    div.innerHTML = '<div class="panel-box pin-box"><h2>おとなのひと</h2><p>あんしょうばんごう を いれてください</p>' +
+      '<div class="row"><input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><button class="btn small" id="pinOk">OK</button></div>' +
+      '<p class="hint" id="pinMsg"></p>' +
+      '<div class="row" style="justify-content:flex-end"><button class="btn small ghost" id="pinCancel">もどる</button></div></div>';
+    document.body.appendChild(div);
+    const check = () => {
+      if ($("pinInput").value === state.pin) { closeParent(); openParent(); }
+      else { $("pinMsg").textContent = "ちがいます"; $("pinInput").value = ""; }
+    };
+    $("pinOk").onclick = check;
+    $("pinInput").addEventListener("keydown", e => { if (e.key === "Enter") check(); });
+    $("pinCancel").onclick = closeParent;
+    div.addEventListener("click", e => { if (e.target === div) closeParent(); });
+    setTimeout(() => $("pinInput").focus(), 50);
+  }
+  function bindLongPress(el, ms, fn) {
+    let t = null;
+    const start = () => { clearTimeout(t); t = setTimeout(fn, ms); };
+    const stop = () => clearTimeout(t);
+    el.addEventListener("pointerdown", start);
+    ["pointerup", "pointerleave", "pointercancel"].forEach(ev => el.addEventListener(ev, stop));
+    el.addEventListener("contextmenu", e => e.preventDefault());
+  }
+
+  // ---- parent panel
+  function openParent() {
+    const p = P();
+    const wrongTop = Object.entries(p.wrong).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([id, n]) => {
+      if (id.startsWith("k:")) return "<li>" + esc(id.slice(2)) + " ×" + n + "</li>";
+      const it = itemById(id); if (!it) return "";
+      const label = it.kind === "word" ? it.w[0] + "(" + it.w[1] + ")" : it.s.a + " / " + it.s.t;
+      return "<li>" + esc(label) + " ×" + n + "</li>";
+    }).join("");
+    const div = document.createElement("div"); div.className = "panel"; div.id = "panel";
+    div.innerHTML =
+      '<div class="panel-box">' +
+      '<h2>おとなのひと むけ</h2>' +
+      '<div class="row"><label for="playerSel">プレイヤー</label><select id="playerSel">' +
+      Object.entries(PLAYERS).map(([k, v]) => '<option value="' + k + '"' + (k === state.player ? " selected" : "") + '>' + v + '</option>').join("") +
+      '</select></div>' +
+      '<div class="row"><label for="questSel">いまの かだい</label><select id="questSel">' +
+      QUESTS.map(q => '<option value="' + q.id + '"' + (q.id === state.quest ? " selected" : "") + '>' + esc(q.name) + '</option>').join("") +
+      '</select></div>' +
+      '<div class="row"><label for="dueNew">かだいの きげん</label><input id="dueNew" type="date" value="' + esc(questDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="dueSave">ほぞん</button></div>' +
+      '<div class="row"><label for="voiceSel">えいごの こえ</label><select id="voiceSel"><option value="1"' + (state.voice ? " selected" : "") + '>オン</option><option value="0"' + (!state.voice ? " selected" : "") + '>オフ</option></select>' +
+      '<button class="btn small ghost" id="voiceTest">テスト</button></div>' +
+      '<p class="stat">コイン <b id="panelCoins">' + p.coins + '</b> / クリア ' + p.stagesCleared + ' 回(あそんだ ' + p.stagesPlayed + ' 回) / きょう ' + p.today.cleared + ' クリア / 3級まぜ率 ' + Math.round(ratioL3() * 100) + '%</p>' +
+      '<p class="stat">かんじ「' + esc(quest().name) + '」 おぼえた ' + learnedCount() + ' / ' + quest().items.length + '</p>' +
+      '<p class="hint">よく まちがえる ことば(多いじゅん)</p><ul style="margin:0 0 8px;padding-left:18px;font-size:13px">' + (wrongTop || "<li>まだ ありません</li>") + '</ul>' +
+      '<p class="hint">こえ: ' + esc(voice ? voice.name : "ブラウザ標準") + '</p>' +
+      '<div class="row"><label for="coinPlus">わたす</label><input id="coinPlus" class="amt" type="tel" inputmode="numeric" maxlength="4" value="' + GIVE_DEFAULT + '"><button class="btn small ghost" id="giveCoins">+ コイン(おてつだい等)</button></div>' +
+      '<div class="row"><label for="coinMinus">つかう</label><input id="coinMinus" class="amt" type="tel" inputmode="numeric" maxlength="4" value="' + GIVE_DEFAULT + '"><button class="btn small ghost" id="spendCoins">− コイン(こうかん等)</button></div>' +
+      '<p class="hint" id="coinMsg">すうじは かえられます(例 20 / 500)。つかいすぎたら わたす で もどせます。</p>' +
+      '<div class="row"><button class="btn small ghost" id="resetBtn">このプレイヤーを リセット</button></div>' +
+      '<div class="row"><label for="pinNew">あんしょうばんごう を かえる</label><input id="pinNew" type="tel" inputmode="numeric" maxlength="6" placeholder="4〜6けた" style="font-size:16px;width:8ch;padding:4px"><button class="btn small ghost" id="pinSave">ほぞん</button></div>' +
+      (function () {
+        const b = readBackup(), c = b ? backupCoins(b) : null, full = b ? backupOk(b) : false;
+        return (brokenSave ? '<p class="stat" style="color:var(--oops-dark)">まえの データが よみこめませんでした。控えから もどせます。</p>' : '') +
+          '<div class="row"><span class="hint">まえの データ: ' +
+          (b ? esc(b.at) + "(" + esc(b.why) + ")" + (c === null ? "" : " コイン " + c) : "なし") +
+          '</span>' +
+          (b && full ? '<button class="btn small ghost" id="restoreBtn">ぜんぶ もどす</button>' : '') +
+          (b && c !== null ? '<button class="btn small ghost" id="restoreCoins">コインだけ もどす</button>' : '') +
+          '</div>' +
+          (readUndo() ? '<div class="row"><span class="hint">もどす まえの データも のこっています</span><button class="btn small ghost" id="undoBtn">とりけす</button></div>' : '');
+      })() +
+      '<p class="stat">ほぞん: ' + esc(storageProbe()) + (saveError ? " / かきこみエラー " + esc(saveError) : "") +
+      ' / はじめて ひらいた ' + esc(state.born || "?") + (bornNow ? " ←このきどうで はじめて" : "") +
+      ' / さいごの ほぞん ' + esc(state.savedAt || "まだ") + '</p>' +
+      '<p class="hint">ひらきかた: ホームの コインの わく を 2びょう おしつづける</p>' +
+      '<div class="row" style="justify-content:flex-end"><button class="btn small" id="closePanel">とじる</button></div>' +
+      '</div>';
+    document.body.appendChild(div);
+    $("playerSel").onchange = e => { state.player = e.target.value; save(); closeParent(); renderPick(); };
+    $("questSel").onchange = e => { state.quest = e.target.value; save(); closeParent(); renderPick(); };
+    $("dueSave").onclick = () => { const v = $("dueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues[state.quest] = v; P().today.kcap = null; save(); alert("きげんを " + v + " にしました"); } else alert("日づけを えらんでください"); };
+    $("voiceSel").onchange = e => { state.voice = e.target.value === "1"; save(); };
+    $("voiceTest").onclick = () => { unlockAudio(); speak("Let's build a house with wood."); };
+    const coinAmt = id => { const v = parseInt(($(id).value || "").replace(/[^0-9]/g, ""), 10); return isFinite(v) && v > 0 ? Math.min(v, 9999) : 0; };
+    const coinDone = msg => { $("coinMsg").textContent = msg; $("panelCoins").textContent = P().coins; save(); renderPick(); };
+    $("giveCoins").onclick = () => {
+      const n = coinAmt("coinPlus");
+      if (!n) { $("coinMsg").textContent = "1いじょうの すうじを いれてください"; return; }
+      P().coins += n;
+      coinDone("+" + n + " わたしました。いま " + P().coins + " コイン");
+    };
+    $("spendCoins").onclick = () => {
+      const n = coinAmt("coinMinus"), p2 = P();
+      if (!n) { $("coinMsg").textContent = "1いじょうの すうじを いれてください"; return; }
+      if (p2.coins <= 0) { $("coinMsg").textContent = "コインが ありません"; return; }
+      const used = Math.min(n, p2.coins);   // never goes below zero
+      p2.coins -= used;
+      coinDone((used < n ? "コインが たりないので " : "") + "−" + used + " つかいました。のこり " + p2.coins + " コイン");
+    };
+    $("resetBtn").onclick = () => { if (confirm(PLAYERS[state.player] + " のデータを全部消します。よろしいですか?")) { state.players[state.player] = freshPlayer(); save(); closeParent(); renderPick(); } };
+    $("pinSave").onclick = () => { const v = $("pinNew").value.trim(); if (/^\d{4,6}$/.test(v)) { state.pin = v; save(); alert("あんしょうばんごうを " + v + " にしました"); } else alert("4〜6けたの すうじで"); };
+    if ($("restoreBtn")) $("restoreBtn").onclick = () => {
+      const b = readBackup(); if (!b) return;
+      const c = backupCoins(b);
+      if (!confirm("いまのデータを " + b.at + " の控え(コイン " + (c === null ? "?" : c) + ")に もどします。よろしいですか?")) return;
+      try {
+        localStorage.setItem(UNDO_KEY, JSON.stringify({ at: todayKey(), why: "もどす まえ", raw: localStorage.getItem(STORE_KEY) }));
+        localStorage.setItem(STORE_KEY, b.raw);
+      } catch (e) { alert("もどせませんでした"); return; }
+      location.reload();
+    };
+    if ($("restoreCoins")) $("restoreCoins").onclick = () => {
+      const b = readBackup(); if (!b) return;
+      const c = backupCoins(b); if (c === null) return;
+      if (!confirm("コインを " + c + " に もどします。よろしいですか?")) return;
+      P().coins = c; save(); closeParent(); renderPick();
+    };
+    if ($("undoBtn")) $("undoBtn").onclick = () => {
+      const u = readUndo(); if (!u || !u.raw) return;
+      if (!confirm("もどす まえの データに 戻します。よろしいですか?")) return;
+      try { localStorage.setItem(STORE_KEY, u.raw); localStorage.removeItem(UNDO_KEY); } catch (e) { return; }
+      location.reload();
+    };
+    $("closePanel").onclick = closeParent;
+    div.addEventListener("click", e => { if (e.target === div) closeParent(); });
+  }
+  function closeParent() { const d = $("panel"); if (d) d.remove(); }
+
+  // ---------------------------------------------------------------
+  // BOOT
+  // ---------------------------------------------------------------
+  function init() {
+    load();
+    $("startBtn").onclick = startStage;
+    $("quitBtn").onclick = () => { try { speechSynthesis.cancel(); } catch (e) {} renderHome(); };
+    $("eBack").onclick = renderPick;
+    $("kStart").onclick = startKStage;
+    $("kBack").onclick = renderPick;
+    $("kQuit").onclick = () => { try { speechSynthesis.cancel(); } catch (e) {} renderKHome(); };
+    bindLongPress($("purse"), 2000, askPin);
+    bindLongPress($("purse2"), 2000, askPin);
+    document.addEventListener("touchstart", function once() { unlockAudio(); document.removeEventListener("touchstart", once); }, { passive: true });
+    renderPick();
+  }
+  if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(init); else init();
+})();
+</script>
