@@ -681,6 +681,7 @@
   // ---------------------------------------------------------------
   const STAGE_SIZE = 10;
   const CLEAR_LINE = 6;          // 6/10 でクリア
+  const START_LEVEL = 3;         // 4級合格済みなので0からは始めない。親メニューで変えられる
   const COINS_PER_CLEAR = 20;
   const DAILY_STAGES = 5;        // 1日ぶんとして たまる回数
   const BANK_MAX = 15;           // ためられるのは3日ぶんまで
@@ -696,7 +697,7 @@
   // STATE
   // ---------------------------------------------------------------
   function freshPlayer() {
-    return { coins: 0, level: 0, stagesCleared: 0, stagesPlayed: 0,
+    return { coins: 0, level: START_LEVEL, stagesCleared: 0, stagesPlayed: 0,
              today: { date: todayKey(), cleared: 0, played: 0, coins: 0, kplayed: 0 },
              left: DAILY_STAGES,
              retry: [], seen: {}, wrong: {}, quests: {} };
@@ -868,7 +869,11 @@
   // ---------------------------------------------------------------
   // STAGE BUILDING
   // ---------------------------------------------------------------
-  function ratioL3() { return Math.min(0.6, 0.1 + P().level * 0.05); }
+  function ratioL3() { return Math.min(0.85, 0.25 + P().level * 0.06); }
+  // 英文は単語より重い(読む量が増える)ので、上がるほど英文を増やす
+  function ratioSent() { return Math.min(0.6, 0.4 + P().level * 0.02); }
+  // 日本語→英語は逆向きで難しい。level 1 から少しずつ増やす
+  function ratioJa2En() { return P().level >= 1 ? Math.min(0.5, 0.2 + P().level * 0.03) : 0; }
   function pickLeastSeen(pool, exclude) {
     const seen = P().seen;
     const cands = pool.filter(id => !exclude.has(id));
@@ -887,7 +892,7 @@
     // 1) everything missed last time comes back first
     for (const id of p.retry.slice(0, STAGE_SIZE)) { if (itemById(id) && (itemById(id).w || itemById(id).s)) { ids.push(id); used.add(id); } }
     const need = STAGE_SIZE - ids.length;
-    const sentTarget = Math.round(need * 0.4);
+    const sentTarget = Math.round(need * ratioSent());
     const wordTarget = need - sentTarget;
     const r3 = ratioL3();
     const wordPool = lvl => WORDS.filter(w => w[2] === lvl).map(w => "w:" + w[0]);
@@ -917,7 +922,7 @@
     const it = itemById(id);
     if (it.kind === "word") {
       const w = it.w; const ds = distractorsFor(w);
-      const ja2en = P().level >= 2 && Math.random() < 0.3;
+      const ja2en = Math.random() < ratioJa2En();
       const opts = shuffle([w].concat(ds).map(x => ({ en: x[0], ja: x[1], ok: x[0] === w[0] })));
       return { id, kind: "word", mode: ja2en ? "ja2en" : "en2ja", en: w[0], ja: w[1], opts };
     }
@@ -1074,7 +1079,8 @@
     if (cleared) {
       p.stagesCleared++;
       if (!dayDone) { gained = COINS_PER_CLEAR; p.coins += gained; p.today.coins += gained; p.today.cleared++; p.left--; }
-      if (nOk >= 9) p.level = Math.min(10, p.level + 1);
+      if (nOk >= STAGE_SIZE) p.level = Math.min(10, p.level + 2);      // 満点は2つ上げる
+      else if (nOk >= 9) p.level = Math.min(10, p.level + 1);
     } else {
       p.level = Math.max(0, p.level - 1);
     }
@@ -1410,9 +1416,14 @@
       QUESTS.map(q => '<option value="' + q.id + '"' + (q.id === state.quest ? " selected" : "") + '>' + esc(q.name) + '</option>').join("") +
       '</select></div>' +
       '<div class="row"><label for="dueNew">かだいの きげん</label><input id="dueNew" type="date" value="' + esc(questDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="dueSave">ほぞん</button></div>' +
+      '<div class="row"><label for="lvlSel">えいごの むずかしさ</label><select id="lvlSel">' +
+      Array.from({ length: 11 }, function (_, i) {
+        return '<option value="' + i + '"' + (i === P().level ? " selected" : "") + '>' + i + '</option>';
+      }).join("") +
+      '</select><span class="hint">3級 ' + Math.round(ratioL3() * 100) + '% / 日→英 ' + Math.round(ratioJa2En() * 100) + '% / 英文 ' + Math.round(ratioSent() * 100) + '%</span></div>' +
       '<div class="row"><label for="voiceSel">えいごの こえ</label><select id="voiceSel"><option value="1"' + (state.voice ? " selected" : "") + '>オン</option><option value="0"' + (!state.voice ? " selected" : "") + '>オフ</option></select>' +
       '<button class="btn small ghost" id="voiceTest">テスト</button></div>' +
-      '<p class="stat">コイン <b id="panelCoins">' + p.coins + '</b> / クリア ' + p.stagesCleared + ' 回(あそんだ ' + p.stagesPlayed + ' 回) / きょう ' + p.today.cleared + ' クリア / 3級まぜ率 ' + Math.round(ratioL3() * 100) + '%</p>' +
+      '<p class="stat">コイン <b id="panelCoins">' + p.coins + '</b> / クリア ' + p.stagesCleared + ' 回(あそんだ ' + p.stagesPlayed + ' 回) / きょう ' + p.today.cleared + ' クリア / むずかしさ ' + P().level + '</p>' +
       '<p class="stat">かんじ「' + esc(quest().name) + '」 おぼえた ' + learnedCount() + ' / ' + quest().items.length + '</p>' +
       '<p class="hint">よく まちがえる ことば(多いじゅん)</p><ul style="margin:0 0 8px;padding-left:18px;font-size:13px">' + (wrongTop || "<li>まだ ありません</li>") + '</ul>' +
       '<p class="hint">こえ: ' + esc(voice ? voice.name : "ブラウザ標準") + '</p>' +
@@ -1442,6 +1453,7 @@
     $("playerSel").onchange = e => { state.player = e.target.value; save(); closeParent(); renderPick(); };
     $("questSel").onchange = e => { state.quest = e.target.value; save(); closeParent(); renderPick(); };
     $("dueSave").onclick = () => { const v = $("dueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues[state.quest] = v; P().today.kcap = null; save(); alert("きげんを " + v + " にしました"); } else alert("日づけを えらんでください"); };
+    $("lvlSel").onchange = e => { P().level = Number(e.target.value); save(); closeParent(); openParent(); };
     $("voiceSel").onchange = e => { state.voice = e.target.value === "1"; save(); };
     $("voiceTest").onclick = () => { unlockAudio(); speak("Let's build a house with wood."); };
     const coinAmt = id => { const v = parseInt(($(id).value || "").replace(/[^0-9]/g, ""), 10); return isFinite(v) && v > 0 ? Math.min(v, 9999) : 0; };
