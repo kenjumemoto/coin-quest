@@ -322,6 +322,7 @@
   .panel-box label { font-size: 14px; font-weight: 800; }
   .panel-box select { font-family: var(--font-ja); font-size: 16px; padding: 6px; }
   .panel-box .amt { font-family: var(--font-en); font-size: 16px; padding: 6px; width: 6ch; text-align: right; }
+  .panel-box textarea { width: 100%; box-sizing: border-box; font-family: var(--font-en); font-size: 12px; height: 62px; padding: 6px; border: 2px solid var(--stone-dark); }
   .stat { font-variant-numeric: tabular-nums; }
 
   /* --- quest picker & kanji mode --- */
@@ -723,6 +724,21 @@
   }
   function readBackup() {
     try { const b = localStorage.getItem(BACKUP_KEY); return b ? JSON.parse(b) : null; } catch (e) { return null; }
+  }
+  // A code the parent can copy out and paste back. localStorage is tied to one
+  // icon/browser, so this is the only way data survives a move.
+  function exportCode() {
+    try { return btoa(unescape(encodeURIComponent(JSON.stringify(state)))); } catch (e) { return ""; }
+  }
+  function importCode(code) {
+    let obj = null;
+    try { obj = JSON.parse(decodeURIComponent(escape(atob(String(code).replace(/\s/g, ""))))); } catch (e) { return "よみこめません"; }
+    if (!obj || !obj.players || !obj.players.taiga) return "データの形が ちがいます";
+    try {
+      localStorage.setItem(UNDO_KEY, JSON.stringify({ at: todayKey(), why: "よみこむ まえ", raw: localStorage.getItem(STORE_KEY) }));
+      localStorage.setItem(STORE_KEY, JSON.stringify(obj));
+    } catch (e) { return "ほぞんできません"; }
+    return "";
   }
   function readUndo() {
     try { const b = localStorage.getItem(UNDO_KEY); return b ? JSON.parse(b) : null; } catch (e) { return null; }
@@ -1448,6 +1464,12 @@
       '<p class="stat">ほぞん: ' + esc(storageProbe()) + (saveError ? " / かきこみエラー " + esc(saveError) : "") +
       ' / はじめて ひらいた ' + esc(state.born || "?") + (bornNow ? " ←このきどうで はじめて" : "") +
       ' / さいごの ほぞん ' + esc(state.savedAt || "まだ") + '</p>' +
+      '<p class="hint" style="margin-top:12px"><b>データの ひっこし</b>(アイコンを つくりなおす前に かならず)</p>' +
+      '<div class="row"><button class="btn small ghost" id="expBtn">かきだす</button>' +
+      '<button class="btn small ghost" id="copyBtn">コピー</button>' +
+      '<button class="btn small ghost" id="impBtn">よみこむ</button></div>' +
+      '<textarea id="codeBox" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="「かきだす」で コードが出ます。よみこむ ときは ここに はりつけて「よみこむ」。"></textarea>' +
+      '<p class="hint" id="codeMsg"></p>' +
       '<p class="hint">ひらきかた: ホームの コインの わく を 2びょう おしつづける</p>' +
       '<div class="row" style="justify-content:flex-end"><button class="btn small" id="closePanel">とじる</button></div>' +
       '</div>';
@@ -1496,6 +1518,26 @@
       const u = readUndo(); if (!u || !u.raw) return;
       if (!confirm("もどす まえの データに 戻します。よろしいですか?")) return;
       try { localStorage.setItem(STORE_KEY, u.raw); localStorage.removeItem(UNDO_KEY); } catch (e) { return; }
+      location.reload();
+    };
+    $("expBtn").onclick = () => {
+      const c = exportCode();
+      $("codeBox").value = c;
+      $("codeMsg").textContent = c ? "このコードを メモに はりつけて とっておいてください(" + c.length + "文字)" : "かきだせませんでした";
+      $("codeBox").focus(); $("codeBox").select();
+    };
+    $("copyBtn").onclick = async () => {
+      const c = $("codeBox").value.trim() || exportCode();
+      $("codeBox").value = c; $("codeBox").select();
+      try { await navigator.clipboard.writeText(c); $("codeMsg").textContent = "コピーしました"; }
+      catch (e) { $("codeMsg").textContent = "コピーできないので、えらんで ⌘C / 長おし→コピー してください"; }
+    };
+    $("impBtn").onclick = () => {
+      const c = $("codeBox").value.trim();
+      if (!c) { $("codeMsg").textContent = "コードを はりつけてください"; return; }
+      if (!confirm("いまのデータを、はりつけた コードで 上書きします。よろしいですか?")) return;
+      const err = importCode(c);
+      if (err) { $("codeMsg").textContent = err; return; }
       location.reload();
     };
     $("closePanel").onclick = closeParent;
