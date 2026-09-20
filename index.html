@@ -366,6 +366,28 @@
   .kanji-big { font-family: var(--font-ja); font-weight: 800; font-size: clamp(90px, 26vw, 170px); line-height: 1; margin: 0; }
   .yomi-big { font-family: var(--font-ja); font-weight: 800; font-size: clamp(34px, 8vw, 56px); line-height: 1.2; margin: 0; }
   .choice.kanji { font-size: clamp(38px, 10vw, 54px); font-weight: 800; min-height: 96px; }
+
+  /* --- さんすう --- */
+  .sum { font-family: var(--font-en); font-weight: 700; font-size: clamp(46px, 13vw, 84px); line-height: 1; margin: 0; letter-spacing: .04em; }
+  .ansbox {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 3.2ch; min-height: 1.25em; padding: 0 .12em;
+    font-family: var(--font-en); font-weight: 700; font-size: clamp(46px, 13vw, 84px); line-height: 1.25;
+    border-bottom: 6px solid var(--blue); color: var(--blue);
+  }
+  .ansbox.ok { border-bottom-color: var(--ok-dark); color: var(--ok-dark); }
+  .ansbox.ng { border-bottom-color: var(--oops-dark); color: var(--oops-dark); }
+  .pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 16px; padding-bottom: 64px; width: min(100%, 420px); margin-inline: auto; }
+  .key {
+    appearance: none; cursor: pointer; min-height: 68px;
+    background: var(--paper); border: 3px solid var(--stone-dark); box-shadow: 0 6px 0 var(--stone-dark);
+    font-family: var(--font-en); font-weight: 700; font-size: 34px; color: var(--ink);
+    transition: transform .05s ease, box-shadow .05s ease;
+  }
+  .key:active { transform: translateY(5px); box-shadow: 0 1px 0 var(--stone-dark); }
+  .key.del { font-family: var(--font-ja); font-weight: 800; font-size: 22px; background: #f1e7d8; }
+  .ev-time { font-family: var(--font-en); font-weight: 700; }
+  .bigtime { font-family: var(--font-en); font-weight: 700; font-size: clamp(52px, 14vw, 88px); line-height: 1; margin: 0; color: #fff; text-shadow: 3px 3px 0 var(--dirt-dark); }
   /* single characters do not need a full-width row, so keep 2x2 even on a phone */
   @media (max-width: 420px) { #kChoices { grid-template-columns: 1fr 1fr; } .choice.kanji { min-height: 84px; } }
   .hint { font-size: 12px; color: var(--ink-soft); }
@@ -401,6 +423,36 @@
       <div class="purse" id="purse2"></div>
       <div class="pick-list" id="pickList"></div>
     </div>
+  </section>
+
+  <!-- MATH HOME (しゅもく えらび) -->
+  <section id="mhome" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="mWallet">0</span></div>
+      <button class="btn ghost small" id="mBack">&#9664; もどる</button>
+    </div>
+    <div class="home-center">
+      <h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(28px,7vw,44px)">けいさん</h2>
+      <div class="day-row" id="mDayRow"></div>
+      <div class="pick-list" id="mList"></div>
+      <p id="mDone" class="hint" hidden></p>
+    </div>
+  </section>
+
+  <!-- MATH PLAY -->
+  <section id="mplay" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="mWallet2">0</span></div>
+      <button class="btn ghost small" id="mQuit">やめる</button>
+    </div>
+    <div class="progress" id="mProgress"></div>
+    <div class="card" id="mCard"></div>
+    <div class="pad" id="mPad"></div>
+  </section>
+
+  <!-- MATH RESULT -->
+  <section id="mresult" class="screen" hidden>
+    <div class="result" id="mResultBody"></div>
   </section>
 
   <!-- KANJI HOME -->
@@ -671,6 +723,30 @@
       due: "2026-09-20", items: KANJI_3 }
     // 次の出題表が来たら、ここに1ブロック足すだけ。上は触らない
   ];
+  // ---------------------------------------------------------------
+  // さんすう: 種目(しゅもく)。記録は種目ごとに持つので、新しい段を足しても
+  // 前の記録は動かないし、覚えたての段は「記録なし」から始められる。
+  // 紙が要る計算(2桁±2桁)は入れない。タップだけの暗算に載るものだけ。
+  // ---------------------------------------------------------------
+  const M_EVENTS = [
+    { id: "add21", name: "たしざん",    sub: "2けた + 1けた", n: 8, on: true },
+    { id: "sub21", name: "ひきざん",    sub: "2けた − 1けた", n: 8, on: true },
+    { id: "ku2",   name: "九九 2のだん", sub: "2 × 1〜9",      n: 9, on: true,  dan: 2 },
+    { id: "ku5",   name: "九九 5のだん", sub: "5 × 1〜9",      n: 9, on: true,  dan: 5 },
+    { id: "ku3",   name: "九九 3のだん", sub: "3 × 1〜9",      n: 9, on: false, dan: 3 },
+    { id: "ku4",   name: "九九 4のだん", sub: "4 × 1〜9",      n: 9, on: false, dan: 4 },
+    { id: "ku6",   name: "九九 6のだん", sub: "6 × 1〜9",      n: 9, on: false, dan: 6 },
+    { id: "ku7",   name: "九九 7のだん", sub: "7 × 1〜9",      n: 9, on: false, dan: 7 },
+    { id: "ku8",   name: "九九 8のだん", sub: "8 × 1〜9",      n: 9, on: false, dan: 8 },
+    { id: "ku9",   name: "九九 9のだん", sub: "9 × 1〜9",      n: 9, on: false, dan: 9 }
+  ];
+  const M_DAILY = 5;             // 1日にコインがもらえる回数(英語とは別枠)
+  const M_BANK_MAX = 10;
+  const MCOINS_DONE = 10;        // 終わらせたら
+  const MCOINS_FAST = 5;         // 目標タイムを切ったら
+  const MCOINS_BEST = 5;         // 自己ベスト更新
+  const M_KEEP_RUNS = 5;         // 目標タイムの計算に使う直近の回数
+
   const MASTER_HITS = 3;         // これだけ正解すると「おぼえた」
   const KSTAGE_SIZE = 10;
   const KCOINS_STAGE = 5;        // 1かい あそんだ
@@ -702,11 +778,11 @@
   function freshPlayer() {
     return { coins: 0, level: START_LEVEL, stagesCleared: 0, stagesPlayed: 0,
              today: { date: todayKey(), cleared: 0, played: 0, coins: 0, kplayed: 0 },
-             left: DAILY_STAGES,
+             left: DAILY_STAGES, mLeft: M_DAILY, mDate: todayKey(), math: {},
              retry: [], seen: {}, wrong: {}, quests: {} };
   }
   const DEFAULT_PIN = "4649";
-  function freshState() { return { player: "taiga", voice: true, pin: DEFAULT_PIN, quest: QUESTS[0].id, dues: {}, players: { taiga: freshPlayer(), gaku: freshPlayer() } }; }
+  function freshState() { return { player: "taiga", voice: true, pin: DEFAULT_PIN, quest: QUESTS[0].id, dues: {}, mOn: {}, players: { taiga: freshPlayer(), gaku: freshPlayer() } }; }
   let state = freshState();
   // A copy of the last known-good save, kept so that neither an update nor a
   // save we cannot parse can quietly cost him the coins he has earned.
@@ -768,6 +844,8 @@
     if (!state.quest || !QUESTS.some(q => q.id === state.quest)) state.quest = QUESTS[0].id;
     if (!state.dues) state.dues = {};
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].quests) state.players[k].quests = {};   // 古い保存データを拾う
+    for (const k of Object.keys(PLAYERS)) if (!state.players[k].math) state.players[k].math = {};
+    if (!state.mOn) state.mOn = {};
     state.ver = SAVE_VER;
     if (!state.born) { state.born = stamp(); bornNow = true; }   // 保存には入れない(入れると次の起動でも残る)
   }
@@ -952,7 +1030,7 @@
   // ---------------------------------------------------------------
   // SCREENS
   // ---------------------------------------------------------------
-  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult"].forEach(s => { $(s).hidden = s !== id; }); }
+  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult", "mhome", "mplay", "mresult"].forEach(s => { $(s).hidden = s !== id; }); }
 
   function renderYen(total) {
     const denoms = [500, 100, 50, 10, 5, 1];
@@ -1373,6 +1451,7 @@
     $("purse2").innerHTML =
       '<div class="purse-head"><span class="coin">&#165;</span><span class="num">' + p.coins.toLocaleString() + '</span><span class="unit">コイン</span></div>' +
       renderYen(p.coins);
+    mRollDay();
     const q = quest(), n = learnedCount(), dl = daysLeft();
     const sub = "おぼえた " + n + " / " + q.items.length + (dl !== null && dl >= 0 ? "・あと " + dl + " にち" : "");
     const esub = "コインが もらえる のこり " + p.left + " かい";
@@ -1380,10 +1459,182 @@
       '<button class="pick" id="goEn"><span class="ico">&#127760;</span><span><span class="ttl">えいご</span>' +
       '<span class="sub">' + esc(esub) + '</span></span></button>' +
       '<button class="pick" id="goKa"><span class="ico">&#128220;</span><span><span class="ttl">' + esc(q.name) + '</span>' +
-      '<span class="sub">' + esc(sub) + '</span></span></button>';
+      '<span class="sub">' + esc(sub) + '</span></span></button>' +
+      '<button class="pick" id="goMa"><span class="ico">&#128290;</span><span><span class="ttl">けいさん</span>' +
+      '<span class="sub">' + esc("コインが もらえる のこり " + p.mLeft + " かい") + '</span></span></button>';
     $("goEn").onclick = renderHome;
     $("goKa").onclick = renderKHome;
+    $("goMa").onclick = renderMHome;
     show("pick");
+  }
+
+  // ---------------------------------------------------------------
+  // MATH  (speed practice: every question must come out right, and the
+  //        only thing measured is how long the whole set took)
+  // ---------------------------------------------------------------
+  function mProg() {
+    const p = P();
+    if (!p.math) p.math = {};
+    return p.math;
+  }
+  function evRec(id) {
+    const m = mProg();
+    if (!m[id]) m[id] = { best: null, runs: [], done: 0 };
+    if (!m[id].runs) m[id].runs = [];
+    return m[id];
+  }
+  function evOn(ev) {
+    const on = (state.mOn && state.mOn[ev.id]);
+    return on === undefined ? ev.on : !!on;
+  }
+  // The target is built from his own recent times, so a harder event gets a
+  // longer target and beating it stays possible as the work gets heavier.
+  function targetTime(id) {
+    const r = evRec(id);
+    if (r.runs.length < 2) return null;              // まだ目安が出せない
+    const sorted = r.runs.slice().sort((a, b) => a - b);
+    const mid = sorted[Math.floor(sorted.length / 2)];
+    return Math.max(3, Math.round(mid * 0.95));      // ほんの少しだけ速く
+  }
+  function mRollDay() {
+    const p = P();
+    if (p.mLeft === undefined || p.mLeft === null) p.mLeft = M_DAILY;
+    if (p.mDate !== todayKey()) {
+      const gap = p.mDate ? daysSince(p.mDate) : 1;
+      p.mLeft = Math.min(M_BANK_MAX, (p.mDate ? p.mLeft : 0) + M_DAILY * gap);
+      p.mDate = todayKey();
+      save();
+    }
+  }
+  function fmtTime(sec) { return sec === null || sec === undefined ? "—" : sec + "びょう"; }
+
+  function makeMQuestion(ev) {
+    if (ev.dan) {
+      const b = 1 + rnd(9);
+      return { t: ev.dan + " × " + b, a: String(ev.dan * b) };
+    }
+    if (ev.id === "add21") {                          // 2桁+1桁、くり上がりあり、答えは2桁
+      for (;;) {
+        const a = 10 + rnd(80), b = 2 + rnd(8);
+        if ((a % 10) + b >= 10 && a + b <= 99) return { t: a + " + " + b, a: String(a + b) };
+      }
+    }
+    for (;;) {                                        // 2桁−1桁、くり下がりあり、答えは2桁
+      const a = 12 + rnd(88), b = 2 + rnd(8);
+      if ((a % 10) < b && a - b >= 10) return { t: a + " − " + b, a: String(a - b) };
+    }
+  }
+
+  let mEv = null, mQueue = [], mTotal = 0, mTyped = "", mStart = 0, mPaid = false, mLock = false;
+
+  function startMStage(ev) {
+    unlockAudio(); mRollDay();
+    mEv = ev;
+    mPaid = P().mLeft > 0;
+    P().mLeft = Math.max(0, P().mLeft - 1); save();
+    mQueue = []; for (let i = 0; i < ev.n; i++) mQueue.push(makeMQuestion(ev));
+    mTotal = ev.n; mTyped = ""; mLock = false;
+    show("mplay");
+    renderMQuestion();
+    mStart = Date.now();                              // 1問目が出てから計り始める
+  }
+  function renderMQuestion() {
+    const q = mQueue[0];
+    let h = "";
+    const doneCount = Math.max(0, mTotal - mQueue.length);
+    for (let i = 0; i < mTotal; i++) h += '<span class="pblock' + (i < doneCount ? " done" : i === doneCount ? " now" : "") + '"></span>';
+    $("mProgress").innerHTML = h;
+    $("mWallet2").textContent = P().coins.toLocaleString();
+    $("mCard").innerHTML = '<p class="sum">' + esc(q.t) + ' = <span class="ansbox" id="mAns">' +
+      (mTyped || "&nbsp;") + '</span></p>';
+    const keys = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "けす", "0", ""];
+    $("mPad").innerHTML = keys.map(k =>
+      k === "" ? '<span></span>'
+        : '<button class="key' + (k === "けす" ? " del" : "") + '" data-k="' + esc(k) + '">' + esc(k) + '</button>'
+    ).join("");
+    Array.from($("mPad").querySelectorAll(".key")).forEach(b => {
+      b.onclick = () => mKey(b.getAttribute("data-k"));
+    });
+  }
+  function mKey(k) {
+    if (mLock) return;
+    const q = mQueue[0];
+    if (k === "けす") { mTyped = mTyped.slice(0, -1); $("mAns").innerHTML = mTyped || "&nbsp;"; return; }
+    if (mTyped.length >= 3) return;
+    mTyped += k;
+    $("mAns").textContent = mTyped;
+    if (mTyped.length < q.a.length) return;           // まだ桁が足りない
+    mLock = true;
+    const box = $("mAns");
+    if (mTyped === q.a) {
+      box.className = "ansbox ok"; sfxRight();
+      const blk = $("mProgress").children[Math.max(0, mTotal - mQueue.length)];
+      if (blk) blk.className = "pblock done breaking";
+      mQueue.shift();
+      setTimeout(() => { mTyped = ""; mLock = false; if (mQueue.length) renderMQuestion(); else finishMStage(); }, 260);
+    } else {
+      box.className = "ansbox ng"; sfxOops();
+      mQueue.push(mQueue.shift());                    // まちがえた問題は うしろに回る
+      mTotal++;                                       // やり直しぶん、ブロックが1つ増える
+      setTimeout(() => { mTyped = ""; mLock = false; renderMQuestion(); }, 700);
+    }
+  }
+  function finishMStage() {
+    const p = P(), r = evRec(mEv.id);
+    const sec = Math.max(1, Math.round((Date.now() - mStart) / 1000));
+    const target = targetTime(mEv.id);
+    const prevBest = r.best;
+    const beatTarget = target !== null && sec <= target;
+    const newBest = prevBest === null || sec < prevBest;
+    if (newBest) r.best = sec;
+    r.runs.push(sec); if (r.runs.length > M_KEEP_RUNS) r.runs.shift();
+    r.done++;
+    let coins = 0;
+    if (mPaid) {
+      coins = MCOINS_DONE + (beatTarget ? MCOINS_FAST : 0) + (newBest && prevBest !== null ? MCOINS_BEST : 0);
+      p.coins += coins;
+    }
+    save();
+    show("mresult");
+    let html = '<h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(30px,8vw,52px)">ぜんぶ せいかい!</h2>';
+    html += '<p class="bigtime">' + sec + 'びょう</p>';
+    if (prevBest === null) html += '<p class="hint" style="color:#fff;font-size:18px">はじめての きろく!</p>';
+    else if (newBest) html += '<p class="hint" style="color:#fff;font-size:18px">きろく こうしん! まえは ' + prevBest + 'びょう</p>';
+    else html += '<p class="hint" style="color:#fff;font-size:16px">さいこう きろく ' + prevBest + 'びょう</p>';
+    if (coins) html += '<div class="gain"><span class="coin">&#165;</span>+' + coins + '</div>';
+    else html += '<p class="hint" style="color:#fff;font-size:16px">きょうの コインは ここまで。あそんでくれて ありがとう!</p>';
+    html += '<div class="wallet"><span class="coin sm">&#165;</span><span>' + p.coins.toLocaleString() + '</span></div>';
+    html += '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">' +
+      '<button class="btn green" id="mAgain">もういちど</button>' +
+      '<button class="btn ghost" id="mHomeBtn">ほかの しゅもく</button></div>';
+    $("mResultBody").innerHTML = html;
+    $("mAgain").onclick = () => startMStage(mEv);
+    $("mHomeBtn").onclick = renderMHome;
+    if (coins) { sfxCoins(); if (newBest) coinRain(); }
+  }
+
+  function renderMHome() {
+    rollDay(); mRollDay();
+    const p = P();
+    $("mWallet").textContent = p.coins.toLocaleString();
+    let slots = '<span class="lbl">のこり</span>';
+    for (let i = 0; i < Math.min(p.mLeft, M_BANK_MAX); i++) slots += '<span class="slot on"></span>';
+    if (p.mLeft <= 0) slots += '<span class="slot"></span>';
+    $("mDayRow").innerHTML = slots;
+    $("mDone").hidden = p.mLeft > 0;
+    $("mDone").textContent = "きょうの コインは つかいきった! でも まだ あそべるよ。";
+    const evs = M_EVENTS.filter(evOn);
+    $("mList").innerHTML = evs.map(ev => {
+      const r = evRec(ev.id);
+      const best = r.best === null ? "きろく なし" : "さいこう " + r.best + "びょう";
+      return '<button class="pick" data-ev="' + ev.id + '"><span class="ico">&#128290;</span><span>' +
+        '<span class="ttl">' + esc(ev.name) + '</span>' +
+        '<span class="sub">' + esc(ev.sub) + ' ・ <span class="ev-time">' + esc(best) + '</span></span></span></button>';
+    }).join("");
+    Array.from($("mList").querySelectorAll(".pick")).forEach(b => {
+      b.onclick = () => { const ev = M_EVENTS.find(e => e.id === b.getAttribute("data-ev")); if (ev) startMStage(ev); };
+    });
+    show("mhome");
   }
 
   // ---- parent gate: hold the purse for 3 seconds, then type the PIN
@@ -1464,6 +1715,15 @@
       '<p class="stat">ほぞん: ' + esc(storageProbe()) + (saveError ? " / かきこみエラー " + esc(saveError) : "") +
       ' / はじめて ひらいた ' + esc(state.born || "?") + (bornNow ? " ←このきどうで はじめて" : "") +
       ' / さいごの ほぞん ' + esc(state.savedAt || "まだ") + '</p>' +
+      '<p class="hint" style="margin-top:12px"><b>けいさんの しゅもく</b>(おぼえた段に チェック)</p>' +
+      '<div class="row" style="gap:10px">' +
+      M_EVENTS.map(ev => '<label style="font-size:13px;font-weight:700"><input type="checkbox" class="mchk" data-ev="' +
+        ev.id + '"' + (evOn(ev) ? " checked" : "") + '> ' + esc(ev.name.replace("九九 ", "")) + '</label>').join("") +
+      '</div>' +
+      '<p class="hint">' + M_EVENTS.filter(evOn).map(ev => {
+        const r = evRec(ev.id);
+        return esc(ev.name) + ": " + (r.best === null ? "—" : r.best + "びょう") + "(" + r.done + "回)";
+      }).join(" / ") + '</p>' +
       '<p class="hint" style="margin-top:12px"><b>データの ひっこし</b>(アイコンを つくりなおす前に かならず)</p>' +
       '<div class="row"><button class="btn small ghost" id="expBtn">かきだす</button>' +
       '<button class="btn small ghost" id="copyBtn">コピー</button>' +
@@ -1520,6 +1780,9 @@
       try { localStorage.setItem(STORE_KEY, u.raw); localStorage.removeItem(UNDO_KEY); } catch (e) { return; }
       location.reload();
     };
+    Array.from(document.querySelectorAll(".mchk")).forEach(c => {
+      c.onchange = () => { state.mOn[c.getAttribute("data-ev")] = c.checked; save(); };
+    });
     $("expBtn").onclick = () => {
       const c = exportCode();
       $("codeBox").value = c;
@@ -1556,6 +1819,8 @@
     $("kStart").onclick = startKStage;
     $("kBack").onclick = renderPick;
     $("kQuit").onclick = () => { try { speechSynthesis.cancel(); } catch (e) {} renderKHome(); };
+    $("mBack").onclick = renderPick;
+    $("mQuit").onclick = renderMHome;
     bindLongPress($("purse"), 2000, askPin);
     bindLongPress($("purse2"), 2000, askPin);
     document.addEventListener("touchstart", function once() { unlockAudio(); document.removeEventListener("touchstart", once); }, { passive: true });
