@@ -765,16 +765,16 @@
   // 紙が要る計算(2桁±2桁)は入れない。タップだけの暗算に載るものだけ。
   // ---------------------------------------------------------------
   const M_EVENTS = [
-    { id: "add21", name: "たしざん",    sub: "2けた + 1けた", n: 8, on: true },
-    { id: "sub21", name: "ひきざん",    sub: "2けた − 1けた", n: 8, on: true },
-    { id: "ku2",   name: "九九 2のだん", sub: "2 × 1〜9",      n: 9, on: true,  dan: 2 },
-    { id: "ku5",   name: "九九 5のだん", sub: "5 × 1〜9",      n: 9, on: true,  dan: 5 },
-    { id: "ku3",   name: "九九 3のだん", sub: "3 × 1〜9",      n: 9, on: false, dan: 3 },
-    { id: "ku4",   name: "九九 4のだん", sub: "4 × 1〜9",      n: 9, on: false, dan: 4 },
-    { id: "ku6",   name: "九九 6のだん", sub: "6 × 1〜9",      n: 9, on: false, dan: 6 },
-    { id: "ku7",   name: "九九 7のだん", sub: "7 × 1〜9",      n: 9, on: false, dan: 7 },
-    { id: "ku8",   name: "九九 8のだん", sub: "8 × 1〜9",      n: 9, on: false, dan: 8 },
-    { id: "ku9",   name: "九九 9のだん", sub: "9 × 1〜9",      n: 9, on: false, dan: 9 }
+    { id: "add21", name: "たしざん",    sub: "2けた + 1けた", n: 7, on: true },
+    { id: "sub21", name: "ひきざん",    sub: "2けた − 1けた", n: 7, on: true },
+    { id: "ku2",   name: "九九 2のだん", sub: "2 × 1〜9",      n: 8, on: true,  dan: 2 },
+    { id: "ku5",   name: "九九 5のだん", sub: "5 × 1〜9",      n: 8, on: true,  dan: 5 },
+    { id: "ku3",   name: "九九 3のだん", sub: "3 × 1〜9",      n: 8, on: false, dan: 3 },
+    { id: "ku4",   name: "九九 4のだん", sub: "4 × 1〜9",      n: 8, on: false, dan: 4 },
+    { id: "ku6",   name: "九九 6のだん", sub: "6 × 1〜9",      n: 8, on: false, dan: 6 },
+    { id: "ku7",   name: "九九 7のだん", sub: "7 × 1〜9",      n: 8, on: false, dan: 7 },
+    { id: "ku8",   name: "九九 8のだん", sub: "8 × 1〜9",      n: 8, on: false, dan: 8 },
+    { id: "ku9",   name: "九九 9のだん", sub: "9 × 1〜9",      n: 8, on: false, dan: 9 }
   ];
   const M_DAILY = 5;             // 1日にコインがもらえる回数(英語とは別枠)
   const M_BANK_MAX = 10;
@@ -1576,8 +1576,7 @@
   function startMStage(ev) {
     unlockAudio(); mRollDay();
     mEv = ev;
-    mPaid = P().mLeft > 0;
-    P().mLeft = Math.max(0, P().mLeft - 1); save();
+    mPaid = P().mLeft > 0;      // 回数を減らすのは終わったとき。やめた回は減らさない
     mQueue = []; for (let i = 0; i < ev.n; i++) mQueue.push(makeMQuestion(ev));
     mTotal = ev.n; mTyped = ""; mLock = false;
     show("mplay");
@@ -1621,9 +1620,19 @@
     } else {
       box.className = "ansbox ng"; sfxOops();
       mQueue.push(mQueue.shift());                    // まちがえた問題は うしろに回る
-      mTotal++;                                       // やり直しぶん、ブロックが1つ増える
+      // ブロックは増やさない。苦戦するほどゴールが遠のくと、途中でやめてしまう
       setTimeout(() => { mTyped = ""; mLock = false; renderMQuestion(); }, 700);
     }
+  }
+  function quitMStage() {
+    if (mEv && mQueue.length) {                       // 1問も残さず終えた回は「やめた」ではない
+      const r = evRec(mEv.id);
+      r.quit = (r.quit || 0) + 1;
+      r.quitAt = mTotal - mQueue.length;              // 何問めでやめたか
+      save();
+    }
+    mEv = null; mQueue = [];
+    renderMHome();
   }
   function finishMStage() {
     const p = P(), r = evRec(mEv.id);
@@ -1639,6 +1648,7 @@
     if (mPaid) {
       coins = MCOINS_DONE + (beatTarget ? MCOINS_FAST : 0) + (newBest && prevBest !== null ? MCOINS_BEST : 0);
       p.coins += coins;
+      p.mLeft = Math.max(0, p.mLeft - 1);
     }
     save();
     show("mresult");
@@ -1768,7 +1778,8 @@
       '</div>' +
       '<p class="hint">' + M_EVENTS.filter(evOn).map(ev => {
         const r = evRec(ev.id);
-        return esc(ev.name) + ": " + (r.best === null ? "—" : r.best + "びょう") + "(" + r.done + "回)";
+        return esc(ev.name) + ": " + (r.best === null ? "—" : r.best + "びょう") + "(" + r.done + "回" +
+          (r.quit ? "・とちゅうでやめた" + r.quit + "回" : "") + ")";
       }).join(" / ") + '</p>' +
       '<p class="hint" style="margin-top:12px"><b>データの ひっこし</b>(アイコンを つくりなおす前に かならず)</p>' +
       '<div class="row"><button class="btn small ghost" id="expBtn">かきだす</button>' +
@@ -1866,7 +1877,7 @@
     $("kBack").onclick = renderPick;
     $("kQuit").onclick = () => { try { speechSynthesis.cancel(); } catch (e) {} renderKHome(); };
     $("mBack").onclick = renderPick;
-    $("mQuit").onclick = renderMHome;
+    $("mQuit").onclick = quitMStage;
     bindLongPress($("purse"), 2000, askPin);
     bindLongPress($("purse2"), 2000, askPin);
     document.addEventListener("touchstart", function once() { unlockAudio(); document.removeEventListener("touchstart", once); }, { passive: true });
