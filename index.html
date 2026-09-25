@@ -518,6 +518,21 @@
   .pick .ttl { display: block; font-weight: 400; font-size: clamp(22px, 2.6vw, 28px); line-height: 1.15; text-shadow: 3px 3px 0 #262626; }
   .pick .sub { display: block; font-size: 14px; color: #ececec; text-shadow: 2px 2px 0 #262626; margin-top: 5px; }
 
+  /* --- the sky switch, top right of the start screen --- */
+  .pick-top { display: flex; justify-content: flex-end; }
+  .skybtn {
+    appearance: none; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+    padding: 6px 14px 6px 6px; min-height: 52px;
+    background-color: #7c7c7c; background-image: var(--stone-tex, none); background-size: 48px 48px;
+    border: 3px solid #141414; color: #ffffff; font-family: var(--font-pixel); font-size: 18px;
+    box-shadow: inset 3px 3px 0 rgba(255,255,255,.45), inset -3px -4px 0 rgba(0,0,0,.45), 0 4px 0 rgba(0,0,0,.4);
+    text-shadow: 2px 2px 0 #262626;
+  }
+  .skybtn:active { transform: translateY(3px); filter: brightness(.92); }
+  .skyico { width: 38px; height: 38px; display: flex; align-items: center; justify-content: center;
+    background: #2f2f2f; box-shadow: inset 2px 2px 0 #161616, inset -2px -2px 0 #5b5b5b; }
+  .skyico svg { width: 32px; height: 32px; display: block; }
+
   /* --- the start screen: two columns when the iPad lies on its side --- */
   .pick-wrap { margin-block: auto; display: flex; flex-direction: column; align-items: center; gap: 14px; padding: 6px 0 calc(3 * var(--gb) + 8px); }
   .pick-grid { display: grid; grid-template-columns: 1fr; gap: 16px; width: min(100%, 460px); justify-items: center; }
@@ -565,6 +580,7 @@
 
   <!-- QUEST PICKER -->
   <section id="pick" class="screen" hidden>
+    <div class="pick-top"><button class="skybtn" id="skyBtn" aria-label="そらを かえる"></button></div>
     <div class="pick-wrap">
       <div class="logo-wrap">
         <h1 class="logo" data-text="COINQUEST">COINQUEST</h1>
@@ -1656,6 +1672,8 @@
     rollDay();
     const p = P();
     $("splash2").textContent = SPLASHES[rnd(SPLASHES.length)];
+    applyTheme(myTheme());
+    renderSkyBtn();
     $("purse2").innerHTML = renderInv(p.coins);
     mRollDay();
     const q = quest(), n = learnedCount(), dl = daysLeft();
@@ -1944,7 +1962,15 @@
     return out.join(",");
   }
 
+  let appliedTheme = null;
+  function myTheme() {
+    const p = P();
+    if (p && THEMES[p.theme]) return p.theme;
+    return THEMES[state.theme] ? state.theme : DEFAULT_THEME;
+  }
   function applyTheme(name) {
+    if (name === appliedTheme) return;
+    appliedTheme = name;
     const t = THEMES[name] || THEMES[DEFAULT_THEME];
     document.body.setAttribute("data-theme", THEMES[name] ? name : DEFAULT_THEME);
     const far = hillTile(t, 48, 3, 3, 9, true), near = hillTile(t, 32, 9, 1, 4, false);
@@ -1955,6 +1981,20 @@
     ne.style.backgroundImage = near.url;
     ne.style.backgroundSize = "calc(" + near.cols + " * var(--nb)) calc(" + near.rows + " * var(--nb))";
     ne.style.height = "calc(" + near.rows + " * var(--nb))";
+  }
+  // the kid changes the sky himself: every tap moves on to the next one
+  function renderSkyBtn() {
+    const cur = myTheme(), i = THEME_NAMES.findIndex(x => x[0] === cur);
+    $("skyBtn").innerHTML = '<span class="skyico">' + SKY_ICONS[cur] + '</span><span class="skylbl">' + THEME_NAMES[i][1] + '</span>';
+  }
+  function nextSky() {
+    unlockAudio();
+    const cur = myTheme(), i = THEME_NAMES.findIndex(x => x[0] === cur);
+    P().theme = THEME_NAMES[(i + 1) % THEME_NAMES.length][0];
+    save();
+    applyTheme(P().theme);
+    renderSkyBtn();
+    beep(660 + i * 180, 0.12, "square", 0.05);
   }
   function buildWorld() {
     $("wGround").style.backgroundImage = groundTile();
@@ -2030,6 +2070,62 @@
       "................"
     ], { K: "#141414", C: "#5ee8df", c: "#239a93", h: "#9a6834" })
   };
+  const SKY_ICONS = {
+    day: pixIcon([
+      "................",
+      ".......Y........",
+      "..Y....Y....Y...",
+      "...Y.......Y....",
+      "......SSSS......",
+      ".....SsssSS.....",
+      "....SsSSSSSS....",
+      "YY..SsSSSSSS..YY",
+      "....SSSSSSSS....",
+      ".....SSSSSS.....",
+      "......SSSS......",
+      "...Y.......Y....",
+      "..Y....Y....Y...",
+      ".......Y........",
+      "................",
+      "................"
+    ], { Y: "#ffd43b", S: "#ffe066", s: "#fff6c2" }),
+    dusk: pixIcon([
+      "................",
+      "................",
+      "..P.........P...",
+      "................",
+      "......OOOO......",
+      "....OOooooOO....",
+      "...OooooooooO...",
+      "..OooooooooooO..",
+      "..OooooooooooO..",
+      "HHHHHHHHHHHHHHHH",
+      "hhhhhhhhhhhhhhhh",
+      "hhh..hhhhhh..hhh",
+      "................",
+      "....OOO..OOO....",
+      "................",
+      "................"
+    ], { O: "#ff7a2e", o: "#ffb35c", H: "#5b3a78", h: "#3c2552", P: "#ffd6e0" }),
+    night: pixIcon([
+      "................",
+      ".s..........s...",
+      ".....WWWWWW.....",
+      "....WWWWWWWW....",
+      "...WWcWWWWWWW...",
+      "...WWWWWWcWWW...",
+      "...WWWWWWWWWW...",
+      "...WcWWWWWWWW...",
+      "...WWWWWWWcWW...",
+      "...WWWWWWWWWW...",
+      "....WWWWWWWW....",
+      ".....WWWWWW.....",
+      "..............s.",
+      "..s.............",
+      "................",
+      "................"
+    ], { W: "#eef2fa", c: "#c3cbdd", s: "#ffffff" })
+  };
 
   // the purse as an inventory: one slot per coin, with the stack size in the corner
   function renderInv(total) {
@@ -2090,9 +2186,6 @@
       '<div class="row"><label for="playerSel">プレイヤー</label><select id="playerSel">' +
       Object.entries(PLAYERS).map(([k, v]) => '<option value="' + k + '"' + (k === state.player ? " selected" : "") + '>' + v + '</option>').join("") +
       '</select></div>' +
-      '<div class="row"><label for="themeSel">せかい</label><select id="themeSel">' +
-      THEME_NAMES.map(([v, l]) => '<option value="' + v + '"' + (state.theme === v ? " selected" : "") + '>' + l + '</option>').join("") +
-      '</select></div>' +
       '<div class="row"><label for="questSel">いまの かだい</label><select id="questSel">' +
       QUESTS.map(q => '<option value="' + q.id + '"' + (q.id === state.quest ? " selected" : "") + '>' + esc(q.name) + '</option>').join("") +
       '</select></div>' +
@@ -2148,7 +2241,6 @@
       '</div>';
     document.body.appendChild(div);
     $("playerSel").onchange = e => { state.player = e.target.value; save(); closeParent(); renderPick(); };
-    $("themeSel").onchange = e => { state.theme = e.target.value; save(); applyTheme(state.theme); };
     $("questSel").onchange = e => { state.quest = e.target.value; save(); closeParent(); renderPick(); };
     $("dueSave").onclick = () => { const v = $("dueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues[state.quest] = v; P().today.kcap = null; save(); alert("きげんを " + v + " にしました"); } else alert("日づけを えらんでください"); };
     $("lvlSel").onchange = e => { P().level = Number(e.target.value); save(); closeParent(); openParent(); };
@@ -2238,7 +2330,8 @@
     bindLongPress($("purse"), 2000, askPin);
     bindLongPress($("purse2"), 2000, askPin);
     document.addEventListener("touchstart", function once() { unlockAudio(); document.removeEventListener("touchstart", once); }, { passive: true });
-    buildWorld(); applyTheme(state.theme);
+    buildWorld(); applyTheme(myTheme());
+    $("skyBtn").onclick = nextSky;
     renderPick();
   }
   if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(init); else init();
