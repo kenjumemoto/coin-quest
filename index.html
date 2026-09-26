@@ -2296,13 +2296,25 @@
     }
   }
 
+  // 1回の中で同じ問題は出さない。九九は1〜9から重ならないように選ぶ
+  // (以前は毎回サイコロで選んでいたので、同じ問題が続けて出ることがあった)
+  function buildMQueue(ev) {
+    if (ev.dan) return shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, ev.n).map(b => ({ t: ev.dan + " × " + b, a: String(ev.dan * b) }));
+    const q = [], seen = {};
+    for (let tries = 0; q.length < ev.n && tries < 500; tries++) {
+      const x = makeMQuestion(ev);
+      if (!seen[x.t]) { seen[x.t] = true; q.push(x); }
+    }
+    return q;
+  }
+
   let mEv = null, mQueue = [], mTotal = 0, mTyped = "", mStart = 0, mPaid = false, mLock = false;
 
   function startMStage(ev) {
     unlockAudio(); mRollDay();
     mEv = ev;
     mPaid = P().mLeft > 0;      // 回数を減らすのは終わったとき。やめた回は減らさない
-    mQueue = []; for (let i = 0; i < ev.n; i++) mQueue.push(makeMQuestion(ev));
+    mQueue = buildMQueue(ev);
     mTotal = ev.n; mTyped = ""; mLock = false;
     show("mplay");
     renderMQuestion();
