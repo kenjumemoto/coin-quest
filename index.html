@@ -1,5 +1,6 @@
 <meta charset="utf-8">
 <title>コインクエスト</title>
+<meta name="robots" content="noindex, nofollow">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -548,6 +549,83 @@
     #khome .wall { width: min(100%, 440px); padding: 6px; gap: 3px; }
     #khome .big-word { font-size: clamp(26px, 5vh, 40px) !important; }
   }
+  /* --- カードめいじん --- */
+  #cmDone { color: var(--on-sky); text-shadow: var(--on-sky-sh); font-size: 16px; font-weight: 800; margin: 0; }
+  .cm-list { display: grid; grid-template-columns: 1fr; gap: 12px; width: min(100%, 460px); }
+  .cm-list .pick { min-height: 70px; padding: 8px 12px 8px 8px; position: relative; }
+  .cm-list .pick .ico { width: 50px; height: 50px; }
+  .cm-list .pick .glyph { font-size: 28px; }
+  .cm-list .pick .ttl { font-size: clamp(19px, 2.3vw, 24px); }
+  .cm-list .pick.glow { border-color: var(--gold); animation: glow 1.4s ease-in-out infinite;
+    box-shadow: inset 3px 3px 0 rgba(255,255,255,.45), inset -3px -4px 0 rgba(0,0,0,.45), 0 5px 0 rgba(0,0,0,.4), 0 0 0 3px var(--gold); }
+  @keyframes glow { 50% { box-shadow: inset 3px 3px 0 rgba(255,255,255,.45), inset -3px -4px 0 rgba(0,0,0,.45), 0 5px 0 rgba(0,0,0,.4), 0 0 0 3px var(--gold), 0 0 22px 6px rgba(255,222,90,.8); } }
+  @media (prefers-reduced-motion: reduce) { .cm-list .pick.glow { animation: none; } }
+  .pick .tag { display: inline-block; margin-top: 4px; background: var(--gold); color: #3d2a00; text-shadow: none; font-size: 13px; padding: 1px 8px; border: 2px solid #141414; }
+  .rings { display: inline-flex; gap: 3px; vertical-align: middle; margin-left: 6px; }
+  .ring { display: inline-block; width: 13px; height: 13px; border: 3px solid var(--gold); border-radius: 50%; box-shadow: 1px 1px 0 #262626; }
+  .rings.big { gap: 8px; margin: 0; } .rings.big .ring { width: 30px; height: 30px; border-width: 6px; }
+  .rx { font-family: var(--font-en); font-weight: 700; margin-left: 2px; }
+  @media (min-width: 600px) { .cm-list { grid-template-columns: 1fr 1fr; width: min(100%, 700px); } }
+  @media (orientation: landscape) and (min-width: 820px) {
+    body[data-screen="cmhome"] #app { max-width: 1000px; }
+    .cm-list { grid-template-columns: repeat(3, 1fr); width: min(100%, 960px); }
+  }
+
+  .cmcard { min-height: 200px; justify-content: center; transform-origin: 50% 50%; }
+  .cmcard.flipping { animation: flipx .34s ease-in-out; }
+  @keyframes flipx { 0% { transform: scaleX(1); } 50% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
+  @media (prefers-reduced-motion: reduce) { .cmcard.flipping { animation: none; } }
+  .cmcard.flipped { background: #fffbe6; border-color: var(--gold-dark); box-shadow: 0 6px 0 var(--gold-dark); }
+  .cmcard .kind.back { color: var(--gold-dark); }
+  .cmcard ruby rt { font-size: .45em; font-weight: 800; color: var(--ink-soft); }
+  .fig { width: auto; height: clamp(170px, 34vh, 260px); max-width: 100%; display: block; }
+  .fig.small { height: clamp(90px, 18vh, 140px); opacity: .85; }
+  .fig rect { fill: none; stroke: #2b2118; stroke-width: .06; }
+  .cm-ans { font-family: var(--font-ja); font-weight: 800; font-size: clamp(40px, 9vw, 64px); line-height: 1.2; margin: 0; color: var(--ink); }
+  .cm-ans small { font-size: .5em; margin-left: .1em; }
+  .cm-ans.kj { font-size: clamp(56px, 13vw, 88px); }
+  .cm-ans ruby rt { font-size: .32em; }
+  .cm-part { margin: 0; font-weight: 800; font-size: 20px; color: var(--ink-soft); }
+  .cm-part span { font-size: 40px; color: var(--ink); vertical-align: middle; margin: 0 .2em; }
+  .cm-text { font-weight: 800; font-size: clamp(22px, 5vw, 32px); line-height: 1.6; margin: 0; max-width: 24em; }
+  .cm-text.boxed { border: 3px solid var(--dirt-dark); padding: 8px 18px; background: #fff; }
+  .cm-sent { font-weight: 800; font-size: clamp(22px, 5vw, 32px); line-height: 2; margin: 0; max-width: 22em; }
+  .cm-phrase { font-weight: 800; font-size: clamp(28px, 6vw, 40px); line-height: 1.8; margin: 0; }
+  .cm-mean { font-weight: 500; font-size: clamp(17px, 3.6vw, 22px); line-height: 1.8; margin: 0; max-width: 30em; text-align: left; }
+  .cm-mean b { display: inline-block; background: var(--ink); color: #fff; border-radius: 999px; padding: 0 .6em; font-size: .8em; margin-right: .3em; }
+  .cm-info { font-weight: 800; font-size: 18px; color: var(--ink-soft); margin: 0; }
+  /* the card text is written with spaces between phrases: break only there */
+  .cm-text, .cm-sent, .cm-phrase, .cm-mean { word-break: keep-all; overflow-wrap: anywhere; }
+  .hbox { display: inline-flex; gap: 3px; vertical-align: middle; margin: 0 .15em; }
+  .hb { display: inline-flex; align-items: center; justify-content: center; width: 1.35em; height: 1.35em;
+    border: 3px solid var(--ink); background: #fff; font-weight: 800; line-height: 1; }
+  .hb.open { background: #fdf3d0; }
+  .hb.got { background: #dff5d6; color: var(--ok-dark); border-color: var(--ok-dark); }
+  .hb.big { width: 64px; height: 64px; }
+  .k-kisetsu > .hbox, .k-hito > .hbox { font-size: clamp(26px, 6vw, 38px); }
+  .season { margin: 0; font-weight: 800; font-size: 18px; color: #fff; padding: 2px 14px; border: 3px solid #141414; }
+  .s-はる { background: #e86a9a; } .s-なつ { background: #2f9ad6; } .s-あき { background: #d9822b; } .s-ふゆ { background: #6f7fa8; }
+  .okuri { display: flex; gap: 24px; justify-content: center; }
+  .otile { writing-mode: vertical-rl; font-weight: 800; font-size: clamp(48px, 11vw, 72px); line-height: 1.3;
+    background: #fff; border: 3px solid var(--stone-dark); padding: 16px 10px; min-height: 3.2em; box-shadow: 0 5px 0 var(--stone-dark); }
+  .otile ruby rt { font-size: .32em; }
+  .otile.ok { border-color: var(--ok-dark); background: #dff5d6; box-shadow: 0 5px 0 var(--ok-dark), 0 0 0 4px var(--ok); }
+  .otile.ng { opacity: .35; text-decoration: line-through; }
+  .dig { --blk: 48px; display: flex; align-items: center; gap: 10px; min-height: 68px; }
+  .dig .swing { width: 44px; height: 44px; transform-origin: 80% 80%; animation: swing .5s ease-in-out infinite alternate; }
+  .dig .swing svg { width: 100%; height: 100%; display: block; }
+  @keyframes swing { from { transform: rotate(-30deg); } to { transform: rotate(18deg); } }
+  @media (prefers-reduced-motion: reduce) { .dig .swing { animation: none; } }
+  .btn.mada { min-height: 68px; font-size: clamp(22px, 4.6vw, 28px); padding: 14px 30px; }
+  #cmCtl { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 18px; margin-top: 16px; min-height: 76px; padding-bottom: calc(3 * var(--gb)); }
+  @media (orientation: landscape) and (max-height: 860px) {
+    #cmplay .card { margin-top: 8px; padding: 10px 14px; gap: 6px; }
+    #cmplay .progress { margin-top: 4px; --blk: 30px; }
+    #cmCtl { margin-top: 10px; }
+    .fig { height: clamp(150px, 36vh, 250px); }
+    .cm-mean { font-size: 20px; line-height: 1.6; }
+    .kanji-big { font-size: clamp(90px, 22vh, 160px); }
+  }
 </style>
 
 <div id="world" aria-hidden="true">
@@ -621,6 +699,37 @@
   <!-- MATH RESULT -->
   <section id="mresult" class="screen" hidden>
     <div class="result" id="mResultBody"></div>
+  </section>
+
+  <!-- CARD MEIJIN HOME (たば えらび) -->
+  <section id="cmhome" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="cmWallet">0</span></div>
+      <button class="btn ghost small" id="cmBack">&#9664; もどる</button>
+    </div>
+    <div class="home-center">
+      <h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(28px,7vw,44px)">カードめいじん</h2>
+      <p class="due" id="cmDueLine"></p>
+      <div class="day-row" id="cmDayRow"></div>
+      <div class="cm-list" id="cmList"></div>
+      <p id="cmDone" class="hint" hidden></p>
+    </div>
+  </section>
+
+  <!-- CARD MEIJIN PLAY -->
+  <section id="cmplay" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="cmWallet2">0</span></div>
+      <button class="btn ghost small" id="cmQuit">やめる</button>
+    </div>
+    <div class="progress" id="cmProgress"></div>
+    <div class="card cmcard" id="cmCard"></div>
+    <div id="cmCtl"></div>
+  </section>
+
+  <!-- CARD MEIJIN RESULT -->
+  <section id="cmresult" class="screen" hidden>
+    <div class="result" id="cmResultBody"></div>
   </section>
 
   <!-- KANJI HOME -->
@@ -944,6 +1053,144 @@
     { id: "ku8",   name: "九九 8のだん", sub: "8 × 1〜9",      n: 8, on: false, dan: 8 },
     { id: "ku9",   name: "九九 9のだん", sub: "9 × 1〜9",      n: 8, on: false, dan: 9 }
   ];
+  // ---------------------------------------------------------------
+  // カードめいじん: 奨学社のリングカード(表=もんだい、うら=こたえ)を画面でめくる。
+  // 正解かどうかは判定しない。考えて、めくって、自分で たしかめるだけ。
+  // テストびまでは「かんじ」の入口が これに入れかわる。
+  // 文は公開ページに教材をそのまま載せないよう、言い回しだけ少し変えてある(こたえは同じ)。
+  // 《》は ふりがな、{ } は カードの ます(_ が あいている ます)。
+  // カードを足すときは各たばの cards の末尾に足す。id は変えない(めくった回数は id で覚える)。
+  // ---------------------------------------------------------------
+  const CM_DUE = "2026-10-03";   // カードめいじんの テストび(親メニューで かえられる)
+  const CM_ROUND = 10;           // 1回に めくる まい数
+  const CM_DAILY = 6;            // 1日に コインが もらえる回数(くりこし なし)
+  const CMCOINS_ROUND = 15;      // 1回 めくりおえた
+  const CMCOINS_RING = 20;       // その たばを ぜんぶ 1しゅう めくった
+  const CMCOINS_PICK = 5;        // おすすめ(光っている たば)で あそんだ
+  const CM_DECKS = [
+    { id: "katachi", name: "かたちの かず", glyph: "△", k: "fig", cards: [
+      {id:"f1-1",t:"sq",a:5,g:["XX","XX"]},
+      {id:"f1-2",t:"sq",a:8,g:["XXX","XXX"]},
+      {id:"f1-3",t:"sq",a:7,g:["X..","XX.","XXX"]},
+      {id:"f1-4",t:"sq",a:13,g:["XXXX","XXX.","XX..","X..."]},
+      {id:"f1-5",t:"sq",a:11,g:["XXXX","XXXX"]},
+      {id:"f1-6",t:"sq",a:9,g:["XX.","XXX",".XX"]},
+      {id:"f1-7",t:"sq",a:14,g:["XXX","XXX","XXX"]},
+      {id:"f2-1",t:"sq",a:3,L:[[0,0,2,0],[0,0,0,2],[0,2,4,2],[2,0,2,4],[4,2,4,4],[2,4,4,4],[2,0,0,2],[0,2,2,4],[2,4,4,2],[4,2,2,0]]},
+      {id:"f2-2",t:"sq",a:10,L:[[0,0,4,0],[4,0,4,4],[4,4,0,4],[0,4,0,0],[2,0,2,4],[0,2,4,2],[2,0,0,2],[0,2,2,4],[2,4,4,2],[4,2,2,0],[1,1,3,3],[3,1,1,3]]},
+      {id:"f2-3",t:"sq",a:11,L:[[0,0,2,0],[0,0,0,2],[0,1,3,1],[1,0,1,3],[0,2,3,2],[2,0,2,3],[1,3,3,3],[3,1,3,3],[1,0,0,1],[0,1,1,2],[1,2,2,1],[2,1,1,0],[2,1,1,2],[1,2,2,3],[2,3,3,2],[3,2,2,1]]},
+      {id:"f2-4",t:"sq",a:6,L:[[0,0,4,0],[4,0,4,4],[4,4,0,4],[0,4,0,0],[2,0,2,4],[0,2,4,2],[2,0,0,2],[0,2,2,4],[2,4,4,2],[4,2,2,0]]},
+      {id:"f2-5",t:"sq",a:17,g:[".XXX","XXXX","XXXX"]},
+      {id:"f2-6",t:"sq",a:10,g:["...X",".XXX","XXXX"]},
+      {id:"f2-7",t:"sq",a:11,g:["XX.","XXX","XXX"]},
+      {id:"f2-8",t:"sq",a:10,g:["XX..","XX..","XXXX"]},
+      {id:"f3-1",t:"sq",a:12,g:["...X","X.XX","XXXX","XX.."]},
+      {id:"f3-2",t:"sq",a:19,g:[".XXX","XXXX","XXXX",".X.X"]},
+      {id:"f3-3",t:"sq",a:15,g:[".X.X","XXXX","XXXX","X.X."]},
+      {id:"f3-4",t:"sq",a:30,g:["XXXX","XXXX","XXXX","XXXX"]},
+      {id:"f3-5",t:"sq",a:18,g:[".XXXX","XXXX.","XXXX."]},
+      {id:"f3-6",t:"sq",a:14,g:[".XX.","XXXX","XXXX"]},
+      {id:"f3-7",t:"sq",a:12,g:["...XX","XXXXX","X.XX."]},
+      {id:"f3-8",t:"sq",a:14,g:["..XX.","XXXXX","XXX.X"]},
+      {id:"f4-1",t:"tr",a:5,L:[[0,0,4,0],[4,0,4,4],[0,4,4,4],[0,0,4,4],[0,4,4,0]]},
+      {id:"f4-2",t:"tr",a:5,L:[[0.5,0.866,1.5,0.866],[1.5,0.866,1,0],[1,0,0.5,0.866],[0,1.7321,1,1.7321],[1,1.7321,0.5,0.866],[0.5,0.866,0,1.7321],[1,1.7321,2,1.7321],[2,1.7321,1.5,0.866],[1.5,0.866,1,1.7321],[0.5,0.866,1.5,0.866],[1.5,0.866,1,1.7321],[1,1.7321,0.5,0.866]]},
+      {id:"f4-3",t:"tr",a:4,L:[[0,0,11,0],[11,0,11,8],[11,8,0,8],[0,8,0,0],[0,4,5.5,0],[0,8,11,0],[5.5,8,11,4]]},
+      {id:"f4-4",t:"tr",a:8,L:[[0,0,4,0],[4,0,4,4],[4,4,0,4],[0,4,0,0],[0,0,4,4],[4,0,0,4]]},
+      {id:"f4-5",t:"tr",a:7,L:[[0,2,2,2],[2,2,2,0],[2,0,0,2],[1,1,2,1],[1,1,1,2],[1,1,2,2]]},
+      {id:"f4-6",t:"tr",a:12,L:[[0,0,3,0],[3,0,3,4],[3,4,0,4],[0,4,0,0],[1.5,0,0,2],[0,2,1.5,4],[1.5,4,3,2],[3,2,1.5,0],[1.5,0,1.5,4],[0,2,3,2]]},
+      {id:"f4-7",t:"tr",a:8,L:[[0,0,2,0],[2,0,2,2],[2,2,0,2],[0,2,0,0],[0,0,2,2],[1,0,1,1],[1,1,2,1],[1,1,2,0]]},
+      {id:"f4-8",t:"tr",a:5,L:[[0,0,6,0],[6,0,6,4],[6,4,0,4],[0,4,0,0],[0,2,6,2],[0,2,6,0],[0,2,6,4]]},
+      {id:"f5-1",t:"tr",a:10,L:[[0,-1,0.5878,0.809],[0.9511,-0.309,-0.5878,0.809],[0.5878,0.809,-0.9511,-0.309],[-0.5878,0.809,0,-1],[-0.9511,-0.309,0.9511,-0.309]]},
+      {id:"f5-2",t:"tr",a:10,L:[[0,-1,1.732,0],[1.732,0,0,1],[0,1,-1.732,0],[-1.732,0,0,-1],[0,-1,0,1],[-0.866,-0.5,-0.866,0.5],[0.866,-0.5,0.866,0.5],[-0.866,-0.5,0.866,0.5],[-0.866,0.5,0.866,-0.5]]},
+      {id:"f5-3",t:"tr",a:12,L:[[0,-2,2,0],[2,0,0,2],[0,2,-2,0],[-2,0,0,-2],[-2,0,2,0],[0,-2,-0.5,0],[0,-2,0.5,0],[0,2,-0.5,0],[0,2,0.5,0]]},
+      {id:"f5-4",t:"tr",a:13,L:[[0,0,0,3],[0,3,3,3],[3,3,0,0],[0,1,1,1],[0,2,2,2],[1,1,1,3],[2,2,2,3],[0,1,2,3],[0,2,1,3]]},
+      {id:"f5-5",t:"tr",a:15,L:[[0,-4,3,0],[3,0,0,2],[0,2,-3,0],[-3,0,0,-4],[-3,0,3,0],[0,-4,0,2],[-3,0,0,-1.5],[3,0,0,-1.5]]},
+      {id:"f5-6",t:"tr",a:14,L:[[0,1,4,1],[4,1,4,3.4],[4,3.4,0,3.4],[0,3.4,0,1],[2,0,0,3.4],[0,3.4,4,3.4],[4,3.4,2,0],[2,4.4,0,1],[0,1,4,1],[4,1,2,4.4]]},
+      {id:"f5-7",t:"tr",a:10,L:[[-0.866,-1.5,-0.866,0.5],[0.866,-1.5,0.866,0.5],[-0.866,-1.5,0,-1],[0,-1,0.866,-1.5],[-0.866,0.5,0,1],[0,1,0.866,0.5],[0,-1,0,1],[-0.866,-0.5,0.866,0.5],[0.866,-0.5,-0.866,0.5],[0,-1,-0.866,-0.5],[0,-1,0.866,-0.5]]},
+      {id:"f5-8",t:"tr",a:8,L:[[0,-1,0.866,0.5],[0.866,0.5,-0.866,0.5],[-0.866,0.5,0,-1],[0,1,0.866,-0.5],[0.866,-0.5,-0.866,-0.5],[-0.866,-0.5,0,1]]},
+      {id:"f6-1",t:"tr",a:13,L:[[1,0.866,2,0.866],[2,0.866,1.5,0],[1.5,0,1,0.866],[0.5,1.7321,1.5,1.7321],[1.5,1.7321,1,0.866],[1,0.866,0.5,1.7321],[1.5,1.7321,2.5,1.7321],[2.5,1.7321,2,0.866],[2,0.866,1.5,1.7321],[1,0.866,2,0.866],[2,0.866,1.5,1.7321],[1.5,1.7321,1,0.866],[0,2.5981,1,2.5981],[1,2.5981,0.5,1.7321],[0.5,1.7321,0,2.5981],[1,2.5981,2,2.5981],[2,2.5981,1.5,1.7321],[1.5,1.7321,1,2.5981],[2,2.5981,3,2.5981],[3,2.5981,2.5,1.7321],[2.5,1.7321,2,2.5981],[0.5,1.7321,1.5,1.7321],[1.5,1.7321,1,2.5981],[1,2.5981,0.5,1.7321],[1.5,1.7321,2.5,1.7321],[2.5,1.7321,2,2.5981],[2,2.5981,1.5,1.7321]]},
+      {id:"f6-2",t:"tr",a:27,L:[[1.5,0.866,2.5,0.866],[2.5,0.866,2,0],[2,0,1.5,0.866],[1,1.7321,2,1.7321],[2,1.7321,1.5,0.866],[1.5,0.866,1,1.7321],[2,1.7321,3,1.7321],[3,1.7321,2.5,0.866],[2.5,0.866,2,1.7321],[1.5,0.866,2.5,0.866],[2.5,0.866,2,1.7321],[2,1.7321,1.5,0.866],[0.5,2.5981,1.5,2.5981],[1.5,2.5981,1,1.7321],[1,1.7321,0.5,2.5981],[1.5,2.5981,2.5,2.5981],[2.5,2.5981,2,1.7321],[2,1.7321,1.5,2.5981],[2.5,2.5981,3.5,2.5981],[3.5,2.5981,3,1.7321],[3,1.7321,2.5,2.5981],[1,1.7321,2,1.7321],[2,1.7321,1.5,2.5981],[1.5,2.5981,1,1.7321],[2,1.7321,3,1.7321],[3,1.7321,2.5,2.5981],[2.5,2.5981,2,1.7321],[0,3.4641,1,3.4641],[1,3.4641,0.5,2.5981],[0.5,2.5981,0,3.4641],[1,3.4641,2,3.4641],[2,3.4641,1.5,2.5981],[1.5,2.5981,1,3.4641],[2,3.4641,3,3.4641],[3,3.4641,2.5,2.5981],[2.5,2.5981,2,3.4641],[3,3.4641,4,3.4641],[4,3.4641,3.5,2.5981],[3.5,2.5981,3,3.4641],[0.5,2.5981,1.5,2.5981],[1.5,2.5981,1,3.4641],[1,3.4641,0.5,2.5981],[1.5,2.5981,2.5,2.5981],[2.5,2.5981,2,3.4641],[2,3.4641,1.5,2.5981],[2.5,2.5981,3.5,2.5981],[3.5,2.5981,3,3.4641],[3,3.4641,2.5,2.5981]]},
+      {id:"f6-3",t:"tr",a:15,L:[[1,0.866,2,0.866],[2,0.866,1.5,0],[1.5,0,1,0.866],[0.5,1.7321,1.5,1.7321],[1.5,1.7321,1,0.866],[1,0.866,0.5,1.7321],[1.5,1.7321,2.5,1.7321],[2.5,1.7321,2,0.866],[2,0.866,1.5,1.7321],[0,0.866,1,0.866],[1,0.866,0.5,1.7321],[0.5,1.7321,0,0.866],[1,0.866,2,0.866],[2,0.866,1.5,1.7321],[1.5,1.7321,1,0.866],[2,0.866,3,0.866],[3,0.866,2.5,1.7321],[2.5,1.7321,2,0.866],[1,2.5981,2,2.5981],[2,2.5981,1.5,1.7321],[1.5,1.7321,1,2.5981],[0.5,1.7321,1.5,1.7321],[1.5,1.7321,1,2.5981],[1,2.5981,0.5,1.7321],[1.5,1.7321,2.5,1.7321],[2.5,1.7321,2,2.5981],[2,2.5981,1.5,1.7321],[1,2.5981,2,2.5981],[2,2.5981,1.5,3.4641],[1.5,3.4641,1,2.5981]]},
+      {id:"f6-4",t:"tr",a:20,L:[[0.5,0.866,1.5,0.866],[1.5,0.866,1,0],[1,0,0.5,0.866],[1.5,0.866,2.5,0.866],[2.5,0.866,2,0],[2,0,1.5,0.866],[0,1.7321,1,1.7321],[1,1.7321,0.5,0.866],[0.5,0.866,0,1.7321],[1,1.7321,2,1.7321],[2,1.7321,1.5,0.866],[1.5,0.866,1,1.7321],[2,1.7321,3,1.7321],[3,1.7321,2.5,0.866],[2.5,0.866,2,1.7321],[0.5,0.866,1.5,0.866],[1.5,0.866,1,1.7321],[1,1.7321,0.5,0.866],[1.5,0.866,2.5,0.866],[2.5,0.866,2,1.7321],[2,1.7321,1.5,0.866],[0.5,2.5981,1.5,2.5981],[1.5,2.5981,1,1.7321],[1,1.7321,0.5,2.5981],[1.5,2.5981,2.5,2.5981],[2.5,2.5981,2,1.7321],[2,1.7321,1.5,2.5981],[0,1.7321,1,1.7321],[1,1.7321,0.5,2.5981],[0.5,2.5981,0,1.7321],[1,1.7321,2,1.7321],[2,1.7321,1.5,2.5981],[1.5,2.5981,1,1.7321],[2,1.7321,3,1.7321],[3,1.7321,2.5,2.5981],[2.5,2.5981,2,1.7321],[0.5,2.5981,1.5,2.5981],[1.5,2.5981,1,3.4641],[1,3.4641,0.5,2.5981],[1.5,2.5981,2.5,2.5981],[2.5,2.5981,2,3.4641],[2,3.4641,1.5,2.5981]]},
+      {id:"f6-5",t:"tr",a:16,L:[[0,0,4,0],[4,0,4,4],[4,4,0,4],[0,4,0,0],[0,0,4,4],[4,0,0,4],[2,0,2,4],[0,2,4,2]]},
+      {id:"f6-6",t:"tr",a:12,L:[[0,0,4,0],[4,0,4,4],[4,4,0,4],[0,4,0,0],[2,0,0,2],[0,2,2,4],[2,4,4,2],[4,2,2,0],[2,0,2,4],[0,2,4,2]]},
+      {id:"f6-7",t:"tr",a:29,L:[[0,0,2,0],[2,0,2,2],[2,2,0,2],[0,2,0,0],[0,0,2,2],[2,0,0,2],[0,2,2,2],[2,2,2,4],[2,4,0,4],[0,4,0,2],[0,2,2,4],[2,2,0,4],[2,2,4,2],[4,2,4,4],[4,4,2,4],[2,4,2,2],[2,2,4,4],[4,2,2,4]]},
+      {id:"f6-8",t:"tr",a:18,L:[[0,0,2,0],[2,0,2,2],[2,2,0,2],[0,2,0,0],[0,0,2,2],[2,0,0,2],[2,0,4,0],[4,0,4,2],[4,2,2,2],[2,2,2,0],[2,0,4,2],[4,0,2,2]]}
+    ] },
+    { id: "okuri", name: "おくりがな", glyph: "る", k: "okuri", cards: [
+      { id: "o1-1", c: "少《すこ》し", w: "少《す》こし" },
+      { id: "o1-2", c: "図《はか》る", w: "図《は》かる" },
+      { id: "o1-3", c: "晴《は》れる", w: "晴《はれ》る" },
+      { id: "o1-4", c: "長《なが》い", w: "長《な》がい" },
+      { id: "o1-5", c: "太《ふと》い", w: "太《ふ》とい" },
+      { id: "o1-6", c: "多《おお》い", w: "多《お》おい" },
+      { id: "o1-7", c: "走《はし》る", w: "走《は》しる" }
+    ] },
+    { id: "bushu", name: "ぶしゅ", glyph: "部", k: "bushu", cards: [
+      { id: "b1-1", q: "丸", a: "てん", p: "丶" },
+      { id: "b1-2", q: "岩", a: "やま", p: "山" },
+      { id: "b1-3", q: "顔", a: "おおがい", p: "頁" },
+      { id: "b1-4", q: "京", a: "なべぶた", p: "亠" },
+      { id: "b1-5", q: "帰", a: "はば", p: "巾" },
+      { id: "b1-6", q: "記", a: "ごんべん", p: "言" },
+      { id: "b1-7", q: "汽", a: "さんずい", p: "氵" }
+    ] },
+    { id: "jukugo", name: "じゅくご", glyph: "熟", k: "juku", cards: [
+      { id: "j1-1", m: "たけの はやし", a: "竹林", r: "ちくりん" },
+      { id: "j1-2", m: "もりと はやし", a: "森林", r: "しんりん" },
+      { id: "j1-3", m: "あめが ふる てんき", a: "雨天", r: "うてん" },
+      { id: "j1-4", m: "はげしく たくさん ふる あめ", a: "大雨", r: "おおあめ" },
+      { id: "j1-5", m: "よく はれた あおい そら", a: "青空", r: "あおぞら" },
+      { id: "j1-6", m: "はいった お金《かね》より、でた お金の ほうが おおい こと", a: "赤字", r: "あかじ" },
+      { id: "j1-7", m: "いちどに くちに いれる こと", a: "一口", r: "ひとくち" }
+    ] },
+    { id: "kanyo", name: "かんようく", glyph: "手", k: "kanyo", cards: [
+      { id: "k1-1", p: "{_}を やく", a: "手《て》", f: "手《て》を やく", m: "うまく いかなくて こまる こと。てこずる。" },
+      { id: "k1-2", p: "{_}が こえる", a: "目《め》", f: "目《め》が こえる", m: "よい ものと わるい ものが、よく 見分《みわ》けられるように なる こと。" },
+      { id: "k1-3", p: "{_}が いたい", a: "耳《みみ》", f: "耳《みみ》が いたい", m: "じぶんに つごうの わるい ことを きくのが つらい こと。" },
+      { id: "k1-4", p: "{_}が たたない", a: "歯《は》", f: "歯《は》が たたない", m: "あいてが つよすぎて、まったく かなわない こと。" },
+      { id: "k1-5", p: "{_}を ながくする", a: "首《くび》", f: "首《くび》を ながくする", m: "いまか いまかと、まちどおしく まつ こと。" },
+      { id: "k1-6", p: "足《あし》が {_}に なる", a: "ぼう", f: "足《あし》が ぼうに なる", m: "たくさん あるいて、足が ぼうのように かたく なるほど つかれる こと。" },
+      { id: "k1-7", p: "顔《かお》から {_}が でる", a: "火《ひ》", f: "顔《かお》から 火《ひ》が でる", m: "とても はずかしくて、顔が まっかに なる こと。" }
+    ] },
+    { id: "kisetsu", name: "きせつの ことば", glyph: "季", k: "kisetsu", cards: [
+      { id: "s1-1", s: "はる", h: "ひ___り", a: "ひなまつり", m: "3月《がつ》3日《か》の「もものせっく」に、ひな人形《にんぎょう》を かざって 女《おんな》の子《こ》の おいわいを する おまつり。" },
+      { id: "s1-2", s: "はる", h: "___のせっく", a: "たんごのせっく", m: "5月《がつ》5日《か》の 男《おとこ》の子《こ》の おいわいの 日《ひ》。「こどもの日」とも いう。こいのぼりを あげて 元気《げんき》に そだつように いのる。" },
+      { id: "s1-3", s: "はる", h: "しお___", a: "しおひがり", m: "はまべで あさりなどの 貝《かい》を とって あそぶ こと。かんじでは「潮干狩り」と かく。" },
+      { id: "s1-4", s: "なつ", h: "た__た", a: "たなばた", m: "7月《がつ》7日《か》の 星《ほし》まつり。けんぎゅう星と しょくじょ星が、天《あま》の川《がわ》を わたって 年《とし》に いちど あうと いう おはなしから。" },
+      { id: "s1-5", s: "なつ", h: "__がえる", a: "あまがえる", m: "みどりいろの 小《ちい》さな かえる。まわりの いろに あわせて、体《からだ》の いろを かえる。" },
+      { id: "s1-6", s: "あき", h: "___がり", a: "もみじがり", m: "赤《あか》や きいろに いろづいた きれいな 葉《は》を 見《み》に、山《やま》へ でかける こと。" },
+      { id: "s1-7", s: "あき", h: "まつ__", a: "まつたけ", m: "とても よい かおりの きのこ。あかまつの 林《はやし》に はえる。" }
+    ] },
+    { id: "kotoba4", name: "ことば 4", glyph: "言", k: "kotoba", cards: [
+      { id: "w4-1", s: "父《ちち》からの {ことづ_}を、おじさんに つたえた。", a: "ことづて", m: "人《ひと》に たのんで、つたえて もらう こと。でんごん。" },
+      { id: "w4-2", s: "ひっこす ともだちに {せんべ_}を わたした。", a: "せんべつ", m: "たびに でる 人《ひと》や、わかれる 人に おくる しなものや お金《かね》。" },
+      { id: "w4-3", s: "かんがえぶかい ところが、兄《あに》の {ちょうし_}です。", a: "ちょうしょ", m: "すぐれて いる ところ。とりえ。" },
+      { id: "w4-4", s: "かれは {かたく_}に、まちがいを みとめなかった。", a: "かたくな", m: "がんこで、じぶんの かんがえを かえない ようす。" },
+      { id: "w4-5", s: "川《かわ》の {せせら_}が きこえて くる。", a: "せせらぎ", m: "川の あさい ところを ながれる 水《みず》の 音《おと》。また、その ながれ。" },
+      { id: "w4-6", s: "エジソンの {でん_}を よんだ。", a: "でんき", m: "ある 人《ひと》の 一生《いっしょう》を、できごとの じゅんに かいた もの。" },
+      { id: "w4-7", s: "先生《せんせい》の お話《はなし》に {あいづ_}を うつ。", a: "あいづち", m: "人《ひと》の はなしを ききながら、うなずいたり へんじを したり する こと。" }
+    ] },
+    { id: "kotoba5", name: "ことば 5", glyph: "語", k: "kotoba", cards: [
+      { id: "w5-1", s: "ちょう上《じょう》に ついた {あ_し}の しゃしん。", a: "あかし", m: "たしかな しょうこ。" },
+      { id: "w5-2", s: "けんかに なった {いきさ_}を はなす。", a: "いきさつ", m: "そう なった わけ。" },
+      { id: "w5-3", s: "{おのず_ら} わかるまで、くりかえし よんだ。", a: "おのずから", m: "ひとりでに。しぜんに。" },
+      { id: "w5-4", s: "{つつ_しい} はなしかたで はなす。", a: "つつましい", m: "れいぎ正《ただ》しく、ひかえめで ある。" },
+      { id: "w5-5", s: "かれは {ひ_むき}に れんしゅうを つづけた。", a: "ひたむき", m: "いっしょうけんめいな ようす。" },
+      { id: "w5-6", s: "雨《あめ》が {ひとし_り} ふる あいだ、雨やどりを した。", a: "ひとしきり", m: "しばらくの あいだ、さかんに つづく ようす。" },
+      { id: "w5-7", s: "{や_しい} ところは ないので、ぜんぶ はなそう。", a: "やましい", m: "わるい ことを したので、心《こころ》の 中《なか》で はずかしく 思《おも》う。" }
+    ] },
+    { id: "hito", name: "ゆうめいな ひと", glyph: "人", k: "hito", cards: [
+      { id: "p1-1", h: "ふく_わ__ち", d: "西《せい》ようの 文化《ぶんか》を 日本《にほん》に ひろめた。「天《てん》は 人《ひと》の 上《うえ》に 人を つくらず…」の ことばと、本「学問《がくもん》の すすめ」で しられる。", a: "ふくざわ ゆきち", i: "1835〜1901年・日本（大分県《おおいたけん》）" },
+      { id: "p1-2", h: "の__ひ_よ", d: "小《ちい》さい ころの 大《おお》やけどで 左手《ひだりて》が 不自由《ふじゆう》に なったが、医学《いがく》を べんきょうして、せかいで ゆうめいな「さいきん学《がく》しゃ」に なった。", a: "のぐち ひでよ", i: "1876〜1928年・日本（ふくしま県《けん》）" },
+      { id: "p1-3", h: "あ_きこ__う", d: "江戸時代《えどじだい》、食《た》べものに こまる 人びとの ために「さつまいも」の そだてかたを けんきゅうして、ひろめた。", a: "あおき こんよう", i: "1698〜1769年・日本（東京都《とうきょうと》）" },
+      { id: "p1-4", h: "いの_た_たか", d: "江戸時代《えどじだい》、日本《にほん》じゅうを あるいて まわり、正《せい》かくな「日本地図《にほんちず》」を つくった。", a: "いのう ただたか", i: "1745〜1818年・日本（ちば県《けん》）" },
+      { id: "p1-5", h: "みや__け_じ", d: "詩人《しじん》で どうわ作家《さっか》。「雨《あめ》ニモマケズ」の 詩《し》や、「銀河鉄道《ぎんがてつどう》の夜《よる》」「風《かぜ》の又三郎《またさぶろう》」を かいた。生《い》きて いる あいだは、あまり みとめられなかった。", a: "みやざわ けんじ", i: "1896〜1933年・日本（いわて県《けん》）" },
+      { id: "p1-6", h: "コロ__ス", d: "スペインの 王《おう》に たすけて もらって 海《うみ》へ でて、アメリカ大陸《たいりく》を 見《み》つけた 人《ひと》。", a: "コロンブス", i: "クリストファー・コロンブス／1451〜1506年・イタリア" },
+      { id: "p1-7", h: "ガリ__", d: "「地球《ちきゅう》が たいようの まわりを 回《まわ》っている」と いう「地動説《ちどうせつ》」を となえた。でも、まわりの 人たちには みとめて もらえなかった。", a: "ガリレオ", i: "ガリレオ・ガリレイ／1564〜1642年・イタリア" }
+    ] }
+  ];
+
   const M_DAILY = 5;             // 1日にコインがもらえる回数(英語とは別枠)
   const M_BANK_MAX = 10;
   const MCOINS_DONE = 10;        // 終わらせたら
@@ -973,7 +1220,7 @@
   const OLD_STORE_KEY = "kotoba-craft-v1";
   const BACKUP_KEY = "coin-quest-v1-bak";
   const UNDO_KEY = "coin-quest-v1-undo";
-  const SAVE_VER = 4;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
+  const SAVE_VER = 5;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
   const PLAYERS = { taiga: "たいが", gaku: "がく" };
 
   // ---------------------------------------------------------------
@@ -983,7 +1230,7 @@
     return { coins: 0, level: START_LEVEL, stagesCleared: 0, stagesPlayed: 0,
              today: { date: todayKey(), cleared: 0, played: 0, coins: 0, kplayed: 0 },
              left: DAILY_STAGES, mLeft: M_DAILY, mDate: todayKey(), math: {},
-             retry: [], seen: {}, wrong: {}, quests: {} };
+             retry: [], seen: {}, wrong: {}, quests: {}, cm: { date: todayKey(), played: 0, decks: {} } };
   }
   // 世界の色(ひる/ゆうがた/よる)。保存データの初期値に使うので、ここで先に決めておく
   const THEMES = {
@@ -1069,6 +1316,7 @@
     })();
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].quests) state.players[k].quests = {};   // 古い保存データを拾う
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].math) state.players[k].math = {};
+    for (const k of Object.keys(PLAYERS)) if (!state.players[k].cm) state.players[k].cm = { date: todayKey(), played: 0, decks: {} };
     if (!state.mOn) state.mOn = {};
     if (!state.theme || !THEMES[state.theme]) state.theme = DEFAULT_THEME;
     state.ver = SAVE_VER;
@@ -1255,7 +1503,7 @@
   // ---------------------------------------------------------------
   // SCREENS
   // ---------------------------------------------------------------
-  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult", "mhome", "mplay", "mresult"].forEach(s => { $(s).hidden = s !== id; }); document.body.setAttribute("data-screen", id); }
+  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult", "mhome", "mplay", "mresult", "cmhome", "cmplay", "cmresult"].forEach(s => { $(s).hidden = s !== id; }); document.body.setAttribute("data-screen", id); }
 
   function renderYen(total) {
     const denoms = [500, 100, 50, 10, 5, 1];
@@ -1684,10 +1932,13 @@
       '<span class="ttl">' + esc(ttl) + '</span><span class="sub">' + esc(sub) + '</span></span></button>';
     $("pickList").innerHTML =
       item("goEn", ICONS.book, "えいご", esub) +
-      item("goKa", ICONS.scroll, q.name, sub) +
+      (cmActive()
+        ? item("goCm", ICONS.cards, "カードめいじん", (cmDaysLeft() > 0 ? "テストまで あと " + cmDaysLeft() + " にち・" : "テストは きょう!・") + "コイン のこり " + cmLeft() + " かい")
+        : item("goKa", ICONS.scroll, q.name, sub)) +
       item("goMa", ICONS.pick, "けいさん", "コインが もらえる のこり " + p.mLeft + " かい");
     $("goEn").onclick = renderHome;
-    $("goKa").onclick = renderKHome;
+    if ($("goKa")) $("goKa").onclick = renderKHome;
+    if ($("goCm")) $("goCm").onclick = renderCmHome;
     $("goMa").onclick = renderMHome;
     show("pick");
   }
@@ -1870,6 +2121,247 @@
       b.onclick = () => { const ev = M_EVENTS.find(e => e.id === b.getAttribute("data-ev")); if (ev) startMStage(ev); };
     });
     show("mhome");
+  }
+
+  // ---------------------------------------------------------------
+  // カードめいじん (flip cards: think, flip, see the answer. Nothing is
+  // marked right or wrong; the only record is how often each card was
+  // turned over and which ones he said he does not know yet)
+  // ---------------------------------------------------------------
+  function cmDue() { return (state.dues && state.dues["card-meijin"]) || CM_DUE; }
+  function cmDaysLeft() {
+    const d = new Date(cmDue() + "T00:00:00"), now = new Date();
+    return Math.round((d - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
+  }
+  // テストびまでは「かんじ」の入口が カードめいじんに なる。すぎたら自動で かんじに もどる
+  function cmActive() { return state.cmMode !== "off" && cmDaysLeft() >= 0; }
+  function cmProg() {
+    const p = P();
+    if (!p.cm) p.cm = { date: todayKey(), played: 0, decks: {} };
+    if (!p.cm.decks) p.cm.decks = {};
+    if (p.cm.date !== todayKey()) { p.cm.date = todayKey(); p.cm.played = 0; }
+    return p.cm;
+  }
+  function cmRec(deck) {
+    const c = cmProg();
+    if (!c.decks[deck.id]) c.decks[deck.id] = { n: {}, mada: {} };
+    return c.decks[deck.id];
+  }
+  function cmLeft() { return Math.max(0, CM_DAILY - (cmProg().played || 0)); }
+  function cmFlips(deck, card) { return cmRec(deck).n[card.id] || 0; }
+  // one ring = every card in the pile turned over once more
+  function cmRings(deck) { return deck.cards.reduce((m, c) => Math.min(m, cmFlips(deck, c)), Infinity); }
+  function cmTotal(deck) { return deck.cards.reduce((s, c) => s + cmFlips(deck, c), 0); }
+  // the pile he has turned least lights up, so all of them get their turn
+  function cmHot() {
+    let best = null, bs = null;
+    for (const d of CM_DECKS) {
+      const s = [cmRings(d), cmTotal(d) / d.cards.length];
+      if (!best || s[0] < bs[0] || (s[0] === bs[0] && s[1] < bs[1] - 1e-9)) { best = d; bs = s; }
+    }
+    return best;
+  }
+
+  // 《》 = ふりがな
+  function rb(s) { return esc(s).replace(/([一-鿿々]+)《([^》]+)》/g, "<ruby>$1<rt>$2</rt></ruby>"); }
+  function plain(s) { return String(s).replace(/《[^》]*》/g, "").replace(/[{}]/g, ""); }
+  // the boxes printed on the card: letters he is given, and empty ones to fill in his head
+  function boxes(h, fill) {
+    return '<span class="hbox">' + Array.from(h).map((ch, i) =>
+      '<span class="hb' + (ch === "_" ? (fill ? " got" : " open") : "") + '">' +
+      (ch === "_" ? (fill ? esc(Array.from(fill)[i] || "") : "") : esc(ch)) + '</span>').join("") + '</span>';
+  }
+  function withBoxes(s, fill) {                     // "父《ちち》からの {ことづ_}を…"
+    return s.split(/(\{[^}]*\})/).map(part => {
+      const m = /^\{([^}]*)\}$/.exec(part);
+      return m ? boxes(m[1], fill) : rb(part);
+    }).join("");
+  }
+  function figSVG(c, small) {
+    let pts = [], body = "";
+    if (c.g) {
+      c.g.forEach((row, y) => Array.from(row).forEach((ch, x) => {
+        if (ch !== "X") return;
+        body += '<rect x="' + x + '" y="' + y + '" width="1" height="1"/>';
+        pts.push([x, y], [x + 1, y + 1]);
+      }));
+    } else {
+      c.L.forEach(s => { body += '<line x1="' + s[0] + '" y1="' + s[1] + '" x2="' + s[2] + '" y2="' + s[3] + '"/>'; pts.push([s[0], s[1]], [s[2], s[3]]); });
+    }
+    const xs = pts.map(p => p[0]), ys = pts.map(p => p[1]);
+    const x0 = Math.min(...xs), y0 = Math.min(...ys), w = Math.max(...xs) - x0, h = Math.max(...ys) - y0;
+    const pad = Math.max(w, h) * 0.06, sw = Math.max(w, h) * 0.022;
+    return '<svg class="fig' + (small ? " small" : "") + '" viewBox="' + (x0 - pad) + " " + (y0 - pad) + " " + (w + pad * 2) + " " + (h + pad * 2) +
+      '" style="aspect-ratio:' + ((w + pad * 2) / (h + pad * 2)).toFixed(3) + '"><g fill="none" stroke="#2b2118" stroke-width="' + sw.toFixed(3) +
+      '" stroke-linejoin="round" stroke-linecap="round">' + body + '</g></svg>';
+  }
+  const CM_ASK = {
+    fig: c => c.t === "sq" ? "正方形《せいほうけい》は いくつ？" : "三角形《さんかくけい》は いくつ？",
+    okuri: () => "ただしい おくりがなは どっち？",
+    bushu: () => "ぶしゅの なまえは？",
+    juku: () => "かんじ 2もじの ことばに すると？",
+    kanyo: () => "□に はいる ことばは？",
+    kisetsu: () => "なんの ことば？",
+    kotoba: () => "□に はいる ことばは？",
+    hito: () => "だれの ことかな？"
+  };
+  function cmFront(deck, c) {
+    switch (deck.k) {
+      case "fig": return figSVG(c);
+      case "okuri": return '<div class="okuri">' + c.pair.map(s => '<span class="otile">' + rb(s) + '</span>').join("") + '</div>';
+      case "bushu": return '<p class="kanji-big">' + esc(c.q) + '</p>';
+      case "juku": return '<p class="cm-text boxed">' + rb(c.m) + '</p><span class="hbox">' + '<span class="hb open big"></span><span class="hb open big"></span></span>';
+      case "kanyo": return '<p class="cm-phrase">' + withBoxes(c.p) + '</p><p class="cm-mean"><b>いみ</b> ' + rb(c.m) + '</p>';
+      case "kisetsu": return '<p class="season s-' + esc(c.s) + '">' + esc(c.s) + '</p>' + boxes(c.h) + '<p class="cm-mean">' + rb(c.m) + '</p>';
+      case "kotoba": return '<p class="cm-sent">' + withBoxes(c.s) + '</p>';
+      case "hito": return boxes(c.h) + '<p class="cm-mean">' + rb(c.d) + '</p>';
+    }
+    return "";
+  }
+  function cmBack(deck, c) {
+    switch (deck.k) {
+      case "fig": return '<p class="cm-ans">' + c.a + '<small>こ</small></p>' + figSVG(c, true);
+      case "okuri": return '<div class="okuri">' + c.pair.map(s => '<span class="otile' + (s === c.c ? " ok" : " ng") + '">' + rb(s) + '</span>').join("") + '</div>';
+      case "bushu": return '<p class="cm-ans">' + esc(c.a) + '</p><p class="cm-part"><span>' + esc(c.q) + '</span> の ぶしゅ <span>' + esc(c.p) + '</span></p>';
+      case "juku": return '<p class="cm-ans kj"><ruby>' + esc(c.a) + '<rt>' + esc(c.r) + '</rt></ruby></p><p class="cm-text">' + rb(c.m) + '</p>';
+      case "kanyo": return '<p class="cm-ans">' + rb(c.a) + '</p><p class="cm-phrase">' + rb(c.f) + '</p><p class="cm-mean"><b>いみ</b> ' + rb(c.m) + '</p>';
+      case "kisetsu": return '<p class="season s-' + esc(c.s) + '">' + esc(c.s) + '</p><p class="cm-ans">' + esc(c.a) + '</p><p class="cm-mean">' + rb(c.m) + '</p>';
+      case "kotoba": {
+        const m = /\{([^}]*)\}/.exec(c.s);
+        return '<p class="cm-ans">' + esc(c.a) + '</p><p class="cm-sent">' + withBoxes(c.s, m ? c.a : "") + '</p><p class="cm-mean"><b>いみ</b> ' + rb(c.m) + '</p>';
+      }
+      case "hito": return '<p class="cm-ans">' + esc(c.a) + '</p><p class="cm-info">' + rb(c.i) + '</p><p class="cm-mean">' + rb(c.d) + '</p>';
+    }
+    return "";
+  }
+  // Long enough to have read the card, so tapping straight through does not pay.
+  // No numbers are shown while he waits: a pickaxe digs instead.
+  function cmWait(deck, c) {
+    if (deck.k === "fig") return 3000;
+    const txt = plain([c.m, c.s, c.d, c.p, c.h, c.q].filter(Boolean).join(""));
+    return Math.min(6000, Math.max(2000, 1500 + txt.length * 45));
+  }
+
+  let cmDeck = null, cmCards = [], cmI = 0, cmPaid = false, cmTok = 0, cmRing0 = 0, cmHotId = "";
+  function cmBuild(deck) {
+    const r = cmRec(deck);
+    const pool = shuffle(deck.cards.slice());
+    // まだ の カードが先、あとは めくった回数が少ない じゅん
+    pool.sort((a, b) => ((r.mada[a.id] ? 0 : 1) - (r.mada[b.id] ? 0 : 1)) || (cmFlips(deck, a) - cmFlips(deck, b)));
+    return pool.slice(0, CM_ROUND).map(c => deck.k === "okuri" ? Object.assign({}, c, { pair: shuffle([c.c, c.w]) }) : c);
+  }
+  function startCm(deck) {
+    unlockAudio();
+    cmDeck = deck; cmHotId = cmHot().id;
+    cmPaid = cmLeft() > 0;            // 回数を へらすのは さいごまで めくったとき
+    cmRing0 = cmRings(deck);
+    cmCards = cmBuild(deck); cmI = 0;
+    show("cmplay"); renderCmCard();
+  }
+  function renderCmCard() {
+    const c = cmCards[cmI], tok = ++cmTok;
+    let h = "";
+    for (let i = 0; i < cmCards.length; i++) h += '<span class="pblock' + (i < cmI ? " done" : i === cmI ? " now" : "") + '"></span>';
+    $("cmProgress").innerHTML = h;
+    $("cmWallet2").textContent = P().coins.toLocaleString();
+    const card = $("cmCard");
+    card.className = "card cmcard k-" + cmDeck.k;
+    card.innerHTML = '<p class="kind">' + rb(CM_ASK[cmDeck.k](c)) + '</p>' + cmFront(cmDeck, c);
+    $("cmCtl").innerHTML = '<div class="dig" aria-label="まってね"><span class="swing">' + ICONS.pick + '</span><span class="pblock now"></span></div>';
+    setTimeout(() => {
+      if (tok !== cmTok) return;
+      $("cmCtl").innerHTML = '<button class="btn next" id="cmFlip">めくる</button>';
+      $("cmFlip").onclick = cmFlip;
+    }, cmWait(cmDeck, c));
+  }
+  function cmFlip() {
+    const c = cmCards[cmI], tok = cmTok, r = cmRec(cmDeck);
+    r.n[c.id] = (r.n[c.id] || 0) + 1; save();
+    $("cmCtl").innerHTML = "";
+    const card = $("cmCard");
+    card.classList.add("flipping");
+    beep(520, .06, "square", .04);
+    setTimeout(() => {
+      if (tok !== cmTok) return;
+      card.innerHTML = '<p class="kind back">こたえ</p>' + cmBack(cmDeck, c);
+      card.classList.add("flipped");
+    }, 170);
+    setTimeout(() => {
+      if (tok !== cmTok) return;
+      card.classList.remove("flipping");
+      const blk = $("cmProgress").children[cmI];
+      if (blk) blk.className = "pblock done breaking";
+      $("cmCtl").innerHTML = '<button class="btn next" id="cmOk">わかった</button>' +
+        '<button class="btn ghost mada" id="cmMada">まだ</button>';
+      $("cmOk").onclick = () => cmMark(false);
+      $("cmMada").onclick = () => cmMark(true);
+    }, 360);
+  }
+  // 「まだ」は つぎから 多めに出すための しるし。コインにも きろくにも ひびかない
+  function cmMark(mada) {
+    const c = cmCards[cmI], r = cmRec(cmDeck);
+    if (mada) r.mada[c.id] = 1; else delete r.mada[c.id];
+    save();
+    cmI++;
+    if (cmI < cmCards.length) renderCmCard(); else finishCm();
+  }
+  function finishCm() {
+    cmTok++;
+    const p = P(), cm = cmProg(), deck = cmDeck;
+    const rings = cmRings(deck), gotRing = rings > cmRing0;
+    let coins = 0;
+    if (cmPaid) {
+      coins = CMCOINS_ROUND + (gotRing ? CMCOINS_RING : 0) + (deck.id === cmHotId ? CMCOINS_PICK : 0);
+      p.coins += coins;
+      cm.played = (cm.played || 0) + 1;
+    }
+    save();
+    show("cmresult");
+    let html = '<h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(30px,8vw,52px)">' +
+      (gotRing ? "リング ゲット!" : "めくった!") + '</h2>';
+    if (gotRing) html += '<p class="rings big">' + cmRingIcons(rings) + '</p>' +
+      '<p class="hint" style="color:#fff;font-size:18px;text-shadow:2px 2px 0 #000">「' + esc(deck.name) + '」を ぜんぶ ' + rings + 'しゅう めくった!</p>';
+    if (coins) html += '<div class="gain"><span class="coin">&#165;</span>+' + coins + '</div>' +
+      (cmPaid && deck.id === cmHotId ? '<p class="hint" style="color:#fff;font-size:15px;text-shadow:2px 2px 0 #000">おすすめの カードで +' + CMCOINS_PICK + '</p>' : '');
+    else html += '<p class="hint" style="color:#fff;font-size:16px">きょうの コインは ここまで。めくってくれて ありがとう!</p>';
+    html += '<div class="wallet"><span class="coin sm">&#165;</span><span>' + p.coins.toLocaleString() + '</span></div>';
+    html += '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">' +
+      '<button class="btn green" id="cmAgain">つづける</button>' +
+      '<button class="btn ghost" id="cmHomeBtn">ほかの カード</button></div>';
+    $("cmResultBody").innerHTML = html;
+    $("cmAgain").onclick = () => startCm(deck);
+    $("cmHomeBtn").onclick = renderCmHome;
+    if (coins) { sfxCoins(); if (gotRing) coinRain(); }
+  }
+  function cmRingIcons(n) {
+    if (!n || !isFinite(n)) return "";
+    return n <= 5 ? Array(n + 1).join('<span class="ring"></span>') : '<span class="ring"></span><span class="rx">×' + n + '</span>';
+  }
+  function renderCmHome() {
+    rollDay(); cmTok++;
+    const p = P(), left = cmLeft(), hot = cmHot(), dl = cmDaysLeft();
+    $("cmWallet").textContent = p.coins.toLocaleString();
+    const due = $("cmDueLine");
+    if (dl > 1) { due.textContent = "テストまで あと " + dl + " にち"; due.className = "due"; }
+    else if (dl === 1) { due.textContent = "テストは あした!"; due.className = "due soon"; }
+    else if (dl === 0) { due.textContent = "テストは きょう!"; due.className = "due soon"; }
+    else { due.textContent = ""; }
+    let slots = '<span class="lbl">のこり</span>';
+    for (let i = 0; i < CM_DAILY; i++) slots += '<span class="slot' + (i < left ? " on" : "") + '"></span>';
+    $("cmDayRow").innerHTML = slots;
+    $("cmDone").hidden = left > 0;
+    $("cmDone").textContent = "きょうの コインは ここまで。でも まだ めくれるよ。";
+    $("cmList").innerHTML = CM_DECKS.map(d => {
+      const rings = cmRings(d), glow = d === hot;
+      return '<button class="pick' + (glow ? " glow" : "") + '" data-deck="' + d.id + '"><span class="ico"><b class="glyph">' + esc(d.glyph) + '</b></span><span>' +
+        '<span class="ttl">' + esc(d.name) + '</span>' +
+        '<span class="sub">' + d.cards.length + 'まい' + (rings ? ' <span class="rings">' + cmRingIcons(rings) + '</span>' : '') + '</span>' +
+        (glow ? '<span class="tag">おすすめ +' + CMCOINS_PICK + '</span>' : '') + '</span></button>';
+    }).join("");
+    Array.from($("cmList").querySelectorAll(".pick")).forEach(b => {
+      b.onclick = () => { const d = CM_DECKS.find(x => x.id === b.getAttribute("data-deck")); if (d) startCm(d); };
+    });
+    show("cmhome");
   }
 
   // ---------------------------------------------------------------
@@ -2070,6 +2562,24 @@
       "................"
     ], { K: "#141414", C: "#5ee8df", c: "#239a93", h: "#9a6834" })
   };
+  ICONS.cards = pixIcon([
+      "................",
+      "....KKKKKKKKK...",
+      "....KwwwwwwwK...",
+      "..KKKKKKKKKwK...",
+      "..KyyyyyyyKwK...",
+      "..KyRRRRRyKwK...",
+      "..KyyyyyyyKwK...",
+      "..KyRRRyyyKwK...",
+      "..KyyyyyyyKwK...",
+      "..KyyyyyyyKKK...",
+      "..KyGGGGGyK.....",
+      "..KyGGGGGyK.....",
+      "..KyyyyyyyK.....",
+      "..KKKKKKKKK.....",
+      "................",
+      "................"
+    ], { K: "#141414", w: "#d8d2bf", y: "#fff3b0", R: "#d23c3c", G: "#3e8e41" });
   const SKY_ICONS = {
     day: pixIcon([
       "................",
@@ -2190,6 +2700,13 @@
       QUESTS.map(q => '<option value="' + q.id + '"' + (q.id === state.quest ? " selected" : "") + '>' + esc(q.name) + '</option>').join("") +
       '</select></div>' +
       '<div class="row"><label for="dueNew">かだいの きげん</label><input id="dueNew" type="date" value="' + esc(questDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="dueSave">ほぞん</button></div>' +
+      '<p class="hint" style="margin-top:12px"><b>カードめいじん</b>(テストびまで 2ばんめの ボタンが これに なる)</p>' +
+      '<div class="row"><label for="cmMode">2ばんめの ボタン</label><select id="cmMode"><option value="auto"' + (state.cmMode !== "off" ? " selected" : "") + '>テストびまで カードめいじん</option><option value="off"' + (state.cmMode === "off" ? " selected" : "") + '>かんじ</option></select></div>' +
+      '<div class="row"><label for="cmDueNew">テストび</label><input id="cmDueNew" type="date" value="' + esc(cmDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="cmDueSave">ほぞん</button></div>' +
+      '<p class="hint">' + CM_DECKS.map(d => {
+        const r = cmRec(d), turned = d.cards.filter(c => cmFlips(d, c) > 0).length, mada = d.cards.filter(c => r.mada[c.id]).length;
+        return esc(d.name) + " " + turned + "/" + d.cards.length + (cmRings(d) ? "(" + cmRings(d) + "しゅう)" : "") + (mada ? "・まだ " + mada : "");
+      }).join(" / ") + '(めくった まい数)</p>' +
       '<div class="row"><label for="lvlSel">えいごの むずかしさ</label><select id="lvlSel">' +
       Array.from({ length: 11 }, function (_, i) {
         return '<option value="' + i + '"' + (i === P().level ? " selected" : "") + '>' + i + '</option>';
@@ -2243,6 +2760,8 @@
     $("playerSel").onchange = e => { state.player = e.target.value; save(); closeParent(); renderPick(); };
     $("questSel").onchange = e => { state.quest = e.target.value; save(); closeParent(); renderPick(); };
     $("dueSave").onclick = () => { const v = $("dueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues[state.quest] = v; P().today.kcap = null; save(); alert("きげんを " + v + " にしました"); } else alert("日づけを えらんでください"); };
+    $("cmMode").onchange = e => { state.cmMode = e.target.value; save(); closeParent(); renderPick(); };
+    $("cmDueSave").onclick = () => { const v = $("cmDueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues["card-meijin"] = v; save(); alert("テストびを " + v + " にしました"); closeParent(); renderPick(); } else alert("日づけを えらんでください"); };
     $("lvlSel").onchange = e => { P().level = Number(e.target.value); save(); closeParent(); openParent(); };
     $("voiceSel").onchange = e => { state.voice = e.target.value === "1"; save(); };
     $("voiceTest").onclick = () => { unlockAudio(); speak("Let's build a house with wood."); };
@@ -2327,6 +2846,8 @@
     $("kQuit").onclick = () => { try { speechSynthesis.cancel(); } catch (e) {} renderKHome(); };
     $("mBack").onclick = renderPick;
     $("mQuit").onclick = quitMStage;
+    $("cmBack").onclick = renderPick;
+    $("cmQuit").onclick = () => { cmTok++; renderCmHome(); };
     bindLongPress($("purse"), 2000, askPin);
     bindLongPress($("purse2"), 2000, askPin);
     document.addEventListener("touchstart", function once() { unlockAudio(); document.removeEventListener("touchstart", once); }, { passive: true });
