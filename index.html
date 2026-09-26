@@ -1566,12 +1566,12 @@
   }
   function importCode(code) {
     let obj = null;
-    try { obj = JSON.parse(decodeURIComponent(escape(atob(String(code).replace(/\s/g, ""))))); } catch (e) { return "よみこめません"; }
-    if (!obj || !obj.players || !obj.players.taiga) return "データの形が ちがいます";
+    try { obj = JSON.parse(decodeURIComponent(escape(atob(String(code).replace(/\s/g, ""))))); } catch (e) { return "読み込めません（コードが正しくありません）"; }
+    if (!obj || !obj.players || !obj.players.taiga) return "データの形式が違います";
     try {
       localStorage.setItem(UNDO_KEY, JSON.stringify({ at: todayKey(), why: "よみこむ まえ", raw: localStorage.getItem(STORE_KEY) }));
       localStorage.setItem(STORE_KEY, JSON.stringify(obj));
-    } catch (e) { return "ほぞんできません"; }
+    } catch (e) { return "保存できません"; }
     return "";
   }
   function readUndo() {
@@ -1632,8 +1632,8 @@
       localStorage.setItem("coin-quest-probe", "1");
       const ok = localStorage.getItem("coin-quest-probe") === "1";
       localStorage.removeItem("coin-quest-probe");
-      return ok ? "つかえる" : "かきこめない";
-    } catch (e) { return "つかえない(" + ((e && e.name) || "?") + ")"; }
+      return ok ? "使える" : "書き込めない";
+    } catch (e) { return "使えない（" + ((e && e.name) || "?") + "）"; }
   }
   function P() { return state.players[state.player]; }
   function todayKey() { const d = new Date(); return d.getFullYear() + "-" + (d.getMonth() + 1) + "-" + d.getDate(); }
@@ -2964,14 +2964,14 @@
   function askPin() {
     if ($("panel")) return;
     const div = document.createElement("div"); div.className = "panel"; div.id = "panel";
-    div.innerHTML = '<div class="panel-box pin-box"><h2>おとなのひと</h2><p>あんしょうばんごう を いれてください</p>' +
+    div.innerHTML = '<div class="panel-box pin-box"><h2>保護者用</h2><p>暗証番号を入力してください</p>' +
       '<div class="row"><input id="pinInput" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off"><button class="btn small" id="pinOk">OK</button></div>' +
       '<p class="hint" id="pinMsg"></p>' +
-      '<div class="row" style="justify-content:flex-end"><button class="btn small ghost" id="pinCancel">もどる</button></div></div>';
+      '<div class="row" style="justify-content:flex-end"><button class="btn small ghost" id="pinCancel">戻る</button></div></div>';
     document.body.appendChild(div);
     const check = () => {
       if ($("pinInput").value === state.pin) { closeParent(); openParent(); }
-      else { $("pinMsg").textContent = "ちがいます"; $("pinInput").value = ""; }
+      else { $("pinMsg").textContent = "番号が違います"; $("pinInput").value = ""; }
     };
     $("pinOk").onclick = check;
     $("pinInput").addEventListener("keydown", e => { if (e.key === "Enter") check(); });
@@ -2991,6 +2991,13 @@
   // ---- parent panel
   function openParent() {
     const p = P();
+    // 親メニューは子ども向けの名前ではなく、ふつうの漢字で出す
+    const qName = q => q.name.replace(/^だい(\d+)かい かんじ$/, "第$1回 漢字");
+    const cmName = { katachi: "形の数", okuri: "送りがな", bushu: "部首", jukugo: "熟語", kanyo: "慣用句",
+                     kisetsu: "季節の言葉", kotoba4: "言葉④", kotoba5: "言葉⑤", hito: "有名な人物名" };
+    const evName = ev => ev.name.replace("のだん", "の段").replace("たしざん", "足し算").replace("ひきざん", "引き算");
+    const whyJa = { "こうしんの まえ": "更新前", "よみこめなかった": "読み込めなかったデータ", "きのうまで": "前日まで",
+                    "よみこむ まえ": "読み込み前", "もどす まえ": "復元前" };
     const wrongTop = Object.entries(p.wrong).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([id, n]) => {
       if (id.startsWith("k:")) return "<li>" + esc(id.slice(2)) + " ×" + n + "</li>";
       const it = itemById(id); if (!it) return "";
@@ -3000,76 +3007,76 @@
     const div = document.createElement("div"); div.className = "panel"; div.id = "panel";
     div.innerHTML =
       '<div class="panel-box">' +
-      '<h2>おとなのひと むけ</h2>' +
+      '<h2>保護者メニュー</h2>' +
       '<div class="row"><label for="playerSel">プレイヤー</label><select id="playerSel">' +
       Object.entries(PLAYERS).map(([k, v]) => '<option value="' + k + '"' + (k === state.player ? " selected" : "") + '>' + v + '</option>').join("") +
       '</select></div>' +
-      '<div class="row"><label for="questSel">いまの かだい</label><select id="questSel">' +
-      QUESTS.map(q => '<option value="' + q.id + '"' + (q.id === state.quest ? " selected" : "") + '>' + esc(q.name) + '</option>').join("") +
+      '<div class="row"><label for="questSel">現在の漢字の課題</label><select id="questSel">' +
+      QUESTS.map(q => '<option value="' + q.id + '"' + (q.id === state.quest ? " selected" : "") + '>' + esc(qName(q)) + '</option>').join("") +
       '</select></div>' +
-      '<div class="row"><label for="dueNew">かだいの きげん</label><input id="dueNew" type="date" value="' + esc(questDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="dueSave">ほぞん</button></div>' +
-      '<p class="hint" style="margin-top:12px"><b>カードめいじん</b>(テストびまで 2ばんめの ボタンが これに なる)</p>' +
-      '<div class="row"><label for="cmMode">2ばんめの ボタン</label><select id="cmMode"><option value="auto"' + (state.cmMode !== "off" ? " selected" : "") + '>テストびまで カードめいじん</option><option value="off"' + (state.cmMode === "off" ? " selected" : "") + '>かんじ</option></select></div>' +
-      '<div class="row"><label for="cmDueNew">テストび</label><input id="cmDueNew" type="date" value="' + esc(cmDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="cmDueSave">ほぞん</button></div>' +
+      '<div class="row"><label for="dueNew">漢字のテスト日</label><input id="dueNew" type="date" value="' + esc(questDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="dueSave">保存</button></div>' +
+      '<p class="hint" style="margin-top:12px"><b>カードめいじん</b>（テスト日まで、初期画面の2番目のボタンがこれになります）</p>' +
+      '<div class="row"><label for="cmMode">2番目のボタン</label><select id="cmMode"><option value="auto"' + (state.cmMode !== "off" ? " selected" : "") + '>テスト日までカードめいじん</option><option value="off"' + (state.cmMode === "off" ? " selected" : "") + '>漢字</option></select></div>' +
+      '<div class="row"><label for="cmDueNew">カード名人のテスト日</label><input id="cmDueNew" type="date" value="' + esc(cmDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="cmDueSave">保存</button></div>' +
       '<p class="hint">' + CM_DECKS.map(d => {
         const r = cmRec(d), turned = d.cards.filter(c => cmFlips(d, c) > 0).length, mada = d.cards.filter(c => r.mada[c.id]).length;
-        return esc(d.name) + " " + turned + "/" + d.cards.length + (cmRings(d) ? "(" + cmRings(d) + "しゅう)" : "") + (mada ? "・まだ " + mada : "");
-      }).join(" / ") + '(めくった まい数)</p>' +
-      '<div class="row"><label for="lvlSel">えいごの むずかしさ</label><select id="lvlSel">' +
+        return esc(cmName[d.id] || d.name) + " " + turned + "/" + d.cards.length + (cmRings(d) ? "（" + cmRings(d) + "周）" : "") + (mada ? "・「まだ」" + mada + "枚" : "");
+      }).join(" / ") + '（めくった枚数／全枚数）</p>' +
+      '<div class="row"><label for="lvlSel">英語の難易度</label><select id="lvlSel">' +
       Array.from({ length: 11 }, function (_, i) {
         return '<option value="' + i + '"' + (i === P().level ? " selected" : "") + '>' + i + '</option>';
       }).join("") +
       '</select><span class="hint">3級 ' + Math.round(ratioL3() * 100) + '% / 日→英 ' + Math.round(ratioJa2En() * 100) + '% / 英文 ' + Math.round(ratioSent() * 100) + '%</span></div>' +
-      '<div class="row"><label for="voiceSel">えいごの こえ</label><select id="voiceSel"><option value="1"' + (state.voice ? " selected" : "") + '>オン</option><option value="0"' + (!state.voice ? " selected" : "") + '>オフ</option></select>' +
+      '<div class="row"><label for="voiceSel">英語の読み上げ</label><select id="voiceSel"><option value="1"' + (state.voice ? " selected" : "") + '>オン</option><option value="0"' + (!state.voice ? " selected" : "") + '>オフ</option></select>' +
       '<button class="btn small ghost" id="voiceTest">テスト</button></div>' +
-      '<p class="stat">コイン <b id="panelCoins">' + p.coins + '</b> / クリア ' + p.stagesCleared + ' 回(あそんだ ' + p.stagesPlayed + ' 回) / きょう ' + p.today.cleared + ' クリア / むずかしさ ' + P().level + '</p>' +
-      '<p class="stat">かんじ「' + esc(quest().name) + '」 おぼえた ' + learnedCount() + ' / ' + quest().items.length + '</p>' +
-      '<p class="hint">よく まちがえる ことば(多いじゅん)</p><ul style="margin:0 0 8px;padding-left:18px;font-size:13px">' + (wrongTop || "<li>まだ ありません</li>") + '</ul>' +
-      '<p class="hint">こえ: ' + esc(voice ? voice.name : "ブラウザ標準") + '</p>' +
-      '<div class="row"><label for="coinPlus">わたす</label><input id="coinPlus" class="amt" type="tel" inputmode="numeric" maxlength="4" value="' + GIVE_DEFAULT + '"><button class="btn small ghost" id="giveCoins">+ コイン(おてつだい等)</button></div>' +
-      '<div class="row"><label for="coinMinus">つかう</label><input id="coinMinus" class="amt" type="tel" inputmode="numeric" maxlength="4" value="' + GIVE_DEFAULT + '"><button class="btn small ghost" id="spendCoins">− コイン(こうかん等)</button></div>' +
-      '<p class="hint" id="coinMsg">すうじは かえられます(例 20 / 500)。つかいすぎたら わたす で もどせます。</p>' +
-      '<div class="row"><button class="btn small ghost" id="resetBtn">このプレイヤーを リセット</button></div>' +
-      '<div class="row"><label for="pinNew">あんしょうばんごう を かえる</label><input id="pinNew" type="tel" inputmode="numeric" maxlength="6" placeholder="4〜6けた" style="font-size:16px;width:8ch;padding:4px"><button class="btn small ghost" id="pinSave">ほぞん</button></div>' +
+      '<p class="stat">コイン <b id="panelCoins">' + p.coins + '</b>　英語：クリア ' + p.stagesCleared + '回（プレイ ' + p.stagesPlayed + '回）・今日 ' + p.today.cleared + '回クリア・難易度 ' + P().level + '</p>' +
+      '<p class="stat">漢字「' + esc(qName(quest())) + '」 覚えた字 ' + learnedCount() + ' / ' + quest().items.length + '</p>' +
+      '<p class="hint">よく間違える言葉（多い順）</p><ul style="margin:0 0 8px;padding-left:18px;font-size:13px">' + (wrongTop || "<li>まだありません</li>") + '</ul>' +
+      '<p class="hint">読み上げの声：' + esc(voice ? voice.name : "ブラウザ標準") + '</p>' +
+      '<div class="row"><label for="coinPlus">渡す</label><input id="coinPlus" class="amt" type="tel" inputmode="numeric" maxlength="4" value="' + GIVE_DEFAULT + '"><button class="btn small ghost" id="giveCoins">＋コイン（お手伝いなど）</button></div>' +
+      '<div class="row"><label for="coinMinus">使う</label><input id="coinMinus" class="amt" type="tel" inputmode="numeric" maxlength="4" value="' + GIVE_DEFAULT + '"><button class="btn small ghost" id="spendCoins">−コイン（交換など）</button></div>' +
+      '<p class="hint" id="coinMsg">数量は変更できます（例：20、500）。使いすぎたときは「渡す」で戻せます。</p>' +
+      '<div class="row"><button class="btn small ghost" id="resetBtn">このプレイヤーのデータをリセット</button></div>' +
+      '<div class="row"><label for="pinNew">暗証番号の変更</label><input id="pinNew" type="tel" inputmode="numeric" maxlength="6" placeholder="4〜6桁" style="font-size:16px;width:8ch;padding:4px"><button class="btn small ghost" id="pinSave">保存</button></div>' +
       (function () {
         const b = readBackup(), c = b ? backupCoins(b) : null, full = b ? backupOk(b) : false;
-        return (brokenSave ? '<p class="stat" style="color:var(--oops-dark)">まえの データが よみこめませんでした。控えから もどせます。</p>' : '') +
-          '<div class="row"><span class="hint">まえの データ: ' +
-          (b ? esc(b.at) + "(" + esc(b.why) + ")" + (c === null ? "" : " コイン " + c) : "なし") +
+        return (brokenSave ? '<p class="stat" style="color:var(--oops-dark)">前回のデータが読み込めませんでした。控えから戻せます。</p>' : '') +
+          '<div class="row"><span class="hint">控え（バックアップ）：' +
+          (b ? esc(b.at) + "（" + esc(whyJa[b.why] || b.why) + "）" + (c === null ? "" : " コイン " + c) : "なし") +
           '</span>' +
-          (b && full ? '<button class="btn small ghost" id="restoreBtn">ぜんぶ もどす</button>' : '') +
-          (b && c !== null ? '<button class="btn small ghost" id="restoreCoins">コインだけ もどす</button>' : '') +
+          (b && full ? '<button class="btn small ghost" id="restoreBtn">すべて戻す</button>' : '') +
+          (b && c !== null ? '<button class="btn small ghost" id="restoreCoins">コインだけ戻す</button>' : '') +
           '</div>' +
-          (readUndo() ? '<div class="row"><span class="hint">もどす まえの データも のこっています</span><button class="btn small ghost" id="undoBtn">とりけす</button></div>' : '');
+          (readUndo() ? '<div class="row"><span class="hint">戻す前のデータも残っています</span><button class="btn small ghost" id="undoBtn">取り消す</button></div>' : '');
       })() +
-      '<p class="stat">ほぞん: ' + esc(storageProbe()) + (saveError ? " / かきこみエラー " + esc(saveError) : "") +
-      ' / はじめて ひらいた ' + esc(state.born || "?") + (bornNow ? " ←このきどうで はじめて" : "") +
-      ' / さいごの ほぞん ' + esc(state.savedAt || "まだ") + '</p>' +
-      '<p class="hint" style="margin-top:12px"><b>けいさんの しゅもく</b>(おぼえた段に チェック)</p>' +
+      '<p class="stat">保存：' + esc(storageProbe()) + (saveError ? "　書き込みエラー " + esc(saveError) : "") +
+      '　初回起動 ' + esc(state.born || "?") + (bornNow ? " ←今回が初回（保存が消えている可能性）" : "") +
+      '　最終保存 ' + esc(state.savedAt || "なし") + '</p>' +
+      '<p class="hint" style="margin-top:12px"><b>計算の種目</b>（覚えた段にチェック）</p>' +
       '<div class="row" style="gap:10px">' +
       M_EVENTS.map(ev => '<label style="font-size:13px;font-weight:700"><input type="checkbox" class="mchk" data-ev="' +
-        ev.id + '"' + (evOn(ev) ? " checked" : "") + '> ' + esc(ev.name.replace("九九 ", "")) + '</label>').join("") +
+        ev.id + '"' + (evOn(ev) ? " checked" : "") + '> ' + esc(evName(ev).replace("九九 ", "")) + '</label>').join("") +
       '</div>' +
       '<p class="hint">' + M_EVENTS.filter(evOn).map(ev => {
         const r = evRec(ev.id);
-        return esc(ev.name) + ": " + (r.best === null ? "—" : r.best + "びょう") + "(" + r.done + "回" +
-          (r.quit ? "・とちゅうでやめた" + r.quit + "回" : "") + ")";
+        return esc(evName(ev)) + "：" + (r.best === null ? "記録なし" : "最高 " + r.best + "秒") + "（" + r.done + "回" +
+          (r.quit ? "・途中でやめた" + r.quit + "回" : "") + "）";
       }).join(" / ") + '</p>' +
-      '<p class="hint" style="margin-top:12px"><b>データの ひっこし</b>(アイコンを つくりなおす前に かならず)</p>' +
-      '<div class="row"><button class="btn small ghost" id="expBtn">かきだす</button>' +
+      '<p class="hint" style="margin-top:12px"><b>データの引っ越し</b>（ホーム画面のアイコンを作り直す前に必ず）</p>' +
+      '<div class="row"><button class="btn small ghost" id="expBtn">書き出す</button>' +
       '<button class="btn small ghost" id="copyBtn">コピー</button>' +
-      '<button class="btn small ghost" id="impBtn">よみこむ</button></div>' +
-      '<textarea id="codeBox" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="「かきだす」で コードが出ます。よみこむ ときは ここに はりつけて「よみこむ」。"></textarea>' +
+      '<button class="btn small ghost" id="impBtn">読み込む</button></div>' +
+      '<textarea id="codeBox" spellcheck="false" autocapitalize="off" autocorrect="off" placeholder="「書き出す」でコードが出ます。読み込むときは、ここに貼り付けて「読み込む」。"></textarea>' +
       '<p class="hint" id="codeMsg"></p>' +
-      '<p class="hint">ひらきかた: ホームの コインの わく を 2びょう おしつづける</p>' +
-      '<div class="row" style="justify-content:flex-end"><button class="btn small" id="closePanel">とじる</button></div>' +
+      '<p class="hint">開き方：初期画面の「もちもの」を2秒長押し</p>' +
+      '<div class="row" style="justify-content:flex-end"><button class="btn small" id="closePanel">閉じる</button></div>' +
       '</div>';
     document.body.appendChild(div);
     $("playerSel").onchange = e => { state.player = e.target.value; save(); closeParent(); renderPick(); };
     $("questSel").onchange = e => { state.quest = e.target.value; save(); closeParent(); renderPick(); };
-    $("dueSave").onclick = () => { const v = $("dueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues[state.quest] = v; P().today.kcap = null; save(); alert("きげんを " + v + " にしました"); } else alert("日づけを えらんでください"); };
+    $("dueSave").onclick = () => { const v = $("dueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues[state.quest] = v; P().today.kcap = null; save(); alert("漢字のテスト日を " + v + " にしました"); } else alert("日付を選んでください"); };
     $("cmMode").onchange = e => { state.cmMode = e.target.value; save(); closeParent(); renderPick(); };
-    $("cmDueSave").onclick = () => { const v = $("cmDueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues["card-meijin"] = v; save(); alert("テストびを " + v + " にしました"); closeParent(); renderPick(); } else alert("日づけを えらんでください"); };
+    $("cmDueSave").onclick = () => { const v = $("cmDueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues["card-meijin"] = v; save(); alert("カード名人のテスト日を " + v + " にしました"); closeParent(); renderPick(); } else alert("日付を選んでください"); };
     $("lvlSel").onchange = e => { P().level = Number(e.target.value); save(); closeParent(); openParent(); };
     $("voiceSel").onchange = e => { state.voice = e.target.value === "1"; save(); };
     $("voiceTest").onclick = () => { unlockAudio(); speak("Let's build a house with wood."); };
@@ -3077,39 +3084,39 @@
     const coinDone = msg => { $("coinMsg").textContent = msg; $("panelCoins").textContent = P().coins; save(); renderPick(); };
     $("giveCoins").onclick = () => {
       const n = coinAmt("coinPlus");
-      if (!n) { $("coinMsg").textContent = "1いじょうの すうじを いれてください"; return; }
+      if (!n) { $("coinMsg").textContent = "1以上の数字を入れてください"; return; }
       P().coins += n;
-      coinDone("+" + n + " わたしました。いま " + P().coins + " コイン");
+      coinDone("+" + n + " 渡しました。現在 " + P().coins + " コイン");
     };
     $("spendCoins").onclick = () => {
       const n = coinAmt("coinMinus"), p2 = P();
-      if (!n) { $("coinMsg").textContent = "1いじょうの すうじを いれてください"; return; }
-      if (p2.coins <= 0) { $("coinMsg").textContent = "コインが ありません"; return; }
+      if (!n) { $("coinMsg").textContent = "1以上の数字を入れてください"; return; }
+      if (p2.coins <= 0) { $("coinMsg").textContent = "コインがありません"; return; }
       const used = Math.min(n, p2.coins);   // never goes below zero
       p2.coins -= used;
-      coinDone((used < n ? "コインが たりないので " : "") + "−" + used + " つかいました。のこり " + p2.coins + " コイン");
+      coinDone((used < n ? "コインが足りないので " : "") + "−" + used + " 使いました。残り " + p2.coins + " コイン");
     };
-    $("resetBtn").onclick = () => { if (confirm(PLAYERS[state.player] + " のデータを全部消します。よろしいですか?")) { state.players[state.player] = freshPlayer(); save(); closeParent(); renderPick(); } };
-    $("pinSave").onclick = () => { const v = $("pinNew").value.trim(); if (/^\d{4,6}$/.test(v)) { state.pin = v; save(); alert("あんしょうばんごうを " + v + " にしました"); } else alert("4〜6けたの すうじで"); };
+    $("resetBtn").onclick = () => { if (confirm(PLAYERS[state.player] + " のデータをすべて消します。よろしいですか？")) { state.players[state.player] = freshPlayer(); save(); closeParent(); renderPick(); } };
+    $("pinSave").onclick = () => { const v = $("pinNew").value.trim(); if (/^\d{4,6}$/.test(v)) { state.pin = v; save(); alert("暗証番号を " + v + " にしました"); } else alert("4〜6桁の数字で入力してください"); };
     if ($("restoreBtn")) $("restoreBtn").onclick = () => {
       const b = readBackup(); if (!b) return;
       const c = backupCoins(b);
-      if (!confirm("いまのデータを " + b.at + " の控え(コイン " + (c === null ? "?" : c) + ")に もどします。よろしいですか?")) return;
+      if (!confirm("現在のデータを " + b.at + " の控え（コイン " + (c === null ? "?" : c) + "）に戻します。よろしいですか？")) return;
       try {
         localStorage.setItem(UNDO_KEY, JSON.stringify({ at: todayKey(), why: "もどす まえ", raw: localStorage.getItem(STORE_KEY) }));
         localStorage.setItem(STORE_KEY, b.raw);
-      } catch (e) { alert("もどせませんでした"); return; }
+      } catch (e) { alert("戻せませんでした"); return; }
       location.reload();
     };
     if ($("restoreCoins")) $("restoreCoins").onclick = () => {
       const b = readBackup(); if (!b) return;
       const c = backupCoins(b); if (c === null) return;
-      if (!confirm("コインを " + c + " に もどします。よろしいですか?")) return;
+      if (!confirm("コインを " + c + " に戻します。よろしいですか？")) return;
       P().coins = c; save(); closeParent(); renderPick();
     };
     if ($("undoBtn")) $("undoBtn").onclick = () => {
       const u = readUndo(); if (!u || !u.raw) return;
-      if (!confirm("もどす まえの データに 戻します。よろしいですか?")) return;
+      if (!confirm("戻す前のデータに戻します。よろしいですか？")) return;
       try { localStorage.setItem(STORE_KEY, u.raw); localStorage.removeItem(UNDO_KEY); } catch (e) { return; }
       location.reload();
     };
@@ -3119,19 +3126,19 @@
     $("expBtn").onclick = () => {
       const c = exportCode();
       $("codeBox").value = c;
-      $("codeMsg").textContent = c ? "このコードを メモに はりつけて とっておいてください(" + c.length + "文字)" : "かきだせませんでした";
+      $("codeMsg").textContent = c ? "このコードをメモなどに貼り付けて保管してください（" + c.length + "文字）" : "書き出せませんでした";
       $("codeBox").focus(); $("codeBox").select();
     };
     $("copyBtn").onclick = async () => {
       const c = $("codeBox").value.trim() || exportCode();
       $("codeBox").value = c; $("codeBox").select();
       try { await navigator.clipboard.writeText(c); $("codeMsg").textContent = "コピーしました"; }
-      catch (e) { $("codeMsg").textContent = "コピーできないので、えらんで ⌘C / 長おし→コピー してください"; }
+      catch (e) { $("codeMsg").textContent = "コピーできませんでした。選択して ⌘C（iPadは長押し→コピー）してください"; }
     };
     $("impBtn").onclick = () => {
       const c = $("codeBox").value.trim();
-      if (!c) { $("codeMsg").textContent = "コードを はりつけてください"; return; }
-      if (!confirm("いまのデータを、はりつけた コードで 上書きします。よろしいですか?")) return;
+      if (!c) { $("codeMsg").textContent = "コードを貼り付けてください"; return; }
+      if (!confirm("現在のデータを、貼り付けたコードで上書きします。よろしいですか？")) return;
       const err = importCode(c);
       if (err) { $("codeMsg").textContent = err; return; }
       location.reload();
