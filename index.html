@@ -1165,7 +1165,47 @@
       { id: "b1-4", q: "京", a: "なべぶた", p: "亠" },
       { id: "b1-5", q: "帰", a: "はば", p: "巾" },
       { id: "b1-6", q: "記", a: "ごんべん", p: "言" },
-      { id: "b1-7", q: "汽", a: "さんずい", p: "氵" }
+      { id: "b1-7", q: "汽", a: "さんずい", p: "氵" },
+      { id: "b2-1", q: "形", a: "さんづくり", p: "彡" },
+      { id: "b2-2", q: "計", a: "ごんべん", p: "言" },
+      { id: "b2-3", q: "元", a: "ひとあし", p: "儿" },
+      { id: "b2-4", q: "原", a: "がんだれ", p: "厂" },
+      { id: "b2-5", q: "児", a: "ひとあし", p: "儿" },
+      { id: "b2-6", q: "近", a: "しんにょう（しんにゅう）", p: "辶" },
+      { id: "b2-7", q: "数", a: "ぼくにょう（のぶん）", p: "攵" },
+      { id: "b2-8", q: "強", a: "ゆみへん", p: "弓" },
+      { id: "b3-1", q: "公", a: "はち", p: "八" },
+      { id: "b3-2", q: "広", a: "まだれ", p: "广" },
+      { id: "b3-3", q: "交", a: "なべぶた", p: "亠" },
+      { id: "b3-4", q: "光", a: "ひとあし", p: "儿" },
+      { id: "b3-5", q: "古", a: "くち", p: "口" },
+      { id: "b3-6", q: "午", a: "じゅう", p: "十" },
+      { id: "b3-7", q: "後", a: "ぎょうにんべん", p: "彳" },
+      { id: "b3-8", q: "語", a: "ごんべん", p: "言" },
+      { id: "b4-1", q: "考", a: "おいかんむり", p: "耂" },
+      { id: "b4-2", q: "行", a: "ぎょうがまえ", p: "" },
+      { id: "b4-3", q: "合", a: "くち", p: "口" },
+      { id: "b4-4", q: "黄", a: "き", p: "" },
+      { id: "b4-5", q: "才", a: "て", p: "" },
+      { id: "b4-6", q: "今", a: "ひとやね", p: "人" },
+      { id: "b4-7", q: "国", a: "くにがまえ", p: "囗" },
+      { id: "b4-8", q: "谷", a: "たに", p: "" },
+      { id: "b5-1", q: "細", a: "いとへん", p: "糸" },
+      { id: "b5-2", q: "作", a: "にんべん", p: "亻" },
+      { id: "b5-3", q: "算", a: "たけかんむり", p: "竹" },
+      { id: "b5-4", q: "市", a: "はば", p: "巾" },
+      { id: "b5-5", q: "寺", a: "すん", p: "寸" },
+      { id: "b5-6", q: "紙", a: "いとへん", p: "糸" },
+      { id: "b5-7", q: "思", a: "こころ", p: "心" },
+      { id: "b5-8", q: "姉", a: "おんなへん", p: "女" },
+      { id: "b6-1", q: "時", a: "ひへん", p: "日" },
+      { id: "b6-2", q: "室", a: "うかんむり", p: "宀" },
+      { id: "b6-3", q: "社", a: "しめすへん", p: "礻" },
+      { id: "b6-4", q: "弱", a: "ゆみへん", p: "弓" },
+      { id: "b6-5", q: "書", a: "ひらび", p: "曰" },
+      { id: "b6-6", q: "春", a: "ひ", p: "日" },
+      { id: "b6-7", q: "週", a: "しんにょう（しんにゅう）", p: "辶" },
+      { id: "b6-8", q: "秋", a: "のぎへん", p: "禾" }
     ] },
     { id: "jukugo", name: "じゅくご", glyph: "熟", k: "juku", cards: [
       { id: "j1-1", m: "たけの はやし", a: "竹林", r: "ちくりん" },
@@ -2358,7 +2398,7 @@
     switch (deck.k) {
       case "fig": return '<p class="cm-ans">' + c.a + '<small>こ</small></p>' + figSVG(c, true);
       case "okuri": return '<div class="okuri">' + c.pair.map(s => '<span class="otile' + (s === c.c ? " ok" : " ng") + '">' + rb(s) + '</span>').join("") + '</div>';
-      case "bushu": return '<p class="cm-ans">' + esc(c.a) + '</p><p class="cm-part"><span>' + esc(c.q) + '</span> の ぶしゅ <span>' + esc(c.p) + '</span></p>';
+      case "bushu": return '<p class="cm-ans">' + esc(c.a) + '</p>' + (c.p ? '<p class="cm-part"><span>' + esc(c.q) + '</span> の ぶしゅ <span>' + esc(c.p) + '</span></p>' : '<p class="cm-part"><span>' + esc(c.q) + '</span> は この <ruby>字<rt>じ</rt></ruby> ぜんぶが ぶしゅ</p>');
       case "juku": return '<p class="cm-ans kj"><ruby>' + esc(c.a) + '<rt>' + esc(c.r) + '</rt></ruby></p><p class="cm-text">' + rb(c.m) + '</p>';
       case "kanyo": return '<p class="cm-ans">' + rb(c.a) + '</p><p class="cm-phrase">' + rb(c.f) + '</p><p class="cm-mean"><b>いみ</b> ' + rb(c.m) + '</p>';
       case "kisetsu": return '<p class="season s-' + esc(c.s) + '">' + esc(c.s) + '</p><p class="cm-ans">' + esc(c.a) + '</p><p class="cm-mean">' + rb(c.m) + '</p>';
