@@ -626,6 +626,84 @@
     .cm-mean { font-size: 20px; line-height: 1.6; }
     .kanji-big { font-size: clamp(90px, 22vh, 160px); }
   }
+  /* --- こくご: さがして タップ(書き抜きの練習) --- */
+  #kgList { width: min(100%, 460px); }
+  @media (orientation: landscape) and (min-width: 820px) {
+    body[data-screen="kghome"] #app { max-width: 1000px; }
+    #kgList { display: grid; grid-template-columns: 1fr 1fr; width: min(100%, 780px); }
+  }
+  .sg-card { position: relative; margin-top: 10px; padding: 10px 16px 12px; gap: 8px; align-items: stretch; text-align: left; }
+  .sg-steps { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; margin: 0; font-weight: 800; font-size: 15px; }
+  .sg-steps span { padding: 2px 10px; border: 2px solid #c9c2b4; background: #fff; color: #9a8f80; }
+  .sg-steps span.on { background: var(--gold); border-color: var(--gold-dark); color: #3d2a00; }
+  .sg-steps span.done { background: #dff5d6; border-color: var(--ok-dark); color: var(--ok-dark); }
+  .sg-steps b { color: #9a8f80; }
+  .sg-q { background: #eaf3fd; border: 3px solid var(--blue-dark); padding: 6px 10px; line-height: 1.9; }
+  .sg-tag { display: inline-block; background: var(--blue-dark); color: #fff; font-weight: 800; font-size: 14px; padding: 0 8px; margin-right: 8px; vertical-align: middle; }
+  .sg-p { background: #fff; border: 3px solid var(--dirt-dark); padding: 8px 10px; line-height: 2.05; }
+  .sgc { display: inline-block; padding: 0 4px; margin: 1px 0; border-bottom: 3px dotted rgba(0,0,0,.2); border-radius: 4px;
+         font-weight: 800; font-size: clamp(21px, 2.5vw, 28px); line-height: 1.45; cursor: pointer; }
+  .sgc ruby rt { font-size: .45em; font-weight: 800; color: var(--ink-soft); }
+  .sgc:active { background: rgba(0,0,0,.07); }
+  .sgs.glow .sgc { background: #fff3b0; }
+  .sgc.hint { box-shadow: 0 0 0 3px var(--gold); animation: sghint 1s ease-in-out infinite; }
+  @keyframes sghint { 50% { box-shadow: 0 0 0 5px rgba(246,195,67,.45); } }
+  .sgc.clue { background: var(--gold); color: #3d2a00; border-bottom-color: var(--gold-dark); box-shadow: none; animation: none; }
+  .sgc.ok { background: #8ee07a; color: #10400a; border-bottom-color: var(--ok-dark); }
+  .sgc.reveal { background: #dff5d6; box-shadow: 0 0 0 3px var(--ok-dark); }
+  .sgc.miss { animation: sgshake .3s; }
+  @keyframes sgshake { 25% { transform: translateX(-4px); background: #ffd9bd; } 75% { transform: translateX(4px); background: #ffd9bd; } }
+  @media (prefers-reduced-motion: reduce) { .sgc.hint, .sgc.miss { animation: none; } }
+  .sg-line { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+  #sgSay { margin: 0; min-height: 1.4em; text-align: center; font-weight: 800; font-size: clamp(17px, 2.2vw, 22px); color: var(--ink); }
+  #sgSay.oops { color: var(--oops-dark); }
+  #sgSay.ok { color: var(--ok-dark); }
+  #sgCtl { display: flex; justify-content: center; margin-top: 10px; min-height: 72px; padding-bottom: calc(3 * var(--gb)); }
+  @media (orientation: landscape) and (max-height: 860px) {
+    #sgplay .progress { margin-top: 4px; --blk: 30px; }
+    #sgCtl { margin-top: 8px; }
+  }
+
+  /* --- ましかくを かぞえよう --- */
+  .zk-wrap { display: flex; gap: 18px; align-items: flex-start; justify-content: center; margin-top: 10px; padding-bottom: calc(3 * var(--gb)); }
+  .zk-board { position: relative; flex: none; touch-action: none; -webkit-user-select: none; user-select: none; }
+  .zk-grid { display: grid; }
+  .zk-cell { box-sizing: border-box; background-color: #9d9d9d; background-image: var(--stone-tex, none); background-size: 100% 100%;
+             border: 2px solid #4a4a4e; box-shadow: inset 2px 2px 0 rgba(255,255,255,.3), inset -2px -2px 0 rgba(0,0,0,.3); }
+  .zk-cell.empty { background: transparent; border: 0; box-shadow: none; }
+  .zk-ov { position: absolute; left: 0; top: 0; pointer-events: none; overflow: visible; }
+  .zk-flash { animation: zkflash .5s steps(2) infinite; }
+  @keyframes zkflash { 50% { opacity: .2; } }
+  .zk-side { flex: 1 1 auto; max-width: 400px; margin-top: 0; align-items: stretch; text-align: left; gap: 8px; }
+  .zk-phase { display: flex; align-items: center; gap: 10px; margin: 0; font-weight: 800; font-size: clamp(18px, 2.2vw, 22px); }
+  .zk-how { margin: 0; font-size: 15px; font-weight: 800; color: var(--ink-soft); }
+  .zk-mini { flex: none; display: inline-grid; gap: 2px; width: 34px; height: 34px; padding: 2px; background: #4a4a4e; box-sizing: border-box; }
+  .zk-mini i { background: var(--gold); }
+  .zk-tally { display: flex; align-items: center; gap: 10px; margin: 0; padding: 4px 8px; font-weight: 800; font-size: 17px; background: #f3efe6; }
+  .zk-tally.now { background: #fff3b0; }
+  .zk-tally b { margin-left: auto; font-family: var(--font-en); font-size: 22px; }
+  .zk-say { margin: 0; min-height: 1.4em; font-weight: 800; font-size: 18px; }
+  .zk-say.oops { color: var(--oops-dark); }
+  .zk-say.ok { color: var(--ok-dark); }
+  .zk-ans { margin: 0; text-align: center; font-weight: 800; font-size: 26px; }
+  .zk-ans .ansbox { font-size: 44px; min-width: 2.4ch; }
+  .zk-pad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .zk-pad .key { min-height: 52px; font-size: 26px; }
+  .zk-pad .key.ok { font-family: var(--font-ja); font-weight: 800; font-size: 20px; background: var(--grass); color: #fff; border-color: var(--grass-dark); box-shadow: 0 6px 0 var(--grass-dark); }
+  @media (orientation: portrait) { .zk-wrap { flex-direction: column; align-items: center; } .zk-side { width: 100%; } }
+  @media (orientation: landscape) and (min-width: 820px) { body[data-screen="zkplay"] #app { max-width: 1000px; } }
+  .zk-side { min-width: 300px; }
+  .zk-tally span, .zk-tally b { white-space: nowrap; }
+  #zkHintBtn { align-self: flex-start; }
+  @media (orientation: landscape) and (max-height: 860px) {
+    .zk-side { padding: 10px 14px; gap: 6px; }
+    .zk-tally { padding: 2px 8px; font-size: 16px; }
+    .zk-tally .zk-mini, .zk-phase .zk-mini { width: 28px; height: 28px; }
+    .zk-ans .ansbox { font-size: 36px; min-height: 1.1em; }
+    .zk-pad { gap: 6px; }
+    .zk-pad .key { min-height: 44px; font-size: 24px; box-shadow: 0 4px 0 var(--stone-dark); }
+    .zk-pad .key.ok { box-shadow: 0 4px 0 var(--grass-dark); }
+  }
 </style>
 
 <div id="world" aria-hidden="true">
@@ -730,6 +808,52 @@
   <!-- CARD MEIJIN RESULT -->
   <section id="cmresult" class="screen" hidden>
     <div class="result" id="cmResultBody"></div>
+  </section>
+
+  <!-- KOKUGO HOME (こくご の中: かんじ / カードめいじん / さがして タップ) -->
+  <section id="kghome" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="kgWallet">0</span></div>
+      <button class="btn ghost small" id="kgBack">&#9664; もどる</button>
+    </div>
+    <div class="home-center">
+      <h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(28px,7vw,44px)">こくご</h2>
+      <div class="pick-list" id="kgList"></div>
+    </div>
+  </section>
+
+  <!-- SAGASHITE TAP PLAY -->
+  <section id="sgplay" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="sgWallet2">0</span></div>
+      <button class="btn ghost small" id="sgQuit">やめる</button>
+    </div>
+    <div class="progress" id="sgProgress"></div>
+    <div class="card sg-card" id="sgCard">
+      <p class="sg-steps" id="sgSteps"></p>
+      <div class="sg-q" id="sgQ"></div>
+      <div class="sg-p" id="sgP"></div>
+      <p id="sgSay"></p>
+      <svg class="sg-line" id="sgLine" aria-hidden="true"></svg>
+    </div>
+    <div id="sgCtl"></div>
+  </section>
+
+  <!-- MASHIKAKU PLAY -->
+  <section id="zkplay" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="zkWallet2">0</span></div>
+      <button class="btn ghost small" id="zkQuit">やめる</button>
+    </div>
+    <div class="zk-wrap">
+      <div class="zk-board" id="zkBoard"><div class="zk-grid" id="zkGrid"></div><svg class="zk-ov" id="zkOv" aria-hidden="true"></svg></div>
+      <div class="card zk-side" id="zkSide"></div>
+    </div>
+  </section>
+
+  <!-- KOKUGO / MASHIKAKU RESULT -->
+  <section id="kgresult" class="screen" hidden>
+    <div class="result" id="kgResultBody"></div>
   </section>
 
   <!-- KANJI HOME -->
@@ -1516,7 +1640,7 @@
   const OLD_STORE_KEY = "kotoba-craft-v1";
   const BACKUP_KEY = "coin-quest-v1-bak";
   const UNDO_KEY = "coin-quest-v1-undo";
-  const SAVE_VER = 5;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
+  const SAVE_VER = 6;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
   const PLAYERS = { taiga: "たいが", gaku: "がく" };
 
   // ---------------------------------------------------------------
@@ -1526,7 +1650,7 @@
     return { coins: 0, level: START_LEVEL, stagesCleared: 0, stagesPlayed: 0,
              today: { date: todayKey(), cleared: 0, played: 0, coins: 0, kplayed: 0 },
              left: DAILY_STAGES, mLeft: M_DAILY, mDate: todayKey(), math: {},
-             retry: [], seen: {}, wrong: {}, quests: {}, cm: { date: todayKey(), played: 0, decks: {} } };
+             retry: [], seen: {}, wrong: {}, quests: {}, cm: { date: todayKey(), played: 0, decks: {} }, kg: freshKg(), zk: freshZk() };
   }
   // 世界の色(ひる/ゆうがた/よる)。保存データの初期値に使うので、ここで先に決めておく
   const THEMES = {
@@ -1613,6 +1737,7 @@
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].quests) state.players[k].quests = {};   // 古い保存データを拾う
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].math) state.players[k].math = {};
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].cm) state.players[k].cm = { date: todayKey(), played: 0, decks: {} };
+    for (const k of Object.keys(PLAYERS)) { if (!state.players[k].kg) state.players[k].kg = freshKg(); if (!state.players[k].zk) state.players[k].zk = freshZk(); }
     if (!state.mOn) state.mOn = {};
     if (!state.theme || !THEMES[state.theme]) state.theme = DEFAULT_THEME;
     state.ver = SAVE_VER;
@@ -1799,7 +1924,7 @@
   // ---------------------------------------------------------------
   // SCREENS
   // ---------------------------------------------------------------
-  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult", "mhome", "mplay", "mresult", "cmhome", "cmplay", "cmresult"].forEach(s => { $(s).hidden = s !== id; }); document.body.setAttribute("data-screen", id); }
+  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult", "mhome", "mplay", "mresult", "cmhome", "cmplay", "cmresult", "kghome", "sgplay", "zkplay", "kgresult"].forEach(s => { $(s).hidden = s !== id; }); document.body.setAttribute("data-screen", id); }
 
   function renderYen(total) {
     const denoms = [500, 100, 50, 10, 5, 1];
@@ -2220,21 +2345,16 @@
     renderSkyBtn();
     $("purse2").innerHTML = renderInv(p.coins);
     mRollDay();
-    const q = quest(), n = learnedCount(), dl = daysLeft();
-    const sub = "おぼえた " + n + " / " + q.items.length + (dl !== null && dl >= 0 ? "・あと " + dl + " にち" : "");
     const esub = "コインが もらえる のこり " + p.left + " かい";
     const item = (id, icon, ttl, sub) =>
       '<button class="pick" id="' + id + '"><span class="ico">' + icon + '</span><span>' +
       '<span class="ttl">' + esc(ttl) + '</span><span class="sub">' + esc(sub) + '</span></span></button>';
     $("pickList").innerHTML =
       item("goEn", ICONS.book, "えいご", esub) +
-      (cmActive()
-        ? item("goCm", ICONS.cards, "カードめいじん", (cmDaysLeft() > 0 ? "テストまで あと " + cmDaysLeft() + " にち・" : "テストは きょう!・") + "コイン のこり " + cmLeft() + " かい")
-        : item("goKa", ICONS.scroll, q.name, sub)) +
+      item("goKg", ICONS.scroll, "こくご", (cmActive() ? "カードめいじん・" : "") + "かんじ・さがして タップ") +
       item("goMa", ICONS.pick, "けいさん", "コインが もらえる のこり " + p.mLeft + " かい");
     $("goEn").onclick = renderHome;
-    if ($("goKa")) $("goKa").onclick = renderKHome;
-    if ($("goCm")) $("goCm").onclick = renderCmHome;
+    $("goKg").onclick = renderKgHome;
     $("goMa").onclick = renderMHome;
     show("pick");
   }
@@ -2425,7 +2545,10 @@
         '<span class="ttl">' + esc(ev.name) + '</span>' +
         '<span class="sub">' + esc(ev.sub) + ' ・ <span class="ev-time">' + esc(best) + '</span></span></span></button>';
     }).join("");
-    Array.from($("mList").querySelectorAll(".pick")).forEach(b => {
+    $("mList").insertAdjacentHTML("beforeend", '<button class="pick" id="goZk"><span class="ico">' + ICONS.squares + '</span><span>' +
+      '<span class="ttl">ましかくを かぞえよう</span><span class="sub">コインが もらえる のこり ' + zkLeft() + ' かい</span></span></button>');
+    $("goZk").onclick = startZk;
+    Array.from($("mList").querySelectorAll(".pick[data-ev]")).forEach(b => {
       b.onclick = () => { const ev = M_EVENTS.find(e => e.id === b.getAttribute("data-ev")); if (ev) startMStage(ev); };
     });
     show("mhome");
@@ -2673,6 +2796,456 @@
   }
 
   // ---------------------------------------------------------------
+  // こくご: かんじ・カードめいじん・さがして タップ を まとめる入口(2026-10-03)。
+  // さがして タップ = 書き抜きの練習。「答えは文の中にある」を、探す手順として体で覚える。
+  //   段階0: ① 問いの手がかりの言葉 → ② 本文で同じ言葉 → ③ その近くの答え、の3タップ
+  //   段階1〜3: 答えだけタップ(1: 同じ文 / 2: 次の文まで / 3: 離れた所・名前を答える)
+  // 段階は本人のプレイで自然に上がる(親メニューで変えることもできる)。
+  // 問題は scratchpad ではなく kokugo/kokugo_data.py で書いて自動チェックしてから貼る。
+  // ---------------------------------------------------------------
+  const SG_TEXTS = [{"id":"creeper","s":[["クリーパーは","みどりいろの","モブです。"],["プレイヤーに","ちかづくと、","ばくはつします。"],["ねこが","にがてです。"],["見《み》つけると、","にげて","いきます。"]],"qs":[{"id":"creeper-1","q":["クリーパーは","なにいろですか。"],"c":[[0,0,0]],"a":[0,1],"st":1},{"id":"creeper-2","q":["ちかづくと","どう","なりますか。"],"c":[[0,1,1]],"a":[1,2],"st":1},{"id":"creeper-3","q":["なにが","にがてですか。"],"c":[[1,2,1]],"a":[2,0],"st":1}]},{"id":"zombie","s":[["ゾンビは","よるに","なると","でて","くる","モブです。"],["あさに","なって","日《ひ》に","あたると、","もえて","しまいます。"],["たおすと、","くさった","にくを","おとします。"]],"qs":[{"id":"zombie-1","q":["ゾンビは","いつ","でて","きますか。"],"c":[[0,0,0],[2,0,3]],"a":[0,1],"st":1},{"id":"zombie-2","q":["日《ひ》に","あたると","どう","なりますか。"],"c":[[0,1,2],[1,1,3]],"a":[1,4],"st":1},{"id":"zombie-3","q":["たおすと、","どんな","にくを","おとしますか。"],"c":[[0,2,0],[2,2,2],[3,2,3]],"a":[2,1],"st":1}]},{"id":"skeleton","s":[["スケルトンは","ほねで","できた","モブです。"],["ゆみを","つかって、","やを","うって","きます。"],["日《ひ》に","あたると","もえて","しまいます。"]],"qs":[{"id":"skeleton-1","q":["スケルトンは","なにで","できて","いますか。"],"c":[[0,0,0]],"a":[0,1],"st":1},{"id":"skeleton-2","q":["なにを","つかって、","やを","うちますか。"],"c":[[1,1,1],[2,1,2]],"a":[1,0],"st":1}]},{"id":"enderman","s":[["エンダーマンは","せが","たかい、","くろい","モブです。"],["目《め》を","見《み》ると","おこって、","おそって","きます。"],["水《みず》が","にがてです。"],["雨《あめ》の","日《ひ》は","ワープして","にげます。"]],"qs":[{"id":"enderman-1","q":["エンダーマンの","目《め》を","見《み》ると","どう","なりますか。"],"c":[[1,1,0],[2,1,1]],"a":[1,2],"st":1},{"id":"enderman-2","q":["なにが","にがてですか。"],"c":[[1,2,1]],"a":[2,0],"st":1},{"id":"enderman-3","q":["雨《あめ》の","日《ひ》は","どう","しますか。"],"c":[[0,3,0],[1,3,1]],"a":[3,2],"st":1}]},{"id":"chicken","s":[["ニワトリは","ときどき","たまごを","うみます。"],["たおすと、","はねを","おとします。"],["これは、","やを","つくる","ときに","つかいます。"]],"qs":[{"id":"chicken-1","q":["ニワトリは","なにを","うみますか。"],"c":[[0,0,0],[2,0,3]],"a":[0,2],"st":1},{"id":"chicken-2","q":["やを","つくる","ときに","つかう","ものは","なんですか。"],"c":[[0,2,1],[1,2,2],[2,2,3]],"a":[1,1],"st":2}]},{"id":"sheep","s":[["ヒツジは","草《くさ》を","たべる","おとなしい","モブです。"],["ハサミを","つかうと、","ようもうが","とれます。"],["これで","ベッドを","つくれます。"]],"qs":[{"id":"sheep-1","q":["ヒツジは","なにを","たべますか。"],"c":[[0,0,0]],"a":[0,1],"st":1},{"id":"sheep-2","q":["ハサミを","つかうと","なにが","とれますか。"],"c":[[0,1,0],[1,1,1],[3,1,3]],"a":[1,2],"st":1},{"id":"sheep-3","q":["ベッドを","つくる","ときに","つかう","ものは","なんですか。"],"c":[[0,2,1]],"a":[1,2],"st":2}]},{"id":"cat","s":[["のらねこは、","さかなを","あげると","なかよく","なれます。"],["ねこが","いると、","クリーパーは","ちかよって","きません。"],["あさに","なると、","プレゼントを","もって","くる","ことも","あります。"]],"qs":[{"id":"cat-1","q":["なにを","あげると","なかよく","なれますか。"],"c":[[1,0,2],[2,0,3],[3,0,4]],"a":[0,1],"st":1},{"id":"cat-2","q":["ねこが","いると","ちかよって","こない","モブは","なんですか。"],"c":[[0,1,0],[1,1,1],[2,1,3]],"a":[1,2],"st":1},{"id":"cat-3","q":["あさに","なると、","なにを","もって","きますか。"],"c":[[0,2,0],[1,2,1],[3,2,3]],"a":[2,2],"st":1}]},{"id":"cow","s":[["ウシは、","バケツを","つかうと","ミルクが","とれます。"],["これを","のむと、","どくが","きえます。"],["たおすと、","かわを","おとします。"]],"qs":[{"id":"cow-1","q":["バケツを","つかうと","なにが","とれますか。"],"c":[[0,0,1],[1,0,2],[3,0,4]],"a":[0,3],"st":1},{"id":"cow-2","q":["のむと","どくが","きえる","ものは","なんですか。"],"c":[[0,1,1],[1,1,2]],"a":[0,3],"st":2},{"id":"cow-3","q":["たおすと","なにを","おとしますか。"],"c":[[0,2,0],[2,2,2]],"a":[2,1],"st":1}]},{"id":"wolf","s":[["オオカミに","ほねを","あげると、","なかまに","なります。"],["なかまの","しるしに、","あかい","くびわが","つきます。"],["いっしょに","たたかって","くれる、","たのもしい","あいぼうです。"]],"qs":[{"id":"wolf-1","q":["オオカミに","なにを","あげると","なかまに","なりますか。"],"c":[[0,0,0],[2,0,2],[3,0,3],[4,0,4]],"a":[0,1],"st":1},{"id":"wolf-2","q":["なにいろの","くびわが","つきますか。"],"c":[[1,1,3],[2,1,4]],"a":[1,2],"st":1}]},{"id":"obsidian","s":[["こくようせきは、","とても","かたい","ブロックです。"],["ダイヤモンドの","つるはしなど、","つよい","つるはしで","しか","ほれません。"],["水《みず》が","ようがんに","かかると","できます。"]],"qs":[{"id":"obsidian-1","q":["こくようせきは","どんな","ブロックですか。"],"c":[[0,0,0],[2,0,3]],"a":[0,2],"st":1},{"id":"obsidian-2","q":["水《みず》が","ようがんに","かかると","なにが","できますか。"],"c":[[0,2,0],[1,2,1],[2,2,2],[4,2,3]],"a":[0,0],"st":3}]},{"id":"furnace","s":[["かまどを","つかうと、","てつの","こうせきを","とかせます。"],["ねんりょうには、","せきたんを","入《い》れます。"],["しばらく","まつと、","てつインゴットが","できあがります。"]],"qs":[{"id":"furnace-1","q":["ねんりょうには","なにを","入《い》れますか。"],"c":[[0,1,0],[2,1,2]],"a":[1,1],"st":1},{"id":"furnace-2","q":["しばらく","まつと","なにが","できあがりますか。"],"c":[[0,2,0],[1,2,1],[3,2,3]],"a":[2,2],"st":1}]},{"id":"bed","s":[["よるに","ベッドで","ねると、","すぐに","あさに","なります。"],["やられた","ときは、","ベッドの","ところに","もどれます。"],["ベッドは","ようもうと","いたで","つくります。"]],"qs":[{"id":"bed-1","q":["ベッドは","なにと","いたで","つくりますか。"],"c":[[0,2,0],[2,2,2],[3,2,3]],"a":[2,1],"st":1}]},{"id":"villager","s":[["村《むら》に","すむ","むらびとは、","エメラルドで","こうかんを","して","くれます。"],["しごとに","よって、","こうかんできる","ものが","ちがいます。"],["よるに","なると、","ベッドで","ねむります。"]],"qs":[{"id":"villager-1","q":["むらびとは","なにで","こうかんを","して","くれますか。"],"c":[[0,0,2],[2,0,4],[3,0,5],[4,0,6]],"a":[0,3],"st":1},{"id":"villager-2","q":["よるに","なると、","どこで","ねむりますか。"],"c":[[0,2,0],[1,2,1],[3,2,3]],"a":[2,2],"st":1}]},{"id":"turtle","s":[["ウミガメは、","すなはまに","たまごを","うみます。"],["生《う》まれた","子《こ》ガメは、","うみへ","むかいます。"],["大《おお》きく","なると、","ふるさとの","はまに","もどって","きます。"]],"qs":[{"id":"turtle-1","q":["ウミガメは","どこに","たまごを","うみますか。"],"c":[[0,0,0],[2,0,2],[3,0,3]],"a":[0,1],"st":1},{"id":"turtle-2","q":["生《う》まれた","子《こ》ガメは","どこへ","むかいますか。"],"c":[[0,1,0],[1,1,1],[3,1,3]],"a":[1,2],"st":1}]},{"id":"slime","s":[["スライムは、","ぬまちなどに","でて","くる","みどりいろの","モブです。"],["こうげきすると、","小《ちい》さな","スライムに","わかれます。"],["たおすと、","スライムボールを","おとします。"]],"qs":[{"id":"slime-1","q":["こうげきすると","どう","なりますか。"],"c":[[0,1,0]],"a":[1,3],"st":1},{"id":"slime-2","q":["たおすと","なにを","おとしますか。"],"c":[[0,2,0],[2,2,2]],"a":[2,1],"st":1}]},{"id":"squid","s":[["イカは","水《みず》の","中《なか》に","すむ","モブです。"],["たおすと、","すみを","おとします。"],["これで、","くろい","せんりょうが","つくれます。"]],"qs":[{"id":"squid-1","q":["くろい","せんりょうを","つくれる","ものは","なんですか。"],"c":[[0,2,1]],"a":[1,1],"st":2}]},{"id":"tnt","s":[["TNTは、","ばくはつする","ブロックです。"],["ひうちいしと","うちがねで","ひを","つけます。"],["レッドストーンの","力《ちから》でも","ばくはつさせられます。"]],"qs":[{"id":"tnt-1","q":["TNTは","どんな","ブロックですか。"],"c":[[0,0,0],[2,0,2]],"a":[0,1],"st":1},{"id":"tnt-2","q":["なにの","力《ちから》でも","ばくはつさせられますか。"],"c":[[1,2,1],[2,2,2]],"a":[2,0],"st":1}]},{"id":"diamond","s":[["ダイヤモンドは、","ちかの","ふかい","ところで","見《み》つかります。"],["てつの","つるはしで","ないと、","ほる","ことが","できません。"],["ダイヤモンドの","どうぐは、","とても","じょうぶです。"]],"qs":[{"id":"diamond-1","q":["ちかの","どんな","ところで","見《み》つかりますか。"],"c":[[0,0,1],[2,0,3],[3,0,4]],"a":[0,2],"st":1},{"id":"diamond-2","q":["なにの","つるはしで","ないと","ほれませんか。"],"c":[[1,1,1],[2,1,2]],"a":[1,0],"st":1}]},{"id":"bee","s":[["ハチの","目《め》は、","小《ちい》さな","目《め》が","たくさん","あつまって","できて","います。"],["これを","ふくがんと","いいます。"]],"qs":[{"id":"bee-1","q":["小《ちい》さな","目《め》が","あつまって","できた","目《め》を","なんと","いいますか。"],"c":[[0,0,2],[1,0,3],[2,0,5],[6,1,2]],"a":[1,1],"st":3}]},{"id":"beetle","s":[["カブトムシの","オスには、","りっぱな","つのが","あります。"],["よるに","なると、","木《き》の","しるを","すいに","あつまります。"],["ひるまは、","おちばの","下《した》で","じっと","して","います。"]],"qs":[{"id":"beetle-1","q":["カブトムシの","オスには","なにが","ありますか。"],"c":[[0,0,0],[1,0,1],[3,0,4]],"a":[0,3],"st":1},{"id":"beetle-2","q":["よるに","なると","なんの","しるを","すいに","いきますか。"],"c":[[0,1,0],[1,1,1],[3,1,3],[4,1,4]],"a":[1,2],"st":1}]},{"id":"cicada","s":[["セミの","なかまで、","なくのは","オスだけです。"],["メスは","なきません。"],["ようちゅうは、","土《つち》の","中《なか》で","なん年《ねん》も","くらします。"]],"qs":[{"id":"cicada-1","q":["なくのは","オスと","メスの","どちらですか。"],"c":[[0,0,2]],"a":[0,3],"st":1},{"id":"cicada-2","q":["ようちゅうは","どこの","中《なか》で","くらしますか。"],"c":[[0,2,0],[2,2,2],[3,2,4]],"a":[2,1],"st":1}]},{"id":"nukegara","s":[["セミの","ようちゅうは、","なつの","よるに","土《つち》から","出《で》て","きます。"],["木《き》に","のぼると、","せなかが","われて","おとなの","セミが","あらわれます。"],["あとに","のこった","からを","ぬけがらと","いいます。"]],"qs":[{"id":"nukegara-1","q":["あとに","のこった","からを","なんと","いいますか。"],"c":[[0,2,0],[1,2,1],[2,2,2],[4,2,4]],"a":[2,3],"st":3}]},{"id":"ladybug","s":[["テントウムシは、","てきに","おそわれると、","あしから","きいろい","しるを","出《だ》します。"],["この","しるは、","とても","にがいのです。"],["こう","して、","じぶんの","みを","まもって","います。"]],"qs":[{"id":"ladybug-1","q":["てきに","おそわれると、","どこから","しるを","出《だ》しますか。"],"c":[[0,0,1],[1,0,2],[3,0,5],[4,0,6]],"a":[0,3],"st":1},{"id":"ladybug-2","q":["この","しるは","なにいろですか。"],"c":[[0,1,0],[1,1,1]],"a":[0,4],"st":2}]},{"id":"frog","s":[["カエルの","子《こ》どもは、","水《みず》の","中《なか》で","くらします。"],["まだ","あしが","なくて、","しっぽで","およぎます。"],["この","ころの","すがたを、","オタマジャクシと","いいます。"]],"qs":[{"id":"frog-1","q":["まだ","あしが","なくて、","なにで","およぎますか。"],"c":[[0,1,0],[1,1,1],[2,1,2],[4,1,4]],"a":[1,3],"st":1},{"id":"frog-2","q":["カエルの","子《こ》どもの","ころの","すがたを","なんと","いいますか。"],"c":[[0,0,0],[2,2,1],[3,2,2],[5,2,4]],"a":[2,3],"st":3}]}];
+  const KG_DAILY = 3;            // さがして タップ: 1日に コインが もらえる回数(くりこし なし)
+  const KGCOINS = 10;            // 1回(5問) おわったら
+  const SG_ROUND = 5;
+  const SG_UP0 = 10;             // ①② を まちがえずに できた問題が これだけ続いたら(2回ぶん)、答えだけの段階へ
+  const SG_UPN = 2;              // 5問とも1回で正解した回が これだけ続いたら、つぎの段階へ
+  const SG_QS = [];
+  SG_TEXTS.forEach(t => t.qs.forEach(q => SG_QS.push(Object.assign({ t: t }, q))));
+
+  function freshKg() { return { date: todayKey(), played: 0, rounds: 0, sg: { lvl: 0, streak: 0, good: 0, hist: {} } }; }
+  function kgProg() {
+    const p = P();
+    if (!p.kg) p.kg = freshKg();
+    const g = p.kg;
+    if (!g.sg) g.sg = freshKg().sg;
+    if (g.date !== todayKey()) { g.date = todayKey(); g.played = 0; }
+    return g;
+  }
+  function kgLeft() { return Math.max(0, KG_DAILY - (kgProg().played || 0)); }
+
+  function renderKgHome() {
+    rollDay(); sgTok++;
+    const p = P(), q = quest(), n = learnedCount(), dl = daysLeft();
+    $("kgWallet").textContent = p.coins.toLocaleString();
+    const rows = [];
+    if (cmActive()) rows.push(["kgCm", ICONS.cards, "カードめいじん",
+      (cmDaysLeft() > 0 ? "テストまで あと " + cmDaysLeft() + " にち" : "テストは きょう!") + "・コイン のこり " + cmLeft() + " かい", renderCmHome]);
+    rows.push(["kgKa", ICONS.scroll, q.name,
+      "おぼえた " + n + " / " + q.items.length + (dl === null ? "" : dl > 0 ? "・テストまで あと " + dl + " にち" : dl === 0 ? "・テストは きょう!" : ""), renderKHome]);
+    rows.push(["kgSg", ICONS.lens, "さがして タップ", "コインが もらえる のこり " + kgLeft() + " かい", startSg]);
+    $("kgList").innerHTML = rows.map(r =>
+      '<button class="pick" id="' + r[0] + '"><span class="ico">' + r[1] + '</span><span>' +
+      '<span class="ttl">' + esc(r[2]) + '</span><span class="sub">' + esc(r[3]) + '</span></span></button>').join("");
+    rows.forEach(r => { $(r[0]).onclick = r[4]; });
+    show("kghome");
+  }
+
+  // ---- さがして タップ
+  let sgQs = [], sgI = 0, sgSt = null, sgPaid = false, sgTok = 0, sgRoundOk = 0, sgLine = null;
+  function sgPool(lvl) { const max = lvl <= 1 ? 1 : lvl; return SG_QS.filter(q => q.st <= max); }
+  function sgBuild() {
+    const g = kgProg(), h = g.sg.hist;
+    // まだ出ていない問題 → まえに まちがえた問題 → 正解した回数が少ない問題 の じゅん
+    const score = q => { const r = h[q.id]; return !r ? 0 : !r.last ? 1 : 2 + r.ok; };
+    const pool = shuffle(sgPool(g.sg.lvl).slice()).sort((a, b) => score(a) - score(b));
+    const out = [], used = {};
+    for (const q of pool) { if (out.length >= SG_ROUND) break; if (!used[q.t.id]) { used[q.t.id] = true; out.push(q); } }
+    for (const q of pool) { if (out.length >= SG_ROUND) break; if (out.indexOf(q) < 0) out.push(q); }
+    return out;
+  }
+  function startSg() {
+    unlockAudio(); rollDay();
+    sgPaid = kgLeft() > 0;           // 回数を へらすのは 5問 おわったとき
+    sgQs = sgBuild(); sgI = 0; sgRoundOk = 0;
+    show("sgplay"); renderSg();
+  }
+  function sgChunk(text, w, si, ci) {
+    return '<span class="sgc" data-w="' + w + '" data-s="' + si + '" data-c="' + ci + '">' + rb(text) + '</span>';
+  }
+  function sgEl(w, si, ci) { return document.querySelector('.sgc[data-w="' + w + '"][data-s="' + si + '"][data-c="' + ci + '"]'); }
+  function sgSay(msg, cls) { const e = $("sgSay"); e.textContent = msg; e.className = cls || ""; }
+  function sgSteps() {
+    const e = $("sgSteps");
+    if (!sgSt.three) { e.hidden = true; return; }
+    e.hidden = false;
+    const names = ["① もんだいの ことば", "② おなじ ことば", "③ こたえ"];
+    e.innerHTML = names.map((t, i) => '<span class="' + (i + 1 < sgSt.step ? "done" : i + 1 === sgSt.step ? "on" : "") + '">' + t + '</span>').join('<b>→</b>');
+  }
+  function sgBest(q) {              // 答えに いちばん近い 手がかり
+    return q.c.slice().sort((a, b) => Math.abs(a[1] - q.a[0]) - Math.abs(b[1] - q.a[0]))[0];
+  }
+  function renderSg() {
+    const q = sgQs[sgI], lvl = kgProg().sg.lvl;
+    sgTok++; sgLine = null;
+    sgSt = { step: lvl === 0 ? 1 : 3, three: lvl === 0, m1: 0, m2: 0, miss: 0, clue: null, done: false };
+    let h = "";
+    for (let i = 0; i < sgQs.length; i++) h += '<span class="pblock' + (i < sgI ? " done" : i === sgI ? " now" : "") + '"></span>';
+    $("sgProgress").innerHTML = h;
+    $("sgWallet2").textContent = P().coins.toLocaleString();
+    $("sgQ").innerHTML = '<span class="sg-tag">もんだい</span>' + q.q.map((c, i) => sgChunk(c, "q", 0, i)).join(" ");
+    $("sgP").innerHTML = q.t.s.map((s, si) => '<span class="sgs" data-s="' + si + '">' +
+      s.map((c, ci) => sgChunk(c, "p", si, ci)).join(" ") + '</span>').join(" ");
+    $("sgLine").innerHTML = "";
+    $("sgCtl").innerHTML = "";
+    sgSteps();
+    sgSay(sgSt.three ? "ぶんしょうにも でて くる ことばを、もんだいの なかから えらぼう" : "こたえを ぶんしょうの なかから さがして タップ");
+  }
+  function sgDrawLine() {
+    const svg = $("sgLine");
+    if (!sgLine) { svg.innerHTML = ""; return; }
+    const card = $("sgCard").getBoundingClientRect(), a = sgLine[0].getBoundingClientRect(), b = sgLine[1].getBoundingClientRect();
+    const x1 = a.left + a.width / 2 - card.left, y1 = a.bottom - card.top, x2 = b.left + b.width / 2 - card.left, y2 = b.top - card.top;
+    svg.setAttribute("width", card.width); svg.setAttribute("height", card.height);
+    svg.innerHTML = '<line x1="' + x1 + '" y1="' + y1 + '" x2="' + x2 + '" y2="' + y2 + '" stroke="#c98a12" stroke-width="4" stroke-dasharray="9 6" stroke-linecap="round"/>' +
+      '<circle cx="' + x1 + '" cy="' + y1 + '" r="6" fill="#c98a12"/><circle cx="' + x2 + '" cy="' + y2 + '" r="6" fill="#c98a12"/>';
+  }
+  function sgMissFx(el) { el.classList.remove("miss"); void el.offsetWidth; el.classList.add("miss"); sfxOops(); }
+  function sgTap(el) {
+    if (!sgSt || sgSt.done) return;
+    const q = sgQs[sgI], w = el.getAttribute("data-w"), si = +el.getAttribute("data-s"), ci = +el.getAttribute("data-c");
+    if (sgSt.step === 1) {                                        // ① 問いの中の 手がかり
+      if (w !== "q") { sgSay("さきに、もんだいの なかの ことばを えらぼう", "oops"); return; }
+      const c = q.c.find(x => x[0] === ci);
+      if (c) {
+        sgSt.clue = c; el.classList.add("clue"); beep(660, .08, "square", .05);
+        sgSt.step = 2; sgSteps(); sgSay("おなじ ことばを、ぶんしょうの なかで さがそう", "ok");
+      } else {
+        sgSt.m1++; sgMissFx(el);
+        sgSay("もんだいの なかで、ぶんしょうにも でてきそうな ことばは どれ？", "oops");
+        if (sgSt.m1 >= 2) q.c.forEach(x => sgEl("q", 0, x[0]).classList.add("hint"));
+      }
+      return;
+    }
+    if (sgSt.step === 2) {                                        // ② 本文の中の 同じ言葉
+      if (w === "q") {                                            // 手がかりを えらびなおす
+        const c2 = q.c.find(x => x[0] === ci);
+        if (c2 && c2 !== sgSt.clue) { sgEl("q", 0, sgSt.clue[0]).classList.remove("clue"); el.classList.add("clue"); sgSt.clue = c2; }
+        return;
+      }
+      const c = q.c.find(x => x[1] === si && x[2] === ci);
+      if (c) {
+        if (c !== sgSt.clue) { sgEl("q", 0, sgSt.clue[0]).classList.remove("clue"); sgEl("q", 0, c[0]).classList.add("clue"); sgSt.clue = c; }
+        el.classList.add("clue"); beep(880, .08, "square", .05);
+        sgLine = [sgEl("q", 0, c[0]), el]; sgDrawLine();
+        sgSt.step = 3; sgSteps(); sgSay("みつけた！ その ちかくに こたえが あるよ", "ok");
+      } else {
+        sgSt.m2++; sgMissFx(el);
+        sgSay("「" + plain(q.q[sgSt.clue[0]]).replace(/[、。]/g, "") + "」と おなじ ことばを さがそう", "oops");
+        if (sgSt.m2 >= 2) sgEl("p", sgSt.clue[1], sgSt.clue[2]).classList.add("hint");
+      }
+      return;
+    }
+    if (w !== "p") return;                                        // ③ 答え
+    if (si === q.a[0] && ci === q.a[1]) { sgRight(el); return; }
+    if (q.c.some(x => x[1] === si && x[2] === ci)) { sgSay("それは てがかりの ことば。こたえは その ちかくだよ"); return; }
+    sgSt.miss++; sgMissFx(el);
+    const best = sgBest(q);
+    // ヒント: 手がかりが光る → 答えのある文が光る → 答えを見せる(答えの文節そのものは光らせない)
+    const glowClue = () => {
+      sgEl("q", 0, best[0]).classList.add("clue"); const pe = sgEl("p", best[1], best[2]); pe.classList.add("clue");
+      sgLine = [sgEl("q", 0, best[0]), pe]; sgDrawLine();
+    };
+    const steps = sgSt.three ? ["sent", "show"] : ["clue", "sent", "show"];
+    const what = steps[Math.min(sgSt.miss, steps.length) - 1];
+    if (what === "clue") { glowClue(); sgSay("てがかりの ことばが ひかったよ。その ちかくを さがそう", "oops"); }
+    else if (what === "sent") { document.querySelector('.sgs[data-s="' + q.a[0] + '"]').classList.add("glow"); sgSay("きいろい ぶんの なかに こたえが あるよ", "oops"); }
+    else sgShow();
+  }
+  function sgRecord(ok) {
+    const h = kgProg().sg.hist, id = sgQs[sgI].id;
+    const r = h[id] || (h[id] = { n: 0, ok: 0, last: false });
+    r.n++; if (ok) r.ok++; r.last = ok;
+  }
+  function sgRight(el) {
+    sgSt.done = true;
+    el.classList.add("ok"); sfxRight();
+    const first = sgSt.miss === 0, s = kgProg().sg;
+    if (sgSt.three) { if (sgSt.m1 === 0 && sgSt.m2 === 0) s.streak++; else s.streak = 0; }
+    if (first) sgRoundOk++;
+    sgRecord(first); save();
+    sgSay(pickOk(), "ok");
+    sgNextBtn();
+    const myI = sgI, myTok = sgTok;
+    setTimeout(() => { if (sgTok === myTok && sgI === myI && $("sgNextBtn")) sgNext(); }, 1600);
+  }
+  function sgShow() {
+    sgSt.done = true;
+    const q = sgQs[sgI];
+    sgEl("p", q.a[0], q.a[1]).classList.add("reveal");
+    if (sgSt.three) kgProg().sg.streak = 0;
+    sgRecord(false); save();
+    sgSay("こたえは ここ！ つぎは みつけられるよ", "oops");
+    sgNextBtn();
+  }
+  function sgNextBtn() {
+    $("sgCtl").innerHTML = '<button class="btn next" id="sgNextBtn">' + (sgI + 1 < sgQs.length ? "つぎへ &#9654;" : "けっか &#9654;") + '</button>';
+    $("sgNextBtn").onclick = sgNext;
+  }
+  function sgNext() {
+    if (!sgQs.length || sgI >= sgQs.length) return;
+    sgI++;
+    if (sgI < sgQs.length) renderSg(); else finishSg();
+  }
+  function finishSg() {
+    sgTok++;
+    const p = P(), g = kgProg(), s = g.sg;
+    let up = "";
+    if (s.lvl === 0 && s.streak >= SG_UP0) {
+      s.lvl = 1; s.streak = 0; s.good = 0;
+      up = "てじゅんを おぼえたね！ つぎからは こたえだけ タップ しよう";
+    } else if (s.lvl >= 1 && s.lvl < 3) {
+      if (sgRoundOk === sgQs.length) s.good++; else if (sgQs.length - sgRoundOk >= 2) s.good = 0;
+      if (s.good >= SG_UPN) {
+        s.lvl++; s.good = 0;
+        up = s.lvl === 2 ? "こんどは、こたえが つぎの ぶんに ある もんだいも でるよ" : "こんどは、はなれた ところや、なまえを こたえる もんだいも でるよ";
+      }
+    }
+    g.rounds = (g.rounds || 0) + 1;
+    let coins = 0;
+    if (sgPaid) { coins = KGCOINS; p.coins += coins; g.played = (g.played || 0) + 1; }
+    save();
+    kgResult(up ? "レベル アップ！" : sgRoundOk === sgQs.length ? "ぜんぶ みつけた！" : "おつかれさま！", up, coins, startSg, renderKgHome, !!up);
+  }
+  function kgResult(title, line, coins, again, home, party) {
+    show("kgresult");
+    let html = '<h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(30px,8vw,52px)">' + esc(title) + '</h2>';
+    if (line) html += '<p class="hint" style="color:#fff;font-size:20px;font-weight:800;text-shadow:2px 2px 0 #000;max-width:30em">' + esc(line) + '</p>';
+    html += coins ? '<div class="gain"><span class="coin">&#165;</span>+' + coins + '</div>'
+      : '<p class="hint" style="color:#fff;font-size:16px;text-shadow:2px 2px 0 #000">きょうの コインは ここまで。あそんでくれて ありがとう!</p>';
+    html += '<div class="wallet"><span class="coin sm">&#165;</span><span>' + P().coins.toLocaleString() + '</span></div>';
+    html += '<div style="display:flex;gap:12px;flex-wrap:wrap;justify-content:center">' +
+      '<button class="btn green" id="kgAgain">つづける</button><button class="btn ghost" id="kgHomeBtn">おわる</button></div>';
+    $("kgResultBody").innerHTML = html;
+    $("kgAgain").onclick = again; $("kgHomeBtn").onclick = home;
+    if (coins) { sfxCoins(); if (party) coinRain(); }
+  }
+
+  // ---------------------------------------------------------------
+  // ましかくを かぞえよう(けいさんの種目のひとつ, 2026-10-03)。
+  // 「大きさ別に分けて数える」型を身につける。1こぶん → 4こぶん → 9こぶん … の順に
+  // なぞって囲む(かどを2回タップでもよい)。見つけた ましかくは光って残る。
+  // 最後に「ぜんぶで いくつ?」を数字パッドで答える。答えはプログラムで数える。
+  // ---------------------------------------------------------------
+  const ZK_FIGS = [                // かんたんな じゅん。g は X=ブロック .=なし
+    { id: "2x2", g: ["XX", "XX"] },
+    { id: "3x2", g: ["XXX", "XXX"] },
+    { id: "2x3", g: ["XX", "XX", "XX"] },
+    { id: "step3", g: ["X..", "XX.", "XXX"] },
+    { id: "3x3", g: ["XXX", "XXX", "XXX"] },
+    { id: "4x2", g: ["XXXX", "XXXX"] },
+    { id: "z3", g: ["XX.", "XXX", ".XX"] },
+    { id: "l4", g: ["XX..", "XX..", "XXXX"] },
+    { id: "b3", g: ["XX.", "XXX", "XXX"] },
+    { id: "step4", g: ["XXXX", "XXX.", "XX..", "X..."] },
+    { id: "t4", g: [".XX.", "XXXX", "XXXX"] },
+    { id: "4x3", g: ["XXXX", "XXXX", "XXXX"] },
+    { id: "s4", g: [".XXX", "XXXX", "XXXX"] },
+    { id: "4x4", g: ["XXXX", "XXXX", "XXXX", "XXXX"] }
+  ];
+  const ZK_DAILY = 3, ZKCOINS = 10;
+  const ZK_COLORS = ["#f6c343", "#4cbb3a", "#3f8fe0", "#e2559b", "#f28b3b", "#8a5cd6", "#24b5a8"];
+  function freshZk() { return { date: todayKey(), played: 0, lvl: 0, hist: {} }; }
+  function zkProg() {
+    const p = P();
+    if (!p.zk) p.zk = freshZk();
+    const z = p.zk;
+    if (!z.hist) z.hist = {};
+    if (z.date !== todayKey()) { z.date = todayKey(); z.played = 0; }
+    return z;
+  }
+  function zkLeft() { return Math.max(0, ZK_DAILY - (zkProg().played || 0)); }
+  function zkSquares(g) {          // [r, c, k] すべての k×k の ましかく
+    const H = g.length, W = g[0].length, out = [];
+    for (let k = 1; k <= Math.min(H, W); k++)
+      for (let r = 0; r + k <= H; r++)
+        for (let c = 0; c + k <= W; c++) {
+          let ok = true;
+          for (let i = 0; i < k && ok; i++) for (let j = 0; j < k; j++) if (g[r + i][c + j] !== "X") { ok = false; break; }
+          if (ok) out.push([r, c, k]);
+        }
+    return out;
+  }
+  let zkFig = null, zkFigI = 0, zkSizes = [], zkPh = 0, zkFound = {}, zkDrag = null, zkPend = null, zkCell = 60,
+      zkHint = 0, zkMiss = 0, zkAnsMiss = 0, zkTyped = "", zkPaid = false, zkTok = 0;
+  function startZk() {
+    unlockAudio();
+    const z = zkProg(), lvl = Math.min(z.lvl, ZK_FIGS.length - 1);
+    // いまの段階の図形を中心に、ときどき まえの図形も出す
+    zkFigI = (rnd(2) === 0 || lvl === 0) ? lvl : Math.max(0, lvl - 1 - rnd(Math.min(3, lvl)));
+    zkFig = ZK_FIGS[zkFigI];
+    const sq = zkSquares(zkFig.g);
+    zkSizes = [...new Set(sq.map(s => s[2]))].sort((a, b) => a - b);
+    zkPh = 0; zkFound = {}; zkSizes.forEach(k => { zkFound[k] = []; });
+    zkDrag = null; zkPend = null; zkHint = 0; zkMiss = 0; zkAnsMiss = 0; zkTyped = "";
+    zkPaid = zkLeft() > 0; zkTok++;
+    show("zkplay"); renderZk();
+  }
+  function zkAll(k) { return zkSquares(zkFig.g).filter(s => s[2] === k); }
+  function zkTotal() { return zkSquares(zkFig.g).length; }
+  function zkLayout() {
+    const g = zkFig.g, H = g.length, W = g[0].length, gb = parseFloat(getComputedStyle(document.body).getPropertyValue("--gb")) || 24;
+    const land = window.innerWidth > window.innerHeight;
+    const appW = Math.min(window.innerWidth - 32, 1000);
+    const maxW = land ? Math.min(560, appW - 400) : appW;
+    const maxH = land ? window.innerHeight - 64 - 3 * gb - 40 : Math.min(window.innerHeight * 0.42, 440);
+    zkCell = Math.max(36, Math.floor(Math.min(maxW / W, maxH / H, 110)));
+  }
+  function renderZk() {
+    zkLayout();
+    const g = zkFig.g, H = g.length, W = g[0].length;
+    $("zkWallet2").textContent = P().coins.toLocaleString();
+    const grid = $("zkGrid");
+    grid.style.gridTemplateColumns = "repeat(" + W + ", " + zkCell + "px)";
+    grid.style.gridAutoRows = zkCell + "px";
+    let h = "";
+    for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) h += '<span class="zk-cell' + (g[r][c] === "X" ? "" : " empty") + '"></span>';
+    grid.innerHTML = h;
+    const ov = $("zkOv");
+    ov.setAttribute("width", W * zkCell); ov.setAttribute("height", H * zkCell);
+    ov.setAttribute("viewBox", "0 0 " + W + " " + H);
+    zkDraw(); zkSide();
+  }
+  function zkDraw(preview, flash) {
+    let s = "", n = 0;
+    zkSizes.forEach(k => zkFound[k].forEach(f => {
+      const col = ZK_COLORS[n++ % ZK_COLORS.length];
+      if (k === 1) s += '<rect x="' + (f[1] + .06) + '" y="' + (f[0] + .06) + '" width=".88" height=".88" fill="' + col + '" fill-opacity=".55" stroke="' + col + '" stroke-width=".08"/>';
+      else {
+        const inset = .07 + (n % 3) * .06;   // 重なっても見分けられるように、少しずつ内側へ
+        s += '<rect x="' + (f[1] + inset) + '" y="' + (f[0] + inset) + '" width="' + (k - 2 * inset) + '" height="' + (k - 2 * inset) +
+             '" fill="' + col + '" fill-opacity=".12" stroke="' + col + '" stroke-width=".1" rx=".08"/>';
+      }
+    }));
+    if (zkPend) s += '<rect x="' + (zkPend[1] + .1) + '" y="' + (zkPend[0] + .1) + '" width=".8" height=".8" fill="none" stroke="#fff" stroke-width=".1" stroke-dasharray=".2 .12"/>';
+    if (preview) s += '<rect x="' + preview[1] + '" y="' + preview[0] + '" width="' + preview[3] + '" height="' + preview[2] +
+                      '" fill="#ffffff" fill-opacity=".25" stroke="#ffffff" stroke-width=".09" stroke-dasharray=".25 .15"/>';
+    if (flash) s += '<rect x="' + (flash[1] + .04) + '" y="' + (flash[0] + .04) + '" width="' + (flash[2] - .08) + '" height="' + (flash[2] - .08) +
+                    '" fill="none" stroke="#ffffff" stroke-width=".14" class="zk-flash"/>';
+    $("zkOv").innerHTML = s;
+  }
+  function zkKName(k) { return "ブロック " + (k * k) + "こ ぶん"; }
+  function zkMini(k) {               // 大きさの見本(k×k の小さな ます)
+    let s = '<span class="zk-mini" style="grid-template-columns:repeat(' + k + ',1fr)">';
+    for (let i = 0; i < k * k; i++) s += "<i></i>";
+    return s + "</span>";
+  }
+  function zkSide(msg, cls) {
+    const side = $("zkSide");
+    const tally = zkSizes.map((k, i) => (i < zkPh || zkPh >= zkSizes.length)
+      ? '<p class="zk-tally">' + zkMini(k) + '<span>' + zkKName(k) + '</span><b>' + zkFound[k].length + 'こ</b></p>'
+      : i === zkPh ? '<p class="zk-tally now">' + zkMini(k) + '<span>' + zkKName(k) + '</span><b>' + zkFound[k].length + 'こ</b></p>' : "").join("");
+    if (zkPh < zkSizes.length) {
+      const k = zkSizes[zkPh];
+      side.innerHTML = '<p class="kind">ましかくは いくつ？</p>' +
+        '<p class="zk-phase">' + zkMini(k) + '<span>' + zkKName(k) + 'の ましかくを ぜんぶ さがそう</span></p>' +
+        '<p class="zk-how">' + (k === 1 ? "ブロックを タップ" : "かどから かどまで なぞろう<br>（かどを 2かい タップ でも いいよ）") + '</p>' +
+        tally + '<p class="zk-say ' + (cls || "") + '" id="zkSay">' + (msg || "") + '</p>' +
+        '<button class="btn ghost small" id="zkHintBtn">ヒント</button>';
+      $("zkHintBtn").onclick = zkHintShow;
+    } else {
+      side.innerHTML = '<p class="kind">ぜんぶで いくつ？</p>' + tally +
+        '<p class="zk-ans"><span class="ansbox" id="zkAns">' + (zkTyped || "&nbsp;") + '</span>こ</p>' +
+        '<p class="zk-say ' + (cls || "") + '" id="zkSay">' + (msg || "") + '</p>' +
+        '<div class="zk-pad">' + ["1", "2", "3", "4", "5", "6", "7", "8", "9", "けす", "0", "OK"].map(k =>
+          '<button class="key' + (k === "けす" ? " del" : k === "OK" ? " ok" : "") + '" data-k="' + k + '">' + k + '</button>').join("") + '</div>';
+      Array.from(side.querySelectorAll(".key")).forEach(b => { b.onclick = () => zkKey(b.getAttribute("data-k")); });
+    }
+  }
+  function zkSay(msg, cls) { const e = $("zkSay"); if (e) { e.innerHTML = esc(msg); e.className = "zk-say " + (cls || ""); } }
+  function zkCellAt(e, clamp) {
+    const r = $("zkGrid").getBoundingClientRect(), g = zkFig.g;
+    let row = Math.floor((e.clientY - r.top) / zkCell), col = Math.floor((e.clientX - r.left) / zkCell);
+    if (clamp) { row = Math.max(0, Math.min(g.length - 1, row)); col = Math.max(0, Math.min(g[0].length - 1, col)); }
+    else if (row < 0 || col < 0 || row >= g.length || col >= g[0].length) return null;
+    return [row, col];
+  }
+  function zkRect(a, b) { const r0 = Math.min(a[0], b[0]), c0 = Math.min(a[1], b[1]); return [r0, c0, Math.abs(a[0] - b[0]) + 1, Math.abs(a[1] - b[1]) + 1]; }
+  function zkDown(e) {
+    if (zkPh >= zkSizes.length) return;
+    const a = zkCellAt(e); if (!a) return;
+    e.preventDefault();
+    zkDrag = { a: a, b: a };
+    try { $("zkBoard").setPointerCapture(e.pointerId); } catch (err) { /* ignore */ }
+    zkDraw(zkRect(a, a));
+  }
+  function zkMove(e) {
+    if (!zkDrag) return;
+    const b = zkCellAt(e, true);
+    if (b[0] !== zkDrag.b[0] || b[1] !== zkDrag.b[1]) { zkDrag.b = b; zkDraw(zkRect(zkDrag.a, b)); }
+  }
+  function zkUp() {
+    if (!zkDrag) return;
+    const a = zkDrag.a, b = zkDrag.b; zkDrag = null;
+    const k = zkSizes[zkPh];
+    if (a[0] === b[0] && a[1] === b[1]) {                         // タップ
+      if (k === 1) { zkTry(zkRect(a, a)); return; }
+      if (zkPend) { const p0 = zkPend; zkPend = null; zkTry(zkRect(p0, a)); return; }
+      zkPend = a; zkDraw(); zkSay("もう ひとつの かどを タップ");
+      return;
+    }
+    zkPend = null; zkTry(zkRect(a, b));
+  }
+  function zkTry(rc) {
+    const r0 = rc[0], c0 = rc[1], h = rc[2], w = rc[3], k = zkSizes[zkPh], g = zkFig.g;
+    let bad = "";
+    if (h !== w) bad = "ましかくに なって いないよ。たてと よこを おなじ ながさに しよう";
+    else if (h !== k) bad = "いまは " + zkKName(k) + "の ましかくを さがして いるよ";
+    else {
+      for (let i = 0; i < h && !bad; i++) for (let j = 0; j < w; j++) if (g[r0 + i][c0 + j] !== "X") { bad = "ブロックが ない ところが あるよ"; break; }
+    }
+    if (!bad && zkFound[k].some(f => f[0] === r0 && f[1] === c0)) bad = "それは もう みつけたよ";
+    if (bad) { zkMiss++; sfxOops(); zkDraw(); zkSay(bad, "oops"); return; }
+    zkFound[k].push([r0, c0]); sfxRight(); zkDraw();
+    const all = zkAll(k).length;
+    if (zkFound[k].length < all) { zkSide(pickOk(), "ok"); return; }
+    zkSide(zkKName(k) + "は ぜんぶで " + all + "こ！", "ok");
+    const myTok = zkTok, myPh = zkPh;
+    setTimeout(() => { if (zkTok === myTok && zkPh === myPh) { zkPh++; zkPend = null; zkDraw(); zkSide(zkPh < zkSizes.length ? "つぎは もっと おおきい ましかく！" : "ぜんぶ たすと いくつ？"); } }, 1300);
+  }
+  function zkHintShow() {
+    if (zkPh >= zkSizes.length) return;
+    const k = zkSizes[zkPh], left = zkAll(k).filter(s => !zkFound[k].some(f => f[0] === s[0] && f[1] === s[1]));
+    if (!left.length) return;
+    zkHint++;
+    const s = left[rnd(left.length)], myTok = zkTok;
+    zkDraw(null, s); zkSay("ここにも ある みたい", "");
+    setTimeout(() => { if (zkTok === myTok) zkDraw(); }, 1500);
+  }
+  function zkKey(k) {
+    if (k === "けす") { zkTyped = zkTyped.slice(0, -1); }
+    else if (k === "OK") { zkCheck(); return; }
+    else if (zkTyped.length < 2) zkTyped += k;
+    $("zkAns").innerHTML = zkTyped || "&nbsp;";
+  }
+  function zkCheck() {
+    if (!zkTyped) return;
+    const total = zkTotal();
+    if (Number(zkTyped) === total) { zkFinish(); return; }
+    zkAnsMiss++; sfxOops();
+    const parts = zkSizes.map(k => zkFound[k].length);
+    zkTyped = "";
+    zkSide(zkSizes.length > 1 && zkAnsMiss >= 2 ? parts.join(" ＋ ") + " ＝ ？"
+      : zkSizes.length > 1 ? "ちいさい ましかくと おおきい ましかくの かずを、ぜんぶ たそう" : "ブロックの かずを かぞえよう", "oops");
+  }
+  function zkFinish() {
+    zkTok++;
+    const p = P(), z = zkProg(), total = zkTotal();
+    const clean = zkAnsMiss === 0 && zkHint === 0;
+    const r = z.hist[zkFig.id] || (z.hist[zkFig.id] = { n: 0, clean: 0 });
+    r.n++; if (clean) r.clean++;
+    let up = "";
+    if (clean && zkFigI === z.lvl && z.lvl < ZK_FIGS.length - 1) { z.lvl++; up = "つぎは あたらしい かべに ちょうせん！"; }
+    let coins = 0;
+    if (zkPaid) { coins = ZKCOINS; p.coins += coins; z.played = (z.played || 0) + 1; }
+    save();
+    const small = zkFound[1] ? zkFound[1].length : 0;
+    const line = zkSizes.length > 1
+      ? "ちいさい ましかく だけなら " + small + "こ。おおきい ましかくも かぞえたから " + total + "こ！" + (up ? " " + up : "")
+      : up;
+    kgResult("ましかくは ぜんぶで " + total + "こ！", line, coins, startZk, renderMHome, !!up);
+  }
+
+  // ---------------------------------------------------------------
   // WORLD: blocky scenery drawn as pixel art at start-up. All of it is
   // original artwork in a block-game idiom; nothing is copied from a game.
   // ---------------------------------------------------------------
@@ -2888,6 +3461,42 @@
       "................",
       "................"
     ], { K: "#141414", w: "#d8d2bf", y: "#fff3b0", R: "#d23c3c", G: "#3e8e41" });
+  ICONS.lens = pixIcon([
+      "................",
+      "....KKKKKK......",
+      "...KwwwwwwK.....",
+      "..KwbbbbbbwK....",
+      "..KwbWWbbbwK....",
+      "..KwbWbbbbwK....",
+      "..KwbbbbbbwK....",
+      "..KwbbbbbbwK....",
+      "...KwwwwwwK.....",
+      "....KKKKKKhK....",
+      "..........hhK...",
+      "...........hhK..",
+      "............hhK.",
+      ".............hK.",
+      "................",
+      "................"
+    ], { K: "#141414", w: "#c8c8c8", b: "#8fd3f4", W: "#ffffff", h: "#9a6834" });
+  ICONS.squares = pixIcon([
+      "YYYYYYYYYYYYYYYY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YKKKKKKKKKKKKKKY",
+      "YKKKKKKKKKKKKKKY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YssssssKKssssssY",
+      "YYYYYYYYYYYYYYYY"
+    ], { Y: "#f6c343", s: "#9d9d9d", K: "#4a4a4a" });
   const SKY_ICONS = {
     day: pixIcon([
       "................",
@@ -3015,13 +3624,22 @@
       QUESTS.map(q => '<option value="' + q.id + '"' + (q.id === state.quest ? " selected" : "") + '>' + esc(qName(q)) + '</option>').join("") +
       '</select></div>' +
       '<div class="row"><label for="dueNew">漢字のテスト日</label><input id="dueNew" type="date" value="' + esc(questDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="dueSave">保存</button></div>' +
-      '<p class="hint" style="margin-top:12px"><b>カードめいじん</b>（テスト日まで、初期画面の2番目のボタンがこれになります）</p>' +
-      '<div class="row"><label for="cmMode">2番目のボタン</label><select id="cmMode"><option value="auto"' + (state.cmMode !== "off" ? " selected" : "") + '>テスト日までカードめいじん</option><option value="off"' + (state.cmMode === "off" ? " selected" : "") + '>漢字</option></select></div>' +
+      '<p class="hint" style="margin-top:12px"><b>カードめいじん</b>（テスト日までは「こくご」の中に出ます）</p>' +
+      '<div class="row"><label for="cmMode">表示</label><select id="cmMode"><option value="auto"' + (state.cmMode !== "off" ? " selected" : "") + '>テスト日まで出す</option><option value="off"' + (state.cmMode === "off" ? " selected" : "") + '>出さない</option></select></div>' +
       '<div class="row"><label for="cmDueNew">カード名人のテスト日</label><input id="cmDueNew" type="date" value="' + esc(cmDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="cmDueSave">保存</button></div>' +
       '<p class="hint">' + CM_DECKS.map(d => {
         const r = cmRec(d), turned = d.cards.filter(c => cmFlips(d, c) > 0).length, mada = d.cards.filter(c => r.mada[c.id]).length;
         return esc(cmName[d.id] || d.name) + " " + turned + "/" + d.cards.length + (cmRings(d) ? "（" + cmRings(d) + "周）" : "") + (mada ? "・「まだ」" + mada + "枚" : "");
       }).join(" / ") + '（めくった枚数／全枚数）</p>' +
+      '<p class="hint" style="margin-top:12px"><b>さがしてタップ</b>（書き抜きの練習・「こくご」の中）</p>' +
+      '<div class="row"><label for="sgLvl">段階</label><select id="sgLvl">' +
+      ["0：3回タップ（手がかり→同じ言葉→答え）", "1：答えだけ（同じ文の中）", "2：答えだけ（次の文まで）", "3：答えだけ（離れた所・名前を答える）"].map((t, i) =>
+        '<option value="' + i + '"' + (kgProg().sg.lvl === i ? " selected" : "") + '>' + t + '</option>').join("") + '</select></div>' +
+      '<p class="hint">' + (function () {
+        const g = kgProg(), h = Object.values(g.sg.hist), ok = h.filter(r => r.last).length;
+        return "今日 " + (g.played || 0) + "回（コインは1日" + KG_DAILY + "回まで）・これまで " + (g.rounds || 0) + "回・出た問題 " + h.length + "問のうち、最後に1回で正解できた問題 " + ok + "問" +
+          (g.sg.lvl === 0 ? "・手順を迷わずできた問題が " + g.sg.streak + "問続いています（" + SG_UP0 + "問で次の段階へ）" : "");
+      })() + '</p>' +
       '<div class="row"><label for="lvlSel">英語の難易度</label><select id="lvlSel">' +
       Array.from({ length: 11 }, function (_, i) {
         return '<option value="' + i + '"' + (i === P().level ? " selected" : "") + '>' + i + '</option>';
@@ -3057,6 +3675,11 @@
       M_EVENTS.map(ev => '<label style="font-size:13px;font-weight:700"><input type="checkbox" class="mchk" data-ev="' +
         ev.id + '"' + (evOn(ev) ? " checked" : "") + '> ' + esc(evName(ev).replace("九九 ", "")) + '</label>').join("") +
       '</div>' +
+      '<div class="row"><label for="zkLvl">ましかくを数える（図形の段階）</label><select id="zkLvl">' +
+      ZK_FIGS.map((f, i) => '<option value="' + i + '"' + (zkProg().lvl === i ? " selected" : "") + '>' + (i + 1) + "：" + f.g[0].length + "×" + f.g.length +
+        (f.g.join("").indexOf(".") >= 0 ? "の形" : "") + "（答え " + zkSquares(f.g).length + "）" + '</option>').join("") + '</select></div>' +
+      '<p class="hint">ましかくを数える：今日 ' + (zkProg().played || 0) + '回（コインは1日' + ZK_DAILY + '回まで）・ヒントなしで解けた図形 ' +
+        Object.values(zkProg().hist).filter(r => r.clean).length + ' / ' + ZK_FIGS.length + '</p>' +
       '<p class="hint">' + M_EVENTS.filter(evOn).map(ev => {
         const r = evRec(ev.id);
         return esc(evName(ev)) + "：" + (r.best === null ? "記録なし" : "最高 " + r.best + "秒") + "（" + r.done + "回" +
@@ -3077,6 +3700,8 @@
     $("dueSave").onclick = () => { const v = $("dueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues[state.quest] = v; P().today.kcap = null; save(); alert("漢字のテスト日を " + v + " にしました"); } else alert("日付を選んでください"); };
     $("cmMode").onchange = e => { state.cmMode = e.target.value; save(); closeParent(); renderPick(); };
     $("cmDueSave").onclick = () => { const v = $("cmDueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues["card-meijin"] = v; save(); alert("カード名人のテスト日を " + v + " にしました"); closeParent(); renderPick(); } else alert("日付を選んでください"); };
+    $("sgLvl").onchange = e => { const s = kgProg().sg; s.lvl = Number(e.target.value); s.streak = 0; s.good = 0; save(); };
+    $("zkLvl").onchange = e => { zkProg().lvl = Number(e.target.value); save(); };
     $("lvlSel").onchange = e => { P().level = Number(e.target.value); save(); closeParent(); openParent(); };
     $("voiceSel").onchange = e => { state.voice = e.target.value === "1"; save(); };
     $("voiceTest").onclick = () => { unlockAudio(); speak("Let's build a house with wood."); };
@@ -3157,11 +3782,22 @@
     $("quitBtn").onclick = () => { try { speechSynthesis.cancel(); } catch (e) {} renderHome(); };
     $("eBack").onclick = renderPick;
     $("kStart").onclick = startKStage;
-    $("kBack").onclick = renderPick;
+    $("kBack").onclick = renderKgHome;
     $("kQuit").onclick = () => { try { speechSynthesis.cancel(); } catch (e) {} renderKHome(); };
     $("mBack").onclick = renderPick;
     $("mQuit").onclick = quitMStage;
-    $("cmBack").onclick = renderPick;
+    $("cmBack").onclick = renderKgHome;
+    $("kgBack").onclick = renderPick;
+    $("sgQuit").onclick = () => { sgTok++; renderKgHome(); };
+    $("zkQuit").onclick = () => { zkTok++; renderMHome(); };
+    ["sgQ", "sgP"].forEach(id => $(id).addEventListener("click", e => { const el = e.target.closest(".sgc"); if (el) sgTap(el); }));
+    $("zkBoard").addEventListener("pointerdown", zkDown);
+    $("zkBoard").addEventListener("pointermove", zkMove);
+    ["pointerup", "pointercancel"].forEach(ev => $("zkBoard").addEventListener(ev, zkUp));
+    window.addEventListener("resize", () => {
+      if (!$("zkplay").hidden && zkFig) renderZk();
+      if (!$("sgplay").hidden) sgDrawLine();
+    });
     $("cmQuit").onclick = () => { cmTok++; renderCmHome(); };
     bindLongPress($("purse"), 2000, askPin);
     bindLongPress($("purse2"), 2000, askPin);
