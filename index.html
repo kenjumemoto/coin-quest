@@ -766,7 +766,7 @@
       <button class="btn ghost small" id="mBack">&#9664; もどる</button>
     </div>
     <div class="home-center">
-      <h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(28px,7vw,44px)">けいさん</h2>
+      <h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(28px,7vw,44px)">さんすう</h2>
       <div class="day-row" id="mDayRow"></div>
       <div class="pick-list" id="mList"></div>
       <p id="mDone" class="hint" hidden></p>
@@ -2362,7 +2362,7 @@
     $("pickList").innerHTML =
       item("goEn", ICONS.book, "えいご", esub) +
       item("goKg", ICONS.scroll, "こくご", (cmActive() ? "カードめいじん・" : "") + "かんじ・さがして タップ") +
-      item("goMa", ICONS.pick, "けいさん", "コインが もらえる のこり " + p.mLeft + " かい");
+      item("goMa", ICONS.pick, "さんすう", "けいさん・かたちを かぞえよう");
     $("goEn").onclick = renderHome;
     $("goKg").onclick = renderKgHome;
     $("goMa").onclick = renderMHome;
@@ -3799,7 +3799,7 @@
       M_EVENTS.map(ev => '<label style="font-size:13px;font-weight:700"><input type="checkbox" class="mchk" data-ev="' +
         ev.id + '"' + (evOn(ev) ? " checked" : "") + '> ' + esc(evName(ev).replace("九九 ", "")) + '</label>').join("") +
       '</div>' +
-      '<p class="hint" style="margin-top:12px"><b>かたちを数える</b>（図形の数え上げ・「けいさん」の中。正方形1：長方形2：三角形2の割合で出る）</p>' +
+      '<p class="hint" style="margin-top:12px"><b>かたちを数える</b>（図形の数え上げ・「さんすう」の中。正方形1：長方形2：三角形2の割合で出る）</p>' +
       Object.keys(ZK_TRACKS).map(t => {
         const tr = ZK_TRACKS[t], cur = zkProg()[tr.lv] || 0, nm = { sq: "正方形", rc: "長方形", tr: "三角形" }[t];
         return '<div class="row"><label for="zkLvl-' + t + '">' + nm + 'の段階</label><select id="zkLvl-' + t + '" class="zklvl" data-t="' + t + '">' +
