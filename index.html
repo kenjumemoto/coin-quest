@@ -325,6 +325,10 @@
   .panel-box .amt { font-family: var(--font-en); font-size: 16px; padding: 6px; width: 6ch; text-align: right; }
   .panel-box textarea { width: 100%; box-sizing: border-box; font-family: var(--font-en); font-size: 12px; height: 62px; padding: 6px; border: 2px solid var(--stone-dark); }
   .stat { font-variant-numeric: tabular-nums; }
+  .kugrid { display: grid; grid-template-columns: auto repeat(9, 1fr); gap: 3px; margin: 6px 0; }
+  .kugrid button { font-family: var(--font-ja); font-size: 12px; font-weight: 800; padding: 7px 0; border: 2px solid #c9bfae; background: #fff; color: var(--ink-soft); border-radius: 4px; cursor: pointer; font-variant-numeric: tabular-nums; }
+  .kugrid .kudan { padding: 7px 6px; background: #efe7d8; white-space: nowrap; }
+  .kugrid .kuc.on { background: #f5b82e; border-color: #b07a00; color: #3a2600; }
 
   /* --- quest picker & kanji mode --- */
   .pick-list { display: flex; flex-direction: column; gap: 16px; width: min(100%, 460px); }
@@ -1178,15 +1182,11 @@
   const M_EVENTS = [
     { id: "add21", name: "たしざん",    sub: "2けた + 1けた", n: 7, on: true },
     { id: "sub21", name: "ひきざん",    sub: "2けた − 1けた", n: 7, on: true },
-    { id: "ku2",   name: "九九 2のだん", sub: "2 × 1〜9",      n: 8, on: true,  dan: 2 },
-    { id: "ku5",   name: "九九 5のだん", sub: "5 × 1〜9",      n: 8, on: true,  dan: 5 },
-    { id: "ku3",   name: "九九 3のだん", sub: "3 × 1〜9",      n: 8, on: false, dan: 3 },
-    { id: "ku4",   name: "九九 4のだん", sub: "4 × 1〜9",      n: 8, on: false, dan: 4 },
-    { id: "ku6",   name: "九九 6のだん", sub: "6 × 1〜9",      n: 8, on: false, dan: 6 },
-    { id: "ku7",   name: "九九 7のだん", sub: "7 × 1〜9",      n: 8, on: false, dan: 7 },
-    { id: "ku8",   name: "九九 8のだん", sub: "8 × 1〜9",      n: 8, on: false, dan: 8 },
-    { id: "ku9",   name: "九九 9のだん", sub: "9 × 1〜9",      n: 8, on: false, dan: 9 }
+    // 九九は段ごとではなく、親が「まだ覚えていない」ものを1つずつ選ぶ(10/5〜。P().kuSel = ["3x7", …])。
+    // 段ごとだったころの記録(ku2〜ku9)は保存に残してある
+    { id: "kuku",  name: "九九",       sub: "",              n: 8, on: true,  ku: true }
   ];
+  const KU_DANS = [2, 3, 4, 5, 6, 7, 8, 9];
   // ---------------------------------------------------------------
   // カードめいじん: 奨学社のリングカード(表=もんだい、うら=こたえ)を画面でめくる。
   // 正解かどうかは判定しない。考えて、めくって、自分で たしかめるだけ。
@@ -1650,7 +1650,7 @@
   const OLD_STORE_KEY = "kotoba-craft-v1";
   const BACKUP_KEY = "coin-quest-v1-bak";
   const UNDO_KEY = "coin-quest-v1-undo";
-  const SAVE_VER = 6;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
+  const SAVE_VER = 7;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
   const PLAYERS = { taiga: "たいが", gaku: "がく" };
 
   // ---------------------------------------------------------------
@@ -1660,7 +1660,7 @@
     return { coins: 0, level: START_LEVEL, stagesCleared: 0, stagesPlayed: 0,
              today: { date: todayKey(), cleared: 0, played: 0, coins: 0, kplayed: 0 },
              left: DAILY_STAGES, mLeft: M_DAILY, mDate: todayKey(), math: {},
-             retry: [], seen: {}, wrong: {}, quests: {}, cm: { date: todayKey(), played: 0, decks: {} }, kg: freshKg(), zk: freshZk() };
+             retry: [], seen: {}, wrong: {}, quests: {}, kuSel: [], cm: { date: todayKey(), played: 0, decks: {} }, kg: freshKg(), zk: freshZk() };
   }
   // 世界の色(ひる/ゆうがた/よる)。保存データの初期値に使うので、ここで先に決めておく
   const THEMES = {
@@ -1749,6 +1749,10 @@
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].cm) state.players[k].cm = { date: todayKey(), played: 0, decks: {} };
     for (const k of Object.keys(PLAYERS)) { if (!state.players[k].kg) state.players[k].kg = freshKg(); if (!state.players[k].zk) state.players[k].zk = freshZk(); }
     if (!state.mOn) state.mOn = {};
+    for (const k of Object.keys(PLAYERS)) if (!state.players[k].kuSel) {   // 段ごとの九九 → 1つずつ選ぶ形へ。2のだんは覚えたので入れない
+      const on = d => { const v = state.mOn["ku" + d]; return v === undefined ? d === 5 : !!v; };
+      state.players[k].kuSel = KU_DANS.filter(d => d !== 2 && on(d)).flatMap(d => [1, 2, 3, 4, 5, 6, 7, 8, 9].map(b => d + "x" + b));
+    }
     if (!state.theme || !THEMES[state.theme]) state.theme = DEFAULT_THEME;
     state.ver = SAVE_VER;
     if (!state.born) { state.born = stamp(); bornNow = true; }   // 保存には入れない(入れると次の起動でも残る)
@@ -2382,9 +2386,20 @@
     const m = mProg();
     if (!m[id]) m[id] = { best: null, runs: [], done: 0 };
     if (!m[id].runs) m[id].runs = [];
+    if (id === "kuku") {             // 選ぶ九九が変わったら タイムは新しく はじめる(ちがう問題どうしは くらべられない)
+      const sig = kuSel().slice().sort().join(",");
+      if (m[id].sig !== sig) { m[id].sig = sig; m[id].best = null; m[id].runs = []; }
+      if (!m[id].c) m[id].c = {};    // 出た回数(少ないものから出す)
+    }
     return m[id];
   }
+  function kuSel() { const p = P(); if (!p.kuSel) p.kuSel = []; return p.kuSel; }
+  function kuSub() {                 // 「3・7のだん」のように、どの段から出るか
+    const ds = KU_DANS.filter(d => kuSel().some(x => x.split("x")[0] === String(d)));
+    return ds.join("・") + "のだん";
+  }
   function evOn(ev) {
+    if (ev.ku) return kuSel().length > 0;
     const on = (state.mOn && state.mOn[ev.id]);
     return on === undefined ? ev.on : !!on;
   }
@@ -2410,10 +2425,6 @@
   function fmtTime(sec) { return sec === null || sec === undefined ? "—" : sec + "びょう"; }
 
   function makeMQuestion(ev) {
-    if (ev.dan) {
-      const b = 1 + rnd(9);
-      return { t: ev.dan + " × " + b, a: String(ev.dan * b) };
-    }
     if (ev.id === "add21") {                          // 2桁+1桁、くり上がりあり、答えは2桁
       for (;;) {
         const a = 10 + rnd(80), b = 2 + rnd(8);
@@ -2426,10 +2437,22 @@
     }
   }
 
-  // 1回の中で同じ問題は出さない。九九は1〜9から重ならないように選ぶ
-  // (以前は毎回サイコロで選んでいたので、同じ問題が続けて出ることがあった)
+  // 1回の中で同じ問題は出さない(以前は毎回サイコロで選んでいたので、同じ問題が続けて出ることがあった)。
+  // 九九は選ばれたものから、これまで出た回数の少ないものを先に。8こより少ないときは
+  // くりかえして8問にするが、同じ問題を続けては出さない
   function buildMQueue(ev) {
-    if (ev.dan) return shuffle([1, 2, 3, 4, 5, 6, 7, 8, 9]).slice(0, ev.n).map(b => ({ t: ev.dan + " × " + b, a: String(ev.dan * b) }));
+    if (ev.ku) {
+      const r = evRec("kuku"), sel = shuffle(kuSel().slice()), q = [];
+      sel.sort((a, b) => (r.c[a] || 0) - (r.c[b] || 0));
+      let pool = [];
+      while (q.length < ev.n && sel.length) {
+        if (!pool.length) pool = sel.length > ev.n ? sel.slice(0, ev.n) : shuffle(sel.slice());
+        let i = pool.findIndex(x => x !== q[q.length - 1]); if (i < 0) i = 0;
+        q.push(pool.splice(i, 1)[0]);
+      }
+      q.forEach(x => { r.c[x] = (r.c[x] || 0) + 1; });
+      return q.map(x => { const [a, b] = x.split("x").map(Number); return { t: a + " × " + b, a: String(a * b) }; });
+    }
     const q = [], seen = {};
     for (let tries = 0; q.length < ev.n && tries < 500; tries++) {
       const x = makeMQuestion(ev);
@@ -2550,10 +2573,10 @@
     $("mList").innerHTML = evs.map(ev => {
       const r = evRec(ev.id);
       const best = r.best === null ? "きろく なし" : "さいこう " + r.best + "びょう";
-      const g = ev.dan ? "×" : ev.id === "add21" ? "+" : "−";
+      const g = ev.ku ? "×" : ev.id === "add21" ? "+" : "−";
       return '<button class="pick" data-ev="' + ev.id + '"><span class="ico"><b class="glyph">' + g + '</b></span><span>' +
         '<span class="ttl">' + esc(ev.name) + '</span>' +
-        '<span class="sub">' + esc(ev.sub) + ' ・ <span class="ev-time">' + esc(best) + '</span></span></span></button>';
+        '<span class="sub">' + esc(ev.ku ? kuSub() : ev.sub) + ' ・ <span class="ev-time">' + esc(best) + '</span></span></span></button>';
     }).join("");
     $("mList").insertAdjacentHTML("beforeend", '<button class="pick" id="goZk"><span class="ico">' + ICONS.squares + '</span><span>' +
       '<span class="ttl">かたちを かぞえよう</span><span class="sub">コインが もらえる のこり ' + zkLeft() + ' かい</span></span></button>');
@@ -3797,11 +3820,16 @@
       '<p class="stat">保存：' + esc(storageProbe()) + (saveError ? "　書き込みエラー " + esc(saveError) : "") +
       '　初回起動 ' + esc(state.born || "?") + (bornNow ? " ←今回が初回（保存が消えている可能性）" : "") +
       '　最終保存 ' + esc(state.savedAt || "なし") + '</p>' +
-      '<p class="hint" style="margin-top:12px"><b>計算の種目</b>（覚えた段にチェック）</p>' +
+      '<p class="hint" style="margin-top:12px"><b>計算の種目</b>（出すものにチェック）</p>' +
       '<div class="row" style="gap:10px">' +
-      M_EVENTS.map(ev => '<label style="font-size:13px;font-weight:700"><input type="checkbox" class="mchk" data-ev="' +
-        ev.id + '"' + (evOn(ev) ? " checked" : "") + '> ' + esc(evName(ev).replace("九九 ", "")) + '</label>').join("") +
+      M_EVENTS.filter(ev => !ev.ku).map(ev => '<label style="font-size:13px;font-weight:700"><input type="checkbox" class="mchk" data-ev="' +
+        ev.id + '"' + (evOn(ev) ? " checked" : "") + '> ' + esc(evName(ev)) + '</label>').join("") +
       '</div>' +
+      '<p class="hint" style="margin-top:12px"><b>九九</b>（まだ覚えていないものを押して選ぶ。選んだものだけが「九九」に出る。段の名前を押すと、その段をまとめて切り替え）</p>' +
+      '<div class="kugrid">' + KU_DANS.map(d => '<button class="kudan" data-d="' + d + '">' + d + 'の段</button>' +
+        [1, 2, 3, 4, 5, 6, 7, 8, 9].map(b => '<button class="kuc' + (kuSel().indexOf(d + "x" + b) >= 0 ? " on" : "") + '" data-k="' + d + "x" + b + '">' +
+          d + "×" + b + '</button>').join("")).join("") + '</div>' +
+      '<p class="hint" id="kuCount"></p>' +
       '<p class="hint" style="margin-top:12px"><b>かたちを数える</b>（図形の数え上げ・「さんすう」の中。正方形1：長方形2：三角形2の割合で出る）</p>' +
       Object.keys(ZK_TRACKS).map(t => {
         const tr = ZK_TRACKS[t], cur = zkProg()[tr.lv] || 0, nm = { sq: "正方形", rc: "長方形", tr: "三角形" }[t];
@@ -3881,6 +3909,22 @@
     Array.from(document.querySelectorAll(".mchk")).forEach(c => {
       c.onchange = () => { state.mOn[c.getAttribute("data-ev")] = c.checked; save(); };
     });
+    const kuShow = () => {
+      Array.from(document.querySelectorAll(".kuc")).forEach(b => b.classList.toggle("on", kuSel().indexOf(b.getAttribute("data-k")) >= 0));
+      $("kuCount").textContent = kuSel().length ? "選択中 " + kuSel().length + "問（1回8問。少ないときは繰り返して8問）" : "選択なし（「九九」は出ません）";
+    };
+    const kuSet = (k, on) => { const s = kuSel(), i = s.indexOf(k); if (on && i < 0) s.push(k); if (!on && i >= 0) s.splice(i, 1); };
+    Array.from(document.querySelectorAll(".kuc")).forEach(b => {
+      b.onclick = () => { const k = b.getAttribute("data-k"); kuSet(k, kuSel().indexOf(k) < 0); save(); kuShow(); };
+    });
+    Array.from(document.querySelectorAll(".kudan")).forEach(b => {
+      b.onclick = () => {
+        const d = b.getAttribute("data-d"), ks = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(x => d + "x" + x);
+        const all = ks.every(k => kuSel().indexOf(k) >= 0);
+        ks.forEach(k => kuSet(k, !all)); save(); kuShow();
+      };
+    });
+    kuShow();
     $("expBtn").onclick = () => {
       const c = exportCode();
       $("codeBox").value = c;
