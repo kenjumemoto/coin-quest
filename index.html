@@ -3281,6 +3281,7 @@
   function zkUp() {
     if (!zkDrag) return;
     const a = zkDrag.a, b = zkDrag.b; zkDrag = null;
+    if (zkPh >= zkSizes.length) { zkDraw(); return; }           // なぞっている あいだに 「ぜんぶで いくつ？」に すすんだ
     const k = zkSizes[zkPh];
     if (a[0] === b[0] && a[1] === b[1]) {                         // タップ
       if (k === 1) { zkTry(zkRect(a, a)); return; }
@@ -3291,6 +3292,7 @@
     zkPend = null; zkTry(zkRect(a, b));
   }
   function zkTry(rc) {               // ましかく・ながしかく: なぞった ながしかく を しらべる
+    if (zkPh >= zkSizes.length) return;
     const k = zkSizes[zkPh], h = rc.r1 - rc.r0 + 1, w = rc.c1 - rc.c0 + 1;
     let bad = "";
     if (zkType === "sq") {
@@ -3304,6 +3306,7 @@
     zkGot(k, key);
   }
   function zkFace(i) {               // さんかく: かけらを えらぶ
+    if (zkPh >= zkSizes.length) return;
     const k = zkSizes[zkPh], j = zkSel.indexOf(i);
     if (j >= 0) { zkSel.splice(j, 1); zkDraw(); zkSay("えらんだ かけら " + zkSel.length + " / " + k); return; }
     zkSel.push(i); beep(660, .05, "square", .04);
@@ -3324,7 +3327,7 @@
     if (zkFound[k].length < all) { zkSide(pickOk(), "ok"); return; }
     zkSide(zkKName(k) + "は ぜんぶで " + all + "こ！", "ok");
     const myTok = zkTok, myPh = zkPh;
-    setTimeout(() => { if (zkTok === myTok && zkPh === myPh) { zkPh++; zkPend = null; zkSel = []; zkDraw(); zkSide(zkPh < zkSizes.length ? "つぎは もっと おおきい " + zkShape() + "！" : "ぜんぶ たすと いくつ？"); } }, 1300);
+    setTimeout(() => { if (zkTok === myTok && zkPh === myPh) { zkPh++; zkPend = null; zkSel = []; zkDrag = null; zkDraw(); zkSide(zkPh < zkSizes.length ? "つぎは もっと おおきい " + zkShape() + "！" : "ぜんぶ たすと いくつ？"); } }, 1300);
   }
   function zkHintShow() {
     if (zkPh >= zkSizes.length) return;
