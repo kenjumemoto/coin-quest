@@ -718,6 +718,38 @@
     .zk-pad .key { min-height: 44px; font-size: 24px; box-shadow: 0 4px 0 var(--stone-dark); }
     .zk-pad .key.ok { box-shadow: 0 4px 0 var(--grass-dark); }
   }
+
+  /* --- むしくいざん --- */
+  .mq-wrap { align-items: center; }
+  .mq-board { --mqc: 84px; flex: none; display: grid; grid-template-columns: calc(var(--mqc) * .8) repeat(var(--mqn, 2), var(--mqc));
+              gap: 8px; align-items: center; padding: 10px 22px 18px 10px; background: rgba(20, 20, 20, .35); border: 3px solid #1e1e1e; }
+  .mq-mark { height: calc(var(--mqc) * .42); display: flex; align-items: flex-end; justify-content: center; font-family: var(--font-en); font-weight: 700;
+             font-size: calc(var(--mqc) * .38); line-height: 1; color: #ffe14d; text-shadow: 2px 2px 0 #000; }
+  .mq-op { display: flex; align-items: center; justify-content: center; font-family: var(--font-en); font-weight: 700; font-size: calc(var(--mqc) * .62); color: #fff; text-shadow: 3px 3px 0 #000; }
+  .mq-line { grid-column: 1 / -1; height: 6px; background: #fff; box-shadow: 3px 3px 0 #000; margin: 2px 0; }
+  .mq-d { position: relative; width: var(--mqc); height: var(--mqc); box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+          font-family: var(--font-en); font-weight: 700; font-size: calc(var(--mqc) * .62); line-height: 1; color: #2b2118;
+          background: #ece6d6; border: 3px solid #5f5a50; box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .7), inset -4px -4px 0 rgba(0, 0, 0, .18); }
+  .mq-d.q { background: #f6c343; border-color: #8a5a00; color: #7a4a00; box-shadow: inset 3px 3px 0 rgba(255, 255, 255, .5), inset -4px -4px 0 rgba(0, 0, 0, .22); }
+  .mq-d.q:not(.now) { opacity: .7; }
+  .mq-d.now { outline: 4px solid #fff; outline-offset: 3px; animation: mqnow 1s steps(2) infinite; }
+  @keyframes mqnow { 50% { outline-color: #ffe14d; } }
+  .mq-d.ng { color: var(--oops-dark); background: #ffd9c2; }
+  .mq-d.got { background: #8fe07a; border-color: #2f8a25; color: #1d5c16; }
+  .mq-d.shown { background: #ffe9a8; border-color: #b77a0c; color: #7a4a00; }
+  .mq-d.col:not(.now) { outline: 4px solid #ffe14d; outline-offset: 3px; }
+  .mq-d.strike::after { content: ""; position: absolute; left: 14%; right: 14%; top: 50%; height: 5px; margin-top: -2px; background: #e23b3b; transform: rotate(-40deg); }
+  .mq-step { margin: 0; font-weight: 800; font-size: clamp(18px, 2.2vw, 22px); }
+  .mq-eq { margin: 0; padding: 6px 10px; text-align: center; font-family: var(--font-en); font-weight: 700; font-size: 34px; background: #fff3b0; white-space: nowrap; }
+  @media (orientation: landscape) and (min-width: 820px) { body[data-screen="mqplay"] #app { max-width: 1000px; } }
+  @media (orientation: landscape) and (max-height: 860px) {
+    #mqplay .progress { margin-top: 4px; --blk: 30px; }
+    .mq-board { --mqc: 74px; }
+    .mq-eq { font-size: 28px; padding: 4px 8px; }
+  }
+  @media (orientation: portrait) { .mq-wrap .zk-side { box-sizing: border-box; } }
+  @media (orientation: portrait) and (max-width: 500px) { .mq-board { --mqc: 60px; } }
+  @media (prefers-reduced-motion: reduce) { .mq-d.now { animation: none; } }
 </style>
 
 <div id="world" aria-hidden="true">
@@ -862,6 +894,19 @@
     <div class="zk-wrap">
       <div class="zk-board" id="zkBoard"><div class="zk-grid" id="zkGrid"></div><svg class="zk-ov" id="zkOv" aria-hidden="true"></svg></div>
       <div class="card zk-side" id="zkSide"></div>
+    </div>
+  </section>
+
+  <!-- MUSHIKUI PLAY -->
+  <section id="mqplay" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="mqWallet2">0</span></div>
+      <button class="btn ghost small" id="mqQuit">やめる</button>
+    </div>
+    <div class="progress" id="mqProgress"></div>
+    <div class="zk-wrap mq-wrap">
+      <div class="mq-board" id="mqBoard"></div>
+      <div class="card zk-side" id="mqSide"></div>
     </div>
   </section>
 
@@ -1750,7 +1795,7 @@
   const OLD_STORE_KEY = "kotoba-craft-v1";
   const BACKUP_KEY = "coin-quest-v1-bak";
   const UNDO_KEY = "coin-quest-v1-undo";
-  const SAVE_VER = 7;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
+  const SAVE_VER = 8;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
   const PLAYERS = { taiga: "たいが", gaku: "がく" };
 
   // ---------------------------------------------------------------
@@ -1848,6 +1893,7 @@
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].math) state.players[k].math = {};
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].cm) state.players[k].cm = { date: todayKey(), played: 0, decks: {} };
     for (const k of Object.keys(PLAYERS)) { if (!state.players[k].kg) state.players[k].kg = freshKg(); if (!state.players[k].zk) state.players[k].zk = freshZk(); }
+    for (const k of Object.keys(PLAYERS)) if (!state.players[k].mq) state.players[k].mq = freshMq();   // むしくいざん(10/25〜, SAVE_VER 8)
     if (!state.mOn) state.mOn = {};
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].kuSel) {   // 段ごとの九九 → 1つずつ選ぶ形へ。2のだんは覚えたので入れない
       const on = d => { const v = state.mOn["ku" + d]; return v === undefined ? d === 5 : !!v; };
@@ -2038,7 +2084,7 @@
   // ---------------------------------------------------------------
   // SCREENS
   // ---------------------------------------------------------------
-  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult", "mhome", "mplay", "mresult", "cmhome", "cmplay", "cmresult", "kghome", "sgplay", "zkplay", "kgresult"].forEach(s => { $(s).hidden = s !== id; }); document.body.setAttribute("data-screen", id); }
+  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult", "mhome", "mplay", "mresult", "cmhome", "cmplay", "cmresult", "kghome", "sgplay", "zkplay", "mqplay", "kgresult"].forEach(s => { $(s).hidden = s !== id; }); document.body.setAttribute("data-screen", id); }
 
   function renderYen(total) {
     const denoms = [500, 100, 50, 10, 5, 1];
@@ -2481,7 +2527,7 @@
     $("pickList").innerHTML =
       item("goEn", ICONS.book, "えいご", esub) +
       item("goKg", ICONS.scroll, "こくご", (cmActive() ? "カードめいじん・" : "") + "かんじ・さがして タップ") +
-      item("goMa", ICONS.pick, "さんすう", "けいさん・かたちを かぞえよう");
+      item("goMa", ICONS.pick, "さんすう", "けいさん・かたち・むしくいざん");
     $("goEn").onclick = renderHome;
     $("goKg").onclick = renderKgHome;
     $("goMa").onclick = renderMHome;
@@ -2695,7 +2741,10 @@
     }).join("");
     $("mList").insertAdjacentHTML("beforeend", '<button class="pick" id="goZk"><span class="ico">' + ICONS.squares + '</span><span>' +
       '<span class="ttl">かたちを かぞえよう</span><span class="sub">コインが もらえる のこり ' + zkLeft() + ' かい</span></span></button>');
+    $("mList").insertAdjacentHTML("beforeend", '<button class="pick" id="goMq"><span class="ico">' + ICONS.mushi + '</span><span>' +
+      '<span class="ttl">むしくいざん</span><span class="sub">コインが もらえる のこり ' + mqLeft() + ' かい</span></span></button>');
     $("goZk").onclick = startZk;
+    $("goMq").onclick = startMq;
     Array.from($("mList").querySelectorAll(".pick[data-ev]")).forEach(b => {
       b.onclick = () => { const ev = M_EVENTS.find(e => e.id === b.getAttribute("data-ev")); if (ev) startMStage(ev); };
     });
@@ -3511,6 +3560,211 @@
   }
 
   // ---------------------------------------------------------------
+  // むしくいざん(さんすうの種目のひとつ, 2026-10-25)。
+  // 11/1回 リビューテストの 虫食い算(□に数を入れる筆算)が 0点で、クラスでも ほとんど できていなかった。
+  // 書かずに、□を 一の位から1つずつ 数字パッドで うめる。1つの□で考えるのは
+  // 「1けたの たし算・ひき算 ＋ くり上がり・くり下がり」だけなので、紙が要らない。
+  // 一の位の列がうまると、筆算で書くのと同じ しるしが出る(たし算は くり上がりの 1、
+  // ひき算は となりの数に ななめ線と 1へった数。その数が まだ□なら「−1」)。
+  // 問題は その場で作り、□の答えが1つに決まるもの(□に0〜9を ぜんぶ入れて確かめる)だけを出す。
+  // 時間は計らない(考える問題なので)。1回5問・コイン10・1日5回(かたちと同じ。くりこし なし)。
+  // 5問のうち4問を まちがえずに できたら つぎの段階へ。親メニューで段階を変えられる。
+  // ---------------------------------------------------------------
+  const MQ_STAGES = [
+    { n: 2, ops: "+",  k: 1, carry: false, name: "2桁＋2桁・□1つ・繰り上がりなし" },
+    { n: 2, ops: "+",  k: 1, carry: true,  name: "2桁＋2桁・□1つ・繰り上がりあり" },
+    { n: 2, ops: "+",  k: 2, carry: true,  name: "2桁＋2桁・□2つ・繰り上がりあり（テスト①〜③の形）" },
+    { n: 2, ops: "-",  k: 1, carry: true,  name: "2桁−2桁・□1つ・繰り下がりあり" },
+    { n: 2, ops: "-",  k: 2, carry: true,  name: "2桁−2桁・□2つ・繰り下がりあり（テスト④〜⑥の形）" },
+    { n: 3, ops: "+-", k: 3, carry: true,  name: "3桁の足し算・引き算・□3つ（テスト⑦〜⑩の形）" }
+  ];
+  const MQ_ROUND = 5, MQ_DAILY = 5, MQCOINS = 10, MQ_UP = 4;
+  const MQ_PLACE = ["いちの くらい", "じゅうの くらい", "ひゃくの くらい"];
+  function freshMq() { return { date: todayKey(), played: 0, lvl: 0, rounds: 0, hist: {} }; }
+  function mqProg() {
+    const p = P();
+    if (!p.mq) p.mq = freshMq();
+    const q = p.mq;
+    if (!q.hist) q.hist = {};
+    if (q.date !== todayKey()) { q.date = todayKey(); q.played = 0; }
+    return q;
+  }
+  function mqLeft() { return Math.max(0, MQ_DAILY - (mqProg().played || 0)); }
+  function mqDigits(v, n) { return String(v).padStart(n, "0").split("").map(Number); }
+  // cs[j] = 列 j(左から)が 左の列へ 1 くり上げた(ひき算は 左の列から 1 かりた)
+  function mqCarries(A, B, op) {
+    const n = A.length, cs = new Array(n).fill(0);
+    let cy = 0;
+    for (let j = n - 1; j >= 0; j--) {
+      const s = op === "+" ? A[j] + B[j] + cy : A[j] - B[j] - cy;
+      cy = op === "+" ? (s >= 10 ? 1 : 0) : (s < 0 ? 1 : 0);
+      cs[j] = cy;
+    }
+    return cs;
+  }
+  // □に 0〜9 を ぜんぶ入れて、式が なりたつ入れ方が いくつあるか(いちばん上の位は 0 にしない)
+  function mqCount(rows, blanks, op) {
+    let cnt = 0;
+    for (let m = 0; m < Math.pow(10, blanks.length); m++) {
+      const R = rows.map(r => r.slice());
+      let x = m, bad = false;
+      blanks.forEach(b => { const d = x % 10; x = Math.floor(x / 10); if (b.j === 0 && d === 0) bad = true; R[b.r][b.j] = d; });
+      if (bad) continue;
+      const v = R.map(r => Number(r.join("")));
+      if (op === "+" ? v[0] + v[1] === v[2] : v[0] - v[1] === v[2]) cnt++;
+    }
+    return cnt;
+  }
+  function mqMake(si) {
+    const st = MQ_STAGES[si], n = st.n, lo = Math.pow(10, n - 1), hi = Math.pow(10, n) - 1;
+    for (let t = 0; t < 2000; t++) {
+      const op = st.ops[rnd(st.ops.length)];
+      const a = lo + rnd(hi - lo + 1), b = lo + rnd(hi - lo + 1), c = op === "+" ? a + b : a - b;
+      if (c < lo || c > hi) continue;                         // こたえも 同じ けた数
+      const rows = [mqDigits(a, n), mqDigits(b, n), mqDigits(c, n)];
+      const cs = mqCarries(rows[0], rows[1], op), nc = cs.filter(x => x).length;
+      if (st.carry ? !cs[n - 1] : nc) continue;               // くり上がりあり: 一の位で かならず / なし: どこにも なし
+      if (n === 3 && nc < 2 && rnd(10) < 7) continue;         // 3けたは テストと同じく 2回 くり上がる問題を多めに
+      if (op === "-" && rows[0].slice(0, n - 1).indexOf(0) >= 0) continue;   // 上の数の 0 から かりる問題は 小1には まだ むずかしい
+      let blanks;
+      if (st.k === 1) blanks = [{ r: rnd(3), j: rnd(n) }];
+      else {                                                  // □は 1列に1つずつ。1つの数が ぜんぶ□には しない
+        blanks = shuffle([...Array(n).keys()]).slice(0, st.k).map(j => ({ r: rnd(3), j: j }));
+        if (blanks.every(x => x.r === blanks[0].r) && st.k === n) continue;
+      }
+      if (mqCount(rows, blanks, op) !== 1) continue;
+      blanks.forEach(x => { x.ans = rows[x.r][x.j]; });
+      blanks.sort((x, y) => y.j - x.j);                       // 一の位から じゅんばんに
+      return { op, n, rows, cs, blanks, si };
+    }
+    return null;
+  }
+  function mqBuildRound() {
+    const L = Math.min(mqProg().lvl || 0, MQ_STAGES.length - 1);
+    // いまの段階を3問、まえの段階を2問(さいしょの段階は5問とも)
+    const sis = [...Array(MQ_ROUND).keys()].map(i => (L === 0 || i < 3) ? L : rnd(L));
+    return shuffle(sis).map(si => mqMake(si) || mqMake(0));
+  }
+  let mqRound = [], mqI = 0, mqB = 0, mqMiss = 0, mqProbMiss = false, mqCleanN = 0,
+      mqLock = false, mqPaid = false, mqTok = 0, mqNg = "", mqShow = false;
+  function startMq() {
+    unlockAudio();
+    mqRound = mqBuildRound(); mqI = 0; mqCleanN = 0; mqPaid = mqLeft() > 0; mqTok++;
+    show("mqplay"); mqNewProblem();
+  }
+  function mqColDone(q, j) { return q.blanks.every((b, i) => b.j !== j || i < mqB); }
+  function mqLent(q, j) { return j + 1 < q.n && q.cs[j + 1] && mqColDone(q, j + 1); }   // 右の列から くり上がり・くり下がりが きた
+  function mqNewProblem() {
+    mqB = 0; mqMiss = 0; mqProbMiss = false; mqLock = false; mqNg = ""; mqShow = false;
+    const q = mqRound[mqI], b = q.blanks[0];
+    let msg = "";
+    if (mqLent(q, b.j)) msg = q.op === "+" ? "うえの 1 は、くりあがりの 1 だよ" : "ななめの せんは、となりに 1 かした しるし";
+    mqRender(msg);
+  }
+  function mqBoardHtml(q) {
+    const n = q.n, cur = q.blanks[mqB];
+    const bi = (r, j) => q.blanks.findIndex(b => b.r === r && b.j === j);
+    let h = "<span></span>";
+    for (let j = 0; j < n; j++) {
+      let m = "";
+      if (mqLent(q, j)) m = q.op === "+" ? "1" : (bi(0, j) >= mqB ? "−1" : String(q.rows[0][j] - 1));
+      h += '<span class="mq-mark">' + m + "</span>";
+    }
+    for (let r = 0; r < 3; r++) {
+      if (r === 2) h += '<span class="mq-line"></span>';
+      h += r === 1 ? '<span class="mq-op">' + (q.op === "+" ? "＋" : "－") + "</span>" : "<span></span>";
+      for (let j = 0; j < n; j++) {
+        const i = bi(r, j);
+        let cls = "mq-d", txt = String(q.rows[r][j]);
+        if (i >= 0 && i > mqB) { cls += " q"; txt = "?"; }
+        else if (i >= 0 && i === mqB && mqShow) cls += " got shown";
+        else if (i >= 0 && i === mqB) { cls += " q now" + (mqNg ? " ng" : ""); txt = mqNg || "?"; }
+        else if (i >= 0) cls += " got";
+        if (r === 0 && q.op === "-" && mqLent(q, j) && !(i >= mqB)) cls += " strike";
+        if (cur && mqMiss > 0 && j === cur.j) cls += " col";
+        h += '<span class="' + cls + '">' + esc(txt) + "</span>";
+      }
+    }
+    return h;
+  }
+  // まちがえたときの よこの しき。くり上がり(くり下がり)も 数に いれて見せる
+  function mqEq(q, b) {
+    const j = b.j, ci = j + 1 < q.n ? q.cs[j + 1] : 0, co = q.cs[j];
+    const d = r => (r === b.r ? "□" : String(q.rows[r][j]));
+    if (q.op === "+") return d(0) + " ＋ " + d(1) + (ci ? " ＋ 1" : "") + " ＝ " + (co ? "1" : "") + d(2);
+    return (co ? "1" : "") + d(0) + (ci ? " − 1" : "") + " − " + d(1) + " ＝ " + d(2);
+  }
+  function mqTip(q, b) {
+    const j = b.j, ci = j + 1 < q.n ? q.cs[j + 1] : 0, co = q.cs[j], place = MQ_PLACE[q.n - 1 - j];
+    if (q.op === "+") return co ? place + "は 10を こえて、となりに 1 くりあがるよ" : ci ? "くりあがった 1 も たそう" : place + "の れつ だけ みよう";
+    return co ? place + "は となりから 10 かりて くるよ" : ci ? "となりに 1 かしたから、1 へって いるよ" : place + "の れつ だけ みよう";
+  }
+  function mqRender(msg, cls) {
+    const q = mqRound[mqI], b = q.blanks[mqB];
+    $("mqWallet2").textContent = P().coins.toLocaleString();
+    let pr = "";
+    for (let i = 0; i < MQ_ROUND; i++) pr += '<span class="pblock' + (i < mqI ? " done" : i === mqI ? " now" : "") + '"></span>';
+    $("mqProgress").innerHTML = pr;
+    const bd = $("mqBoard");
+    bd.style.setProperty("--mqn", q.n);
+    bd.innerHTML = mqBoardHtml(q);
+    let h = '<p class="kind">□に はいる かずは？</p>';
+    if (b) h += '<p class="mq-step">' + (mqB === 0 && b.j === q.n - 1 ? "いちの くらいから かんがえよう" : MQ_PLACE[q.n - 1 - b.j] + "の □") + "</p>";
+    h += '<p class="zk-say ' + (cls || "") + '" id="mqSay">' + esc(msg || "") + "</p>";
+    if (b && mqMiss >= 2 && !mqShow) h += '<p class="mq-eq">' + esc(mqEq(q, b)) + "</p>";
+    h += '<div class="zk-pad">' + ["1", "2", "3", "4", "5", "6", "7", "8", "9", "", "0", ""].map(k =>
+      k === "" ? "<span></span>" : '<button class="key" data-k="' + k + '">' + k + "</button>").join("") + "</div>";
+    $("mqSide").innerHTML = h;
+    Array.from($("mqSide").querySelectorAll(".key")).forEach(x => { x.onclick = () => mqKey(x.getAttribute("data-k")); });
+  }
+  function mqKey(k) {
+    if (mqLock) return;
+    const q = mqRound[mqI], b = q.blanks[mqB], myTok = mqTok;
+    if (!b) return;
+    if (Number(k) === b.ans) { sfxRight(); mqAdvance(); return; }
+    sfxOops(); mqMiss++; mqProbMiss = true; mqLock = true;
+    if (mqMiss >= 3) {                                        // こたえを 見せて すすむ。減点は なし
+      mqShow = true; mqRender("こたえは " + b.ans + "。つぎに いこう", "oops");
+      setTimeout(() => { if (mqTok === myTok) { mqShow = false; mqAdvance(); } }, 1700);
+      return;
+    }
+    mqNg = k;
+    const tip = mqMiss === 1 ? mqTip(q, b) : "よこの しきに すると こう なるよ";
+    mqRender(tip, "oops");
+    setTimeout(() => { if (mqTok === myTok) { mqNg = ""; mqLock = false; mqRender(tip, "oops"); } }, 600);
+  }
+  function mqAdvance() {                                      // いまの □ が うまった
+    const q = mqRound[mqI], myTok = mqTok, j = q.blanks[mqB].j;
+    mqB++; mqMiss = 0; mqNg = "";
+    if (mqB < q.blanks.length) {
+      mqLock = false;
+      const lent = j > 0 && q.cs[j] && mqColDone(q, j);
+      mqRender(lent ? (q.op === "+" ? "10を こえたから、となりに 1 くりあがり！" : "となりから 10 かりたよ！") : pickOk(), "ok");
+      return;
+    }
+    mqLock = true;
+    if (!mqProbMiss) mqCleanN++;
+    const z = mqProg(), hs = z.hist[q.si] || (z.hist[q.si] = { n: 0, clean: 0 });
+    hs.n++; if (!mqProbMiss) hs.clean++;
+    save();
+    mqRender("できた！", "ok");
+    const blk = $("mqProgress").children[mqI];
+    if (blk) blk.className = "pblock done breaking";
+    setTimeout(() => { if (mqTok !== myTok) return; mqI++; if (mqI < mqRound.length) mqNewProblem(); else mqFinish(); }, 1300);
+  }
+  function mqFinish() {
+    mqTok++;
+    const p = P(), z = mqProg(), L = z.lvl || 0;
+    z.rounds = (z.rounds || 0) + 1;
+    let up = "";
+    if (mqCleanN >= MQ_UP && L < MQ_STAGES.length - 1) { z.lvl = L + 1; up = "つぎは もっと むずかしい むしくいに ちょうせん！"; }
+    let coins = 0;
+    if (mqPaid) { coins = MQCOINS; p.coins += coins; z.played = (z.played || 0) + 1; }
+    save();
+    kgResult("むしくい ぜんぶ うめた!", up || "いちの くらいから じゅんばんに かんがえると とけるよ", coins, startMq, renderMHome, !!up);
+  }
+
+  // ---------------------------------------------------------------
   // WORLD: blocky scenery drawn as pixel art at start-up. All of it is
   // original artwork in a block-game idiom; nothing is copied from a game.
   // ---------------------------------------------------------------
@@ -3762,6 +4016,24 @@
       "YssssssKKssssssY",
       "YYYYYYYYYYYYYYYY"
     ], { Y: "#f6c343", s: "#9d9d9d", K: "#4a4a4a" });
+  ICONS.mushi = pixIcon([
+      "KKKKKKKKKKKKKKKK",
+      "KYYYYYYYYYYYYYYK",
+      "KYYYYYWWWWYYYYoK",
+      "KYYYYWWooWWYYYoK",
+      "KYYYYWWoYWWoYYoK",
+      "KYYYYYooYWWoYYoK",
+      "KYYYYYYYWWooYYoK",
+      "KYYYYYYWWooYYYoK",
+      "KYYYYYYWWoYYYYoK",
+      "KYYYYYYYooYYYYoK",
+      "KYYYYYYWWYYYYYoK",
+      "KYYYYYYWWoYYYYoK",
+      "KYYYYYYYooYYYYoK",
+      "KYYYYYYYYYYYYYoK",
+      "KooooooooooooooK",
+      "KKKKKKKKKKKKKKKK"
+    ], { K: "#3a2a00", Y: "#f6c343", o: "#b77a0c", W: "#ffffff" });
   const SKY_ICONS = {
     day: pixIcon([
       "................",
@@ -3956,6 +4228,11 @@
       }).join("") +
       '<p class="hint">今日 ' + (zkProg().played || 0) + '回（コインは1日' + ZK_DAILY + '回まで）・ヒントなしで解けた図形 ' +
         Object.values(zkProg().hist).filter(r => r.clean).length + ' / ' + (ZK_FIGS.length + ZK_RC.length + ZK_TR.length) + '</p>' +
+      '<p class="hint" style="margin-top:12px"><b>虫食い算</b>（□に数を入れる筆算・「さんすう」の中。5問中4問を間違えずに解けると次の段階へ）</p>' +
+      '<div class="row"><label for="mqLvl">段階</label><select id="mqLvl">' + MQ_STAGES.map((st, i) =>
+        '<option value="' + i + '"' + ((mqProg().lvl || 0) === i ? " selected" : "") + '>' + (i + 1) + "：" + esc(st.name) + '</option>').join("") + '</select></div>' +
+      '<p class="hint">今日 ' + (mqProg().played || 0) + '回（コインは1日' + MQ_DAILY + '回まで）・これまで ' + (mqProg().rounds || 0) + '回' +
+        MQ_STAGES.map((st, i) => { const r = mqProg().hist[i]; return r && r.n ? "・段階" + (i + 1) + " 間違えずに解けた " + r.clean + "/" + r.n + "問" : ""; }).join("") + '</p>' +
       '<p class="hint">' + M_EVENTS.filter(evOn).map(ev => {
         const r = evRec(ev.id);
         return esc(evName(ev)) + "：" + (r.best === null ? "記録なし" : "最高 " + r.best + "秒") + "（" + r.done + "回" +
@@ -3977,6 +4254,7 @@
     $("cmMode").onchange = e => { state.cmMode = e.target.value; save(); closeParent(); renderPick(); };
     $("cmDueSave").onclick = () => { const v = $("cmDueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues["card-meijin"] = v; save(); alert("カード名人のテスト日を " + v + " にしました"); closeParent(); renderPick(); } else alert("日付を選んでください"); };
     $("sgLvl").onchange = e => { const s = kgProg().sg; s.lvl = Number(e.target.value); s.streak = 0; s.good = 0; save(); };
+    $("mqLvl").onchange = e => { mqProg().lvl = Number(e.target.value); save(); };
     Array.from(document.querySelectorAll(".zklvl")).forEach(sel => { sel.onchange = () => { zkProg()[ZK_TRACKS[sel.getAttribute("data-t")].lv] = Number(sel.value); save(); }; });
     $("lvlSel").onchange = e => { P().level = Number(e.target.value); save(); closeParent(); openParent(); };
     $("voiceSel").onchange = e => { state.voice = e.target.value === "1"; save(); };
@@ -4082,6 +4360,7 @@
     $("kgBack").onclick = renderPick;
     $("sgQuit").onclick = () => { sgTok++; renderKgHome(); };
     $("zkQuit").onclick = () => { zkTok++; renderMHome(); };
+    $("mqQuit").onclick = () => { mqTok++; renderMHome(); };
     ["sgQ", "sgP"].forEach(id => $(id).addEventListener("click", e => { const el = e.target.closest(".sgc"); if (el) sgTap(el); }));
     $("zkBoard").addEventListener("pointerdown", zkDown);
     $("zkBoard").addEventListener("pointermove", zkMove);
