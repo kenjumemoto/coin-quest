@@ -2361,7 +2361,13 @@
     const pool = (rest.length ? rest : items).slice();
     shuffle(pool);
     pool.sort((a, b) => (g.hits[a[0]] || 0) - (g.hits[b[0]] || 0));   // 苦手な字から
-    const chosen = pool.slice(0, KSTAGE_SIZE);
+    // 半分は 正解の少ない字、のこり半分は「あと少しで おぼえる」字(正解の多い字)から出す(10/24〜)。
+    // 苦手な字だけを出していると、あと1回の字がいつまでも出ず「おぼえた」が0のまま止まった
+    // (第3回は40字中33字、第4回は36字中24字が正解2回で止まっていた)
+    const half = Math.ceil(KSTAGE_SIZE / 2);
+    const chosen = pool.slice(0, half);
+    const near = pool.slice(half).sort((a, b) => (g.hits[b[0]] || 0) - (g.hits[a[0]] || 0));
+    chosen.push(...near.slice(0, KSTAGE_SIZE - chosen.length));
     while (chosen.length < KSTAGE_SIZE && items.length) chosen.push(items[rnd(items.length)]);
     return shuffle(chosen.map((it, i) => pickKQuestion(it, (i % 2 === 0 || !g.sawB[it[0]]) ? "B" : "A")));
   }
