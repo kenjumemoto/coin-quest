@@ -1733,8 +1733,8 @@
   const KCOINS_STAGE = 5;        // 1かい あそんだ
   const KCOINS_LEARN = 2;        // 1字 はじめて おぼえた
   const KCOINS_ALL = 100;        // ぜんぶ そろえた(1回だけ)
-  const KDAILY_MIN = 2;          // 1日にコインがもらえる回数の下限
-  const KDAILY_MAX = 5;          // 同じく上限。あとは期限までの日数から逆算する
+  const KDAILY_MIN = 5;          // 1日にコインがもらえる回数の下限(10/24 に 2→5。本人が「2回しかできない」と不満で、親の判断)
+  const KDAILY_MAX = 5;          // 同じく上限。テストの前日・当日だけは上限なし
 
   // ---------------------------------------------------------------
   // SETTINGS
@@ -2280,10 +2280,16 @@
   // the allowance would shrink under him halfway through the day.
   function kDailyCap() {
     const t = P().today;
-    if (t.kcap === undefined || t.kcap === null) { t.kcap = computeKCap(); save(); }
+    // 下限を上げる前に決めた きょうの上限(2)は、上げなおす。下げることはない
+    if (t.kcap === undefined || t.kcap === null || t.kcap < KDAILY_MIN) { t.kcap = computeKCap(); save(); }
     return t.kcap;
   }
+  // kplayed は「コインが出て、さいごまで やった回」だけを数える(10/24〜。やめた回は へらさない)
   function kLeftToday() { return Math.max(0, kDailyCap() - (P().today.kplayed || 0)); }
+  // 覚えきったあとも「たしかめ」で1日 KDAILY_MIN 回までは コインを出す(上限なしの日に無限に稼げないように)
+  function kPayable() {
+    return kLeftToday() > 0 && (kRoundsNeeded() > 0 || (P().today.kplayed || 0) < KDAILY_MIN);
+  }
 
   function renderKHome() {
     rollDay();
@@ -2302,18 +2308,20 @@
     const n = learnedCount();
     $("kCount").textContent = "おぼえた " + n + " / " + items.length;
     const all = n >= items.length;
-    const left = kLeftToday(), cap = kDailyCap(), free = cap >= KCAP_FREE;
+    const left = kLeftToday(), cap = kDailyCap(), free = cap >= KCAP_FREE, paid = kPayable();
     let slots = "";
     if (!all && free) slots = '<span class="lbl">ぜんぶ そろうまで やろう!</span>';
-    else if (!all) { slots = '<span class="lbl">のこり</span>';
-      for (let i = 0; i < cap; i++) slots += '<span class="slot' + (i < left ? " on" : "") + '"></span>'; }
+    else {                                  // 覚えきったあとは「たしかめ」の のこり回数
+      const n = all ? KDAILY_MIN : cap, l = all ? Math.max(0, KDAILY_MIN - (p.today.kplayed || 0)) : left;
+      slots = '<span class="lbl">のこり</span>';
+      for (let i = 0; i < n; i++) slots += '<span class="slot' + (i < l ? " on" : "") + '"></span>'; }
     $("kDayRow").innerHTML = slots;
-    $("kDone").hidden = !(all || (!free && left <= 0));
+    $("kDone").hidden = !(all || !paid);
     $("kDone").textContent = all
       ? "ぜんぶ そろった! かんぺき!"
       : "きょうの コインは ここまで。あしたに なると また もらえるよ。";
-    $("kStart").textContent = left <= 0 ? "コインなしで あそぶ" : (all ? "もういちど たしかめる" : "スタート");
-    $("kStart").className = "btn big " + (left <= 0 ? "ghost" : all ? "gold" : "green");
+    $("kStart").textContent = !paid ? "コインなしで あそぶ" : (all ? "もういちど たしかめる" : "スタート");
+    $("kStart").className = "btn big " + (!paid ? "ghost" : all ? "gold" : "green");
     show("khome");
   }
 
@@ -2360,8 +2368,7 @@
   let kPaid = false;
   function startKStage() {
     unlockAudio(); rollDay();
-    kPaid = kLeftToday() > 0 && kRoundsNeeded() > 0;   // 上限をこえた回と、覚えきったあとはコインなし
-    P().today.kplayed = (P().today.kplayed || 0) + 1; save();
+    kPaid = kPayable();                // 回数を へらすのは さいごまで やったとき。やめた回は へらさない
     kStage = buildKStage(); kQi = 0; kGained = [];
     show("kplay"); renderKQuestion();
   }
@@ -2423,7 +2430,9 @@
   }
   function finishKStage() {
     const p = P(), g = qprog(), items = quest().items;
-    let coins = (kPaid ? KCOINS_STAGE : 0) + kGained.length * KCOINS_LEARN;   // おぼえた分は上限に関係なく出す
+    const paidNow = kPaid; kPaid = false;
+    if (paidNow) p.today.kplayed = (p.today.kplayed || 0) + 1;   // さいごまで やった回だけ へらす
+    let coins = (paidNow ? KCOINS_STAGE : 0) + kGained.length * KCOINS_LEARN;   // おぼえた分は上限に関係なく出す
     const all = learnedCount() >= items.length;
     const firstAll = all && !g.done;
     if (firstAll) { g.done = true; coins += KCOINS_ALL; }   // 達成のごほうびは上限に関係なく1回だけ出す
