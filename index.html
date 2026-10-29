@@ -270,6 +270,8 @@
   .blank.tight { margin-right: 0; }   /* no gap before a full stop */
   .blank { display: inline-block; min-width: 3.2em; border-bottom: 4px solid var(--blue); margin: 0 .15em; vertical-align: baseline; color: var(--blue); font-weight: 700; }
   .blank.filled { border-bottom-color: var(--ok-dark); color: var(--ok-dark); }
+  .idiom { margin: 0; font-weight: 800; font-size: clamp(17px, 2.4vw, 22px); color: var(--ok-dark); }
+  .idiom b { font-family: var(--font-en); font-weight: 700; }
   .speak {
     appearance: none; border: 3px solid var(--blue-dark); background: var(--blue); color: #fff; width: 56px; height: 56px;
     font-size: 26px; cursor: pointer; box-shadow: 0 4px 0 var(--blue-dark); line-height: 1;
@@ -1053,6 +1055,59 @@
     ["friendly","なかよくしてくれる",3,"a"],["smart","かしこい",3,"a"],["lonely","さびしい",3,"a"],["proud","ほこらしい",3,"a"],["ready","じゅんびできた",3,"a"]
   ];
 
+  // ---------------------------------------------------------------
+  // 英検3級クラス(2026-10-29〜)。クラスで「覚えてください」と配られた 単語138・熟語40。
+  // 1回(10問)のうち K3 のわくで いくつか出す(親メニューで 0/3/5。最初は3)。出た回数の少ないものから。
+  // ここで あたらしく足した語・熟語(K3_NEW)は このわくでしか出さない(いちどに知らない語ばかりに ならないように)。
+  // 品詞 d=副詞 c=接続詞 i=熟語。にた意味の語は 和訳を そろえる(すばらしい=excellent/wonderful)と、
+  // おたがいの ダミーに ならないので 正解が2つにならない。熟語の例文は 教材の文を使わず、つくりなおした
+  // ---------------------------------------------------------------
+  const K3_LIST = "answer drink eat follow hold invite lose move pass save taste touch wear cross drive explain grow hurt leave miss order peel spend throw travel win " +
+    "borrow lend break build close open forget remember pull push " +
+    "another broken clever crowded delicious excellent hard important main poor rich sick sunny warm wonderful " +
+    "beautiful cheap cloudy dangerous enough expensive heavy last next professional same special true windy wrong " +
+    "angry nervous shy glad sad surprised " +
+    "accident capital coach computer difference e-mail flight Internet leaf meeting minute mountain office place prize project schedule speech subject tournament " +
+    "advice clothes company culture elevator event history job meaning memory money novel package plan problem report sign stadium title website " +
+    "abroad ago always even later once still then tonight again almost carefully finally often soon straight together twice " +
+    "because if since when but or so while";
+  const K3_NEW_WORDS = [
+    ["answer","こたえる",3,"v"],["invite","しょうたいする",3,"v"],["move","うごかす",3,"v"],["pass","てわたす",3,"v"],["taste","あじが する",3,"v"],
+    ["touch","さわる",3,"v"],["wear","きている",3,"v"],["drive","うんてんする",3,"v"],["explain","せつめいする",3,"v"],["miss","いなくて さびしい",3,"v"],
+    ["order","ちゅうもんする",3,"v"],["peel","かわを むく",3,"v"],["spend","（おかねを）つかう",3,"v"],
+    ["another","もう ひとつの",3,"a"],["clever","かしこい",3,"a"],["crowded","（ひとで）こんでいる",3,"a"],["excellent","すばらしい",3,"a"],["hard","むずかしい",3,"a"],
+    ["important","だいじな",3,"a"],["main","メインの",3,"a"],["sick","びょうきの",3,"a"],["sunny","はれた",3,"a"],["warm","あたたかい",3,"a"],
+    ["wonderful","すばらしい",3,"a"],["cloudy","くもった",3,"a"],["enough","じゅうぶんな",3,"a"],["last","さいごの",3,"a"],["next","つぎの",3,"a"],
+    ["professional","プロの",3,"a"],["same","おなじ",3,"a"],["true","ほんとうの",3,"a"],["windy","かぜが つよい",3,"a"],["wrong","まちがった",3,"a"],
+    ["nervous","ドキドキしている",3,"a"],["shy","はずかしがりの",3,"a"],["glad","うれしい",3,"a"],["surprised","びっくりした",3,"a"],
+    ["accident","じこ",3,"n"],["capital","しゅと",3,"n"],["coach","コーチ",3,"n"],["computer","コンピューター",3,"n"],["difference","ちがい",3,"n"],
+    ["e-mail","メール",3,"n"],["flight","ひこうきの びん",3,"n"],["Internet","インターネット",3,"n"],["leaf","はっぱ",3,"n"],["meeting","かいぎ",3,"n"],
+    ["minute","〜ふん（じかん）",3,"n"],["office","じむしょ",3,"n"],["place","ばしょ",3,"n"],["project","けんきゅう",3,"n"],["schedule","スケジュール",3,"n"],
+    ["speech","スピーチ",3,"n"],["subject","きょうか（さんすう など）",3,"n"],["tournament","たいかい",3,"n"],["advice","アドバイス",3,"n"],["clothes","ふく",3,"n"],
+    ["company","かいしゃ",3,"n"],["culture","ぶんか",3,"n"],["elevator","エレベーター",3,"n"],["event","イベント",3,"n"],["history","れきし",3,"n"],
+    ["job","しごと",3,"n"],["meaning","いみ",3,"n"],["memory","おもいで",3,"n"],["novel","ものがたりの ほん",3,"n"],["package","にもつ",3,"n"],
+    ["plan","けいかく",3,"n"],["report","レポート",3,"n"],["sign","かんばん",3,"n"],["stadium","スタジアム",3,"n"],["title","タイトル",3,"n"],["website","ウェブサイト",3,"n"],
+    ["abroad","がいこくで",3,"d"],["ago","〜まえに",3,"d"],["always","いつも",3,"d"],["even","〜でも",3,"d"],["later","あとで",3,"d"],
+    ["once","1かい",3,"d"],["still","まだ",3,"d"],["then","それから",3,"d"],["tonight","こんや",3,"d"],["again","もう いちど",3,"d"],
+    ["almost","ほとんど",3,"d"],["carefully","ちゅういして",3,"d"],["finally","やっと",3,"d"],["often","よく",3,"d"],["soon","もうすぐ",3,"d"],
+    ["straight","まっすぐ",3,"d"],["together","いっしょに",3,"d"],["twice","2かい",3,"d"],
+    ["because","なぜなら",3,"c"],["if","もし",3,"c"],["since","〜してから",3,"c"],["when","〜の とき",3,"c"],
+    ["but","でも",3,"c"],["or","それとも",3,"c"],["so","だから",3,"c"],["while","〜している あいだに",3,"c"],
+    // 熟語(いみあて)。使いかたは SENTS の さいごの 熟語の文で出る
+    ["be able to","〜することが できる",3,"i"],["be absent from","〜を やすむ（けっせき）",3,"i"],["be afraid of","〜を こわがる",3,"i"],
+    ["be popular with","〜に にんきが ある",3,"i"],["be proud of","〜を じまんに おもう",3,"i"],["be surprised at","〜に びっくりする",3,"i"],
+    ["be tired of","〜に あきている",3,"i"],["far away","とおく はなれて",3,"i"],["for free","ただで",3,"i"],["next to","〜の となりに",3,"i"],
+    ["right away","すぐに",3,"i"],["so ... that","とても…なので〜",3,"i"],["a pair of","1くみの（くつ など）",3,"i"],["at first","さいしょは",3,"i"],
+    ["do one's best","いっしょうけんめい がんばる",3,"i"],["each other","おたがいに",3,"i"],["give ... a ride","くるまに のせて あげる",3,"i"],
+    ["on business","しごとで",3,"i"],["on foot","あるいて",3,"i"],["on the way to","〜へ いく とちゅうで",3,"i"],["be covered with","〜で おおわれている",3,"i"],
+    ["do well","うまく いく",3,"i"],["fall down","ころぶ",3,"i"],["get off","（のりものを）おりる",3,"i"],["get on","（のりものに）のる",3,"i"],
+    ["grow up","おおきく なる",3,"i"],["hold on","（でんわで）そのまま まつ",3,"i"],["hurry up","いそぐ",3,"i"],["laugh at","〜を わらう",3,"i"],
+    ["look forward to","〜を たのしみに する",3,"i"],["pay ... for","…の おかねを はらう",3,"i"],["pick up","（くるまで）むかえに いく",3,"i"],
+    ["put on","きる（みに つける）",3,"i"],["run away","にげる",3,"i"],["spend ... on","…に おかねを つかう",3,"i"],["take part in","〜に さんかする",3,"i"],
+    ["turn down","（おとを）ちいさく する",3,"i"],["turn off","（でんきを）けす",3,"i"],["worry about","〜を しんぱいする",3,"i"],["write back","へんじを かく",3,"i"]
+  ];
+  WORDS.push(...K3_NEW_WORDS);
+
   // {t: sentence with ___, a: answer, d: 3 distractors, l: level}
   const SENTS = [
     {l:4,t:"I ___ milk every morning.",a:"drink",d:["eat","read","run"]},
@@ -1235,7 +1290,49 @@
     {l:3,t:"Are you ___? Let's go!",a:"ready",d:["cheap","empty","delicious"]},
     {l:3,t:"I have no friends here. I feel ___.",a:"lonely",d:["proud","full","rich"]},
     {l:3,t:"The boy was very ___. He fought the dragon alone.",a:"brave",d:["empty","cheap","delicious"]},
-    {l:3,t:"The dogs are barking. It is very ___.",a:"noisy",d:["quiet","empty","cheap"]}
+    {l:3,t:"The dogs are barking. It is very ___.",a:"noisy",d:["quiet","empty","cheap"]},
+
+    // ---- 2026-10-29 英検3級クラスの熟語(p=熟語 j=いみ)。K3 のわくでしか出ない。教材の例文は使わず つくりなおした
+    {l:3,t:"Birds are ___ to fly in the sky.",a:"able",d:["absent","covered","popular"],p:"be able to",j:"〜することが できる"},
+    {l:3,t:"Ken was ___ from school because he was sick.",a:"absent",d:["able","covered","popular"],p:"be absent from",j:"〜を やすむ（けっせき）"},
+    {l:3,t:"Many children are afraid ___ the dark.",a:"of",d:["at","on","with"],p:"be afraid of",j:"〜を こわがる"},
+    {l:3,t:"This game is popular ___ kids.",a:"with",d:["at","of","on"],p:"be popular with",j:"〜に にんきが ある"},
+    {l:3,t:"I am proud ___ my big castle.",a:"of",d:["at","on","with"],p:"be proud of",j:"〜を じまんに おもう"},
+    {l:3,t:"We were surprised ___ the huge spider.",a:"at",d:["of","on","for"],p:"be surprised at",j:"〜に びっくりする"},
+    {l:3,t:"I am tired ___ eating bread every day.",a:"of",d:["at","on","for"],p:"be tired of",j:"〜に あきている"},
+    {l:3,t:"The village is far ___. Let's ride a horse.",a:"away",d:["up","on","at"],p:"far away",j:"とおく はなれて"},
+    {l:3,t:"I got this sword for ___. I didn't pay.",a:"free",d:["first","foot","business"],p:"for free",j:"ただで"},
+    {l:3,t:"The chest is next ___ the bed.",a:"to",d:["at","of","on"],p:"next to",j:"〜の となりに"},
+    {l:3,t:"It's getting dark. Come home right ___.",a:"away",d:["up","on","at"],p:"right away",j:"すぐに"},
+    {l:3,t:"The cave was ___ dark that I couldn't see.",a:"so",d:["very","too","such"],p:"so ... that",j:"とても…なので〜"},
+    {l:3,t:"I want a new ___ of shoes.",a:"pair",d:["cup","slice","piece"],p:"a pair of",j:"1くみの（くつ など）"},
+    {l:3,t:"At ___, I couldn't swim. Now I can.",a:"first",d:["foot","free","way"],p:"at first",j:"さいしょは"},
+    {l:3,t:"Let's do our ___ in the race!",a:"best",d:["good","well","most"],p:"do one's best",j:"いっしょうけんめい がんばる"},
+    {l:3,t:"The two dogs played with each ___.",a:"other",d:["another","some","any"],p:"each other",j:"おたがいに"},
+    {l:3,t:"Grandpa gave me a ___ to the zoo in his car.",a:"ride",d:["run","walk","foot"],p:"give ... a ride",j:"くるまに のせて あげる"},
+    {l:3,t:"My father went to Osaka on ___.",a:"business",d:["free","first","away"],p:"on business",j:"しごとで"},
+    {l:3,t:"We went to the park on ___.",a:"foot",d:["first","free","away"],p:"on foot",j:"あるいて"},
+    {l:3,t:"I found a diamond on the ___ to school.",a:"way",d:["foot","free","first"],p:"on the way to",j:"〜へ いく とちゅうで"},
+    {l:3,t:"The mountain is covered ___ snow.",a:"with",d:["of","at","for"],p:"be covered with",j:"〜で おおわれている"},
+    {l:3,t:"I did ___ in the soccer game!",a:"well",d:["many","much","very"],p:"do well",j:"うまく いく"},
+    {l:3,t:"Be careful on the ice. Don't fall ___.",a:"down",d:["up","on","at"],p:"fall down",j:"ころぶ"},
+    {l:3,t:"This is our station! Let's get ___ the train.",a:"off",d:["up","of","for"],p:"get off",j:"（のりものを）おりる"},
+    {l:3,t:"The bus is here. Let's get ___ it!",a:"on",d:["up","of","for"],p:"get on",j:"（のりものに）のる"},
+    {l:3,t:"I want to be a scientist when I grow ___.",a:"up",d:["down","on","off"],p:"grow up",j:"おおきく なる"},
+    {l:3,t:"Please ___ on. Mom is coming to the phone.",a:"hold",d:["put","turn","get"],p:"hold on",j:"（でんわで）そのまま まつ"},
+    {l:3,t:"Please hurry ___! The bus is leaving.",a:"up",d:["down","at","of"],p:"hurry up",j:"いそぐ"},
+    {l:3,t:"Everyone laughed ___ my silly dance.",a:"at",d:["of","on","for"],p:"laugh at",j:"〜を わらう"},
+    {l:3,t:"I'm looking ___ to my birthday party!",a:"forward",d:["up","down","after"],p:"look forward to",j:"〜を たのしみに する"},
+    {l:3,t:"I paid 500 yen ___ this cake.",a:"for",d:["on","at","of"],p:"pay ... for",j:"…の おかねを はらう"},
+    {l:3,t:"Mom will pick me ___ at the park.",a:"up",d:["down","on","off"],p:"pick up",j:"（くるまで）むかえに いく"},
+    {l:3,t:"It's cold. Put ___ your coat.",a:"on",d:["off","at","of"],p:"put on",j:"きる（みに つける）"},
+    {l:3,t:"When you see a creeper, run ___!",a:"away",d:["up","at","of"],p:"run away",j:"にげる"},
+    {l:3,t:"I spent all my coins ___ a new sword.",a:"on",d:["at","of","to"],p:"spend ... on",j:"…に おかねを つかう"},
+    {l:3,t:"I will take ___ in the building contest.",a:"part",d:["home","walk","foot"],p:"take part in",j:"〜に さんかする"},
+    {l:3,t:"The music is too loud. Please turn it ___.",a:"down",d:["up","on","at"],p:"turn down",j:"（おとを）ちいさく する"},
+    {l:3,t:"It's bedtime. Turn ___ the light.",a:"off",d:["at","of","for"],p:"turn off",j:"（でんきを）けす"},
+    {l:3,t:"Don't worry ___ the zombies. I have a sword.",a:"about",d:["at","on","with"],p:"worry about",j:"〜を しんぱいする"},
+    {l:3,t:"Grandma sent me a letter, so I wrote ___ to her.",a:"back",d:["up","at","on"],p:"write back",j:"へんじを かく"}
   ];
 
   // ---------------------------------------------------------------
@@ -1795,7 +1892,7 @@
   const OLD_STORE_KEY = "kotoba-craft-v1";
   const BACKUP_KEY = "coin-quest-v1-bak";
   const UNDO_KEY = "coin-quest-v1-undo";
-  const SAVE_VER = 8;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
+  const SAVE_VER = 9;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
   const PLAYERS = { taiga: "たいが", gaku: "がく" };
 
   // ---------------------------------------------------------------
@@ -2009,6 +2106,11 @@
   function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = rnd(i + 1); [a[i], a[j]] = [a[j], a[i]]; } return a; }
   function esc(s) { return String(s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])); }
   const WORD_BY_EN = {}; WORDS.forEach(w => { WORD_BY_EN[w[0]] = w; });
+  // 英検3級クラス: あたらしく足した語・熟語の文(K3 のわくでしか出さない) と、クラスの一覧ぜんぶ
+  const K3_NEW = new Set(K3_NEW_WORDS.map(w => "w:" + w[0]).concat(SENTS.map((s, i) => s.p ? "s:" + i : "").filter(Boolean)));
+  const K3_ALL = [...new Set(K3_LIST.split(/\s+/).filter(Boolean).map(w => "w:" + w).concat([...K3_NEW]))];
+  const K3_DEFAULT = 3;              // 1回(10問)のうち クラスの語を いくつ出すか。親メニューで 0/3/5
+  function k3Per() { const v = P().k3per; return v === undefined || v === null ? K3_DEFAULT : v; }
   function jaOf(en) { const w = WORD_BY_EN[en] || WORD_BY_EN[en.replace(/s$/, "")]; return w ? w[1] : ""; }
   function itemById(id) {
     if (id.startsWith("w:")) return { kind: "word", w: WORD_BY_EN[id.slice(2)], id };
@@ -2041,12 +2143,15 @@
     const used = new Set();
     // 1) everything missed last time comes back first
     for (const id of p.retry.slice(0, STAGE_SIZE)) { if (itemById(id) && (itemById(id).w || itemById(id).s)) { ids.push(id); used.add(id); } }
+    // 2) 英検3級クラスの語・熟語(出た回数の少ないものから)
+    const k3n = Math.min(STAGE_SIZE - ids.length, k3Per());
+    for (let i = 0; i < k3n; i++) { const id = pickLeastSeen(K3_ALL, used); if (id) { ids.push(id); used.add(id); } }
     const need = STAGE_SIZE - ids.length;
     const sentTarget = Math.round(need * ratioSent());
     const wordTarget = need - sentTarget;
     const r3 = ratioL3();
-    const wordPool = lvl => WORDS.filter(w => w[2] === lvl).map(w => "w:" + w[0]);
-    const sentPool = lvl => SENTS.map((s, i) => s.l === lvl ? "s:" + i : null).filter(Boolean);
+    const wordPool = lvl => WORDS.filter(w => w[2] === lvl).map(w => "w:" + w[0]).filter(id => !K3_NEW.has(id));
+    const sentPool = lvl => SENTS.map((s, i) => s.l === lvl ? "s:" + i : null).filter(id => id && !K3_NEW.has(id));
     for (let i = 0; i < wordTarget; i++) {
       const lvl = Math.random() < r3 ? 3 : 4;
       const id = pickLeastSeen(wordPool(lvl), used) || pickLeastSeen(wordPool(lvl === 3 ? 4 : 3), used);
@@ -2078,7 +2183,7 @@
     }
     const s = it.s;
     const opts = shuffle([s.a].concat(s.d).map(x => ({ en: x, ja: jaOf(x), ok: x === s.a })));
-    return { id, kind: "sent", text: s.t, answer: s.a, opts };
+    return { id, kind: "sent", text: s.t, answer: s.a, opts, p: s.p, j: s.j };
   }
 
   // ---------------------------------------------------------------
@@ -2190,6 +2295,7 @@
     // say the right english, and show the filled sentence
     if (q.kind === "sent") {
       const bl = $("blank"); bl.textContent = q.answer; bl.classList.add("filled");
+      if (q.p) $("card").insertAdjacentHTML("beforeend", '<p class="idiom"><b>' + esc(q.p) + '</b> ＝ ' + esc(q.j) + '</p>');
       setTimeout(() => speak(q.text.replace("___", q.answer), 0.9), 350);
     } else if (q.mode === "ja2en") {
       setTimeout(() => speak(q.en), 250);
@@ -2257,7 +2363,7 @@
       const list = $("reviewList");
       results.filter(r => !r.ok).forEach(r => {
         const q = r.q; const b = document.createElement("button"); b.className = "chip";
-        const en = q.kind === "word" ? q.en : q.answer; const ja = q.kind === "word" ? q.ja : jaOf(q.answer);
+        const en = q.kind === "word" ? q.en : (q.p || q.answer); const ja = q.kind === "word" ? q.ja : (q.j || jaOf(q.answer));
         b.innerHTML = esc(en) + (ja ? '<small>' + esc(ja) + '</small>' : "");
         b.onclick = () => speak(q.kind === "sent" ? q.text.replace("___", q.answer) : en);
         list.appendChild(b);
@@ -4147,7 +4253,7 @@
     const wrongTop = Object.entries(p.wrong).sort((a, b) => b[1] - a[1]).slice(0, 12).map(([id, n]) => {
       if (id.startsWith("k:")) return "<li>" + esc(id.slice(2)) + " ×" + n + "</li>";
       const it = itemById(id); if (!it) return "";
-      const label = it.kind === "word" ? it.w[0] + "(" + it.w[1] + ")" : it.s.a + " / " + it.s.t;
+      const label = it.kind === "word" ? it.w[0] + "(" + it.w[1] + ")" : (it.s.p || it.s.a) + " / " + it.s.t;
       return "<li>" + esc(label) + " ×" + n + "</li>";
     }).join("");
     const div = document.createElement("div"); div.className = "panel"; div.id = "panel";
@@ -4184,6 +4290,16 @@
       '</select><span class="hint">3級 ' + Math.round(ratioL3() * 100) + '% / 日→英 ' + Math.round(ratioJa2En() * 100) + '% / 英文 ' + Math.round(ratioSent() * 100) + '%</span></div>' +
       '<div class="row"><label for="voiceSel">英語の読み上げ</label><select id="voiceSel"><option value="1"' + (state.voice ? " selected" : "") + '>オン</option><option value="0"' + (!state.voice ? " selected" : "") + '>オフ</option></select>' +
       '<button class="btn small ghost" id="voiceTest">テスト</button></div>' +
+      '<div class="row"><label for="k3Sel">英検3級クラスの単語・熟語</label><select id="k3Sel">' +
+        [[0, "出さない"], [3, "1回に3問（ふつう）"], [5, "1回に5問（多め）"]].map(o => '<option value="' + o[0] + '"' + (k3Per() === o[0] ? " selected" : "") + '>' + o[1] + '</option>').join("") +
+      '</select></div>' +
+      '<p class="hint">' + (function () {
+        const seen = P().seen, wrong = P().wrong, ws = K3_LIST.split(/\s+/).filter(Boolean), ids = WORDS.filter(w => w[3] === "i").map(w => w[0]);
+        const sid = {}; SENTS.forEach((x, i) => { if (x.p) sid[x.p] = "s:" + i; });
+        const wSeen = ws.filter(w => seen["w:" + w]).length, iSeen = ids.filter(t => seen["w:" + t] || seen[sid[t]]).length;
+        const miss = K3_ALL.filter(id => wrong[id]).length;
+        return "単語 出た " + wSeen + " / " + ws.length + "・熟語 出た " + iSeen + " / " + ids.length + "（意味あてと英文の両方で出る）・間違えたことがある " + miss;
+      })() + '</p>' +
       '<p class="stat">コイン <b id="panelCoins">' + p.coins + '</b>　英語：クリア ' + p.stagesCleared + '回（プレイ ' + p.stagesPlayed + '回）・今日 ' + p.today.cleared + '回クリア・難易度 ' + P().level + '</p>' +
       '<p class="stat">漢字「' + esc(qName(quest())) + '」 覚えた字 ' + learnedCount() + ' / ' + quest().items.length + '</p>' +
       '<p class="hint">よく間違える言葉（多い順）</p><ul style="margin:0 0 8px;padding-left:18px;font-size:13px">' + (wrongTop || "<li>まだありません</li>") + '</ul>' +
@@ -4258,6 +4374,7 @@
     Array.from(document.querySelectorAll(".zklvl")).forEach(sel => { sel.onchange = () => { zkProg()[ZK_TRACKS[sel.getAttribute("data-t")].lv] = Number(sel.value); save(); }; });
     $("lvlSel").onchange = e => { P().level = Number(e.target.value); save(); closeParent(); openParent(); };
     $("voiceSel").onchange = e => { state.voice = e.target.value === "1"; save(); };
+    $("k3Sel").onchange = e => { P().k3per = Number(e.target.value); save(); };
     $("voiceTest").onclick = () => { unlockAudio(); speak("Let's build a house with wood."); };
     const coinAmt = id => { const v = parseInt(($(id).value || "").replace(/[^0-9]/g, ""), 10); return isFinite(v) && v > 0 ? Math.min(v, 9999) : 0; };
     const coinDone = msg => { $("coinMsg").textContent = msg; $("panelCoins").textContent = P().coins; save(); renderPick(); };
