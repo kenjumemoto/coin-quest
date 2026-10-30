@@ -2069,8 +2069,12 @@
     if (!state.voice || !("speechSynthesis" in window)) return;
     try {
       speechSynthesis.cancel();
-      const u1 = utter(before.trim() || "hmm", 0.85);
-      u1.onend = function () { beep(880, .12); setTimeout(function () { if (after.trim()) speechSynthesis.speak(utter(after, 0.85)); }, 260); };
+      // 「I」「A」だけを読ませると Samantha は「Capital I」と読む(10/30 親の録画で判明)。「I,」なら ふつうの アイ
+      let b = before.trim();
+      if (/^[A-Z]$/.test(b)) b += ",";
+      const u1 = utter(b || "hmm", 0.85);
+      // 空欄のあとが「.」「!」だけのときは読まない(記号だけを読ませると「full stop」「question mark」と読む)
+      u1.onend = function () { beep(880, .12); setTimeout(function () { if (/[A-Za-z0-9]/.test(after)) speechSynthesis.speak(utter(after, 0.85)); }, 260); };
       speechSynthesis.speak(u1);
     } catch (e) { /* ignore */ }
   }
