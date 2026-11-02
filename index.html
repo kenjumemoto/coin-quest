@@ -752,6 +752,37 @@
   @media (orientation: portrait) { .mq-wrap .zk-side { box-sizing: border-box; } }
   @media (orientation: portrait) and (max-width: 500px) { .mq-board { --mqc: 60px; } }
   @media (prefers-reduced-motion: reduce) { .mq-d.now { animation: none; } }
+
+  /* --- つみきを かぞえよう --- */
+  .tk-wrap { display: flex; gap: 16px; align-items: flex-start; justify-content: center; margin-top: 10px; padding-bottom: calc(3 * var(--gb)); }
+  .tk-board { flex: none; }
+  .tk-board svg { display: block; }
+  .tk-side { margin-top: 0; flex: 1 1 auto; max-width: 600px; display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 12px; align-items: start; text-align: left; padding: 12px 14px; }
+  .tk-left { display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+  .tk-rows { display: flex; flex-direction: column; gap: 3px; }
+  .tk-row { margin: 0; display: flex; align-items: center; flex-wrap: wrap; gap: 4px; font-weight: 800; font-size: 17px; padding: 2px 6px; background: #f3efe6; }
+  .tk-row.on { background: #fff3b0; }
+  .tk-lab { font-family: var(--font-ja); min-width: 3.7em; font-size: 15px; color: var(--ink-soft); }
+  .tk-n { font-family: var(--font-en); font-size: 20px; min-width: 1.4em; text-align: center; }
+  .tk-box { display: inline-flex; align-items: center; justify-content: center; min-width: 2.2em; height: 1.45em; padding: 0 4px; box-sizing: border-box;
+            font-family: var(--font-en); font-weight: 700; font-size: 20px; border: 3px solid #b8b0a0; background: #fff; }
+  .tk-box.empty { background: transparent; border-style: dashed; }
+  .tk-box.now { border-color: var(--blue); color: var(--blue); outline: 3px solid #ffe14d; outline-offset: 1px; }
+  .tk-box.got { border-color: var(--ok-dark); color: var(--ok-dark); background: #e6f6df; }
+  .tk-box.shown { border-color: #b77a0c; color: #7a4a00; background: #ffe9a8; }
+  .tk-list { font-family: var(--font-en); font-size: 15px; }
+  .tk-sum { margin-left: auto; font-size: 12px; color: var(--oops-dark); white-space: nowrap; }
+  .tk-side .zk-pad .key.del { font-size: 17px; white-space: nowrap; }
+  @media (orientation: portrait) { .tk-wrap { flex-direction: column; align-items: center; } .tk-side { width: 100%; box-sizing: border-box; grid-template-columns: 1fr; } }
+  @media (orientation: landscape) and (min-width: 820px) { body[data-screen="tkplay"] #app { max-width: 1060px; } }
+  @media (orientation: landscape) and (max-height: 860px) {
+    .tk-side { padding: 10px 12px; }
+    .tk-side .kind { font-size: 17px; }
+    .tk-row { font-size: 15px; padding: 1px 6px; }
+    .tk-box, .tk-n { font-size: 17px; }
+    .tk-side .zk-pad .key { min-height: 44px; font-size: 24px; box-shadow: 0 4px 0 var(--stone-dark); }
+    .tk-side .zk-pad .key.ok { box-shadow: 0 4px 0 var(--grass-dark); }
+  }
 </style>
 
 <div id="world" aria-hidden="true">
@@ -909,6 +940,18 @@
     <div class="zk-wrap mq-wrap">
       <div class="mq-board" id="mqBoard"></div>
       <div class="card zk-side" id="mqSide"></div>
+    </div>
+  </section>
+
+  <!-- TSUMIKI PLAY -->
+  <section id="tkplay" class="screen" hidden>
+    <div class="topbar">
+      <div class="wallet"><span class="coin sm">&#165;</span><span id="tkWallet2">0</span></div>
+      <button class="btn ghost small" id="tkQuit">やめる</button>
+    </div>
+    <div class="tk-wrap">
+      <div class="tk-board" id="tkBoard"></div>
+      <div class="card tk-side" id="tkSide"></div>
     </div>
   </section>
 
@@ -1892,7 +1935,7 @@
   const OLD_STORE_KEY = "kotoba-craft-v1";
   const BACKUP_KEY = "coin-quest-v1-bak";
   const UNDO_KEY = "coin-quest-v1-undo";
-  const SAVE_VER = 9;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
+  const SAVE_VER = 10;            // 保存の形をかえたら +1 する。上げるとこうしん前の控えが残る
   const PLAYERS = { taiga: "たいが", gaku: "がく" };
 
   // ---------------------------------------------------------------
@@ -1991,6 +2034,7 @@
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].cm) state.players[k].cm = { date: todayKey(), played: 0, decks: {} };
     for (const k of Object.keys(PLAYERS)) { if (!state.players[k].kg) state.players[k].kg = freshKg(); if (!state.players[k].zk) state.players[k].zk = freshZk(); }
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].mq) state.players[k].mq = freshMq();   // むしくいざん(10/25〜, SAVE_VER 8)
+    for (const k of Object.keys(PLAYERS)) if (!state.players[k].tk) state.players[k].tk = freshTk();   // つみきを かぞえよう(11/2〜, SAVE_VER 10)
     if (!state.mOn) state.mOn = {};
     for (const k of Object.keys(PLAYERS)) if (!state.players[k].kuSel) {   // 段ごとの九九 → 1つずつ選ぶ形へ。2のだんは覚えたので入れない
       const on = d => { const v = state.mOn["ku" + d]; return v === undefined ? d === 5 : !!v; };
@@ -2193,7 +2237,7 @@
   // ---------------------------------------------------------------
   // SCREENS
   // ---------------------------------------------------------------
-  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult", "mhome", "mplay", "mresult", "cmhome", "cmplay", "cmresult", "kghome", "sgplay", "zkplay", "mqplay", "kgresult"].forEach(s => { $(s).hidden = s !== id; }); document.body.setAttribute("data-screen", id); }
+  function show(id) { ["pick", "home", "play", "result", "khome", "kplay", "kresult", "mhome", "mplay", "mresult", "cmhome", "cmplay", "cmresult", "kghome", "sgplay", "zkplay", "mqplay", "tkplay", "kgresult"].forEach(s => { $(s).hidden = s !== id; }); document.body.setAttribute("data-screen", id); }
 
   function renderYen(total) {
     const denoms = [500, 100, 50, 10, 5, 1];
@@ -2637,7 +2681,7 @@
     $("pickList").innerHTML =
       item("goEn", ICONS.book, "えいご", esub) +
       item("goKg", ICONS.scroll, "こくご", (cmActive() ? "カードめいじん・" : "") + "かんじ・さがして タップ") +
-      item("goMa", ICONS.pick, "さんすう", "けいさん・かたち・むしくいざん");
+      item("goMa", ICONS.pick, "さんすう", "けいさん・かたち・むしくい・つみき");
     $("goEn").onclick = renderHome;
     $("goKg").onclick = renderKgHome;
     $("goMa").onclick = renderMHome;
@@ -2854,7 +2898,10 @@
     $("mList").insertAdjacentHTML("beforeend", '<button class="pick" id="goMq"><span class="ico">' + ICONS.mushi + '</span><span>' +
       '<span class="ttl">むしくいざん</span><span class="sub">コインが もらえる のこり ' + mqLeft() + ' かい</span></span></button>');
     $("goZk").onclick = startZk;
+    $("mList").insertAdjacentHTML("beforeend", '<button class="pick" id="goTk"><span class="ico">' + ICONS.tsumiki + '</span><span>' +
+      '<span class="ttl">つみきを かぞえよう</span><span class="sub">コインが もらえる のこり ' + tkLeft() + ' かい</span></span></button>');
     $("goMq").onclick = startMq;
+    $("goTk").onclick = startTk;
     Array.from($("mList").querySelectorAll(".pick[data-ev]")).forEach(b => {
       b.onclick = () => { const ev = M_EVENTS.find(e => e.id === b.getAttribute("data-ev")); if (ev) startMStage(ev); };
     });
@@ -3875,6 +3922,184 @@
   }
 
   // ---------------------------------------------------------------
+  // つみきを かぞえよう(さんすうの種目, 2026-11-02)。奨学社「つみ木の数え方」(前から続いている課題で、親が とくに ほしいと)。
+  // かべの すみに つんだ つみきを、うえの だんから じゅんばんに かぞえる(プリントの 右の たし算を 作っていく 手順そのまま):
+  //   1だんめ □こ / 2だんめ (1だんめの数) ＋ □(ふえた数) ＝ □ / … / ぜんぶで □
+  // 下の だんは「うえの だんと おなじ ぶん ＋ ふえた ぶん」(うえの だんの したにも かならず ブロックが ある)。
+  // 図は kokugo/tsumiki_data.py で作って チェックしてから貼る(ブロックの少ない図から じゅんばん。手助け as も そこで決める)。
+  // 手助け as: 2=うえの だんを うすくして、おなじ ぶん=みず色・ふえた ぶん=きいろ / 1=うすく するだけ / 0=なし。
+  // まちがえると その問いだけ 2 にする(2回めは きいろに ばんごう、3回めは こたえを見せて すすむ。減点なし)。
+  // 1回=図1つ。時間は計らない。コイン10・1日5回(くりこし なし)。ヒントなしで できたら つぎの図へ
+  // ---------------------------------------------------------------
+  const TK_FIGS = [{"id":"t1","m":[[2,1],[1]],"as":2},{"id":"t2","m":[[2,2],[1,1]],"as":2},{"id":"t3","m":[[3,2,1],[2,1],[1]],"as":2},{"id":"t4","m":[[3,2],[3,2],[1,1]],"as":2},{"id":"t5","m":[[3,3,2,1],[2,2,1],[1,1]],"as":2},{"id":"t6","m":[[4,3,2,1],[3,2,1],[2,1],[1]],"as":1},{"id":"t7","m":[[4,4,3,2],[4,3,2,1],[3,2,1],[2,1]],"as":1},{"id":"t8","m":[[5,4,3,2,1],[4,3,2,1],[3,2,1],[2,1],[1]],"as":1},{"id":"t9","m":[[5,4,3,2,1],[4,4,3,2,1],[3,3,3,2,1],[2,2,2,2,1],[1,1,1,1,1]],"as":1},{"id":"t10","m":[[6,6,5,4,3,2],[6,5,4,3,2,1],[5,4,3,2,1],[4,3,2,1],[3,2,1],[2,1]],"as":0},{"id":"t11","m":[[7,7,6,5,4,3,2],[6,6,5,4,3,2,1],[5,5,4,3,2,1],[4,4,3,2,1],[3,3,2,1],[2,2,1],[1,1]],"as":0},{"id":"t12","m":[[8,7,6,5,4,3,2,1],[7,6,5,4,3,2,1],[6,5,4,3,2,1],[5,4,3,2,1],[4,3,2,1],[3,2,1],[2,1],[1]],"as":0},{"id":"t13","m":[[8,8,7,6,5,4,3,2],[7,7,6,5,4,3,2,1],[6,6,5,4,3,2,1],[5,5,4,3,2,1],[4,4,3,2,1],[3,3,2,1],[2,2,1],[1,1]],"as":0},{"id":"t14","m":[[8,7,7,6,5,4,3,2],[7,7,6,5,5,3,2,1],[7,6,5,4,3,2,1],[6,5,4,4,3,2],[5,4,3,2,1],[4,3,2,1],[2,2,1],[1,1]],"as":0}];
+  const TK_DAILY = 5, TKCOINS = 10;
+  function freshTk() { return { date: todayKey(), played: 0, lvl: 0, rounds: 0, hist: {} }; }
+  function tkProg() {
+    const p = P();
+    if (!p.tk) p.tk = freshTk();
+    const t = p.tk;
+    if (!t.hist) t.hist = {};
+    if (t.date !== todayKey()) { t.date = todayKey(); t.played = 0; }
+    return t;
+  }
+  function tkLeft() { return Math.max(0, TK_DAILY - (tkProg().played || 0)); }
+  function tkInfo(f) {                       // だんごとの数(うえから)と ふえた数
+    const H = Math.max(...f.m.map(r => Math.max(...r))), cells = [].concat(...f.m), counts = [], news = [];
+    for (let k = 1; k <= H; k++) { counts.push(cells.filter(h => h >= H - k + 1).length); news.push(counts[k - 1] - (k > 1 ? counts[k - 2] : 0)); }
+    return { H, counts, news, total: counts.reduce((s, x) => s + x, 0) };
+  }
+  let tkFig = null, tkFigI = 0, tkL = null, tkSteps = [], tkSi = 0, tkTyped = "", tkMiss = 0, tkAnyMiss = false,
+      tkPaid = false, tkTok = 0, tkShow = false, tkLock = false;
+  function startTk() {
+    unlockAudio();
+    const t = tkProg(), lvl = Math.min(t.lvl || 0, TK_FIGS.length - 1);
+    // いまの段階の図を中心に、ときどき まえの図も出す
+    tkFigI = (rnd(2) === 0 || lvl === 0) ? lvl : Math.max(0, lvl - 1 - rnd(Math.min(3, lvl)));
+    tkFig = TK_FIGS[tkFigI]; tkL = tkInfo(tkFig);
+    tkSteps = [{ t: "c", k: 1 }];
+    for (let k = 2; k <= tkL.H; k++) tkSteps.push({ t: "n", k: k }, { t: "c", k: k });
+    tkSteps.push({ t: "tot", k: 0 });
+    tkSi = 0; tkTyped = ""; tkMiss = 0; tkAnyMiss = false; tkShow = false; tkLock = false;
+    tkPaid = tkLeft() > 0; tkTok++;
+    show("tkplay"); tkRender("うえの だんから じゅんばんに かぞえよう");
+  }
+  function tkAns(st) { return st.t === "tot" ? tkL.total : st.t === "n" ? tkL.news[st.k - 1] : tkL.counts[st.k - 1]; }
+  function tkSvg() {
+    const st = tkSteps[tkSi] || { t: "tot", k: 0 }, m = tkFig.m, H = tkL.H;
+    const R = m.length, C = Math.max(...m.map(r => r.length));
+    const as = st.t === "tot" ? 0 : (tkMiss > 0 || tkShow ? 2 : tkFig.as);
+    const zc = st.k ? H - st.k : -1;                  // いまの だんの たかさ(0=いちばん した)
+    const nums = (tkMiss >= 2 || tkShow) && (st.t === "n" || (st.t === "c" && st.k === 1));
+    const gb = parseFloat(getComputedStyle(document.body).getPropertyValue("--gb")) || 24;
+    const land = window.innerWidth > window.innerHeight, appW = Math.min(window.innerWidth - 32, 1060);
+    const maxW = land ? Math.min(400, appW - 646) : Math.min(appW - 8, 520);
+    const maxH = land ? window.innerHeight - 64 - 3 * gb - 40 : Math.min(window.innerHeight * 0.4, 440);
+    const a = Math.max(8, Math.min(58, maxW / (R + C + 0.8), maxH / ((R + C) / 2 + H + 1.4)));   // ちいさい図は おおきく
+    const X = (r, c) => (c - r) * a, Y = (r, c, z) => (c + r) * a / 2 - z * a;
+    const cubes = [];
+    let far = 0;
+    m.forEach((row, r) => row.forEach((h, c) => { far = Math.max(far, r + c); for (let z = 0; z < h; z++) cubes.push({ r, c, z, h }); }));
+    cubes.sort((p, q) => (p.r + p.c) - (q.r + q.c) || p.z - q.z);   // おくから てまえへ、したから うえへ
+    const x0 = -(R + 0.9) * a, x1 = (C + 0.9) * a, y0 = Y(0, 0, H - 1) - a * 0.9, y1 = far * a / 2 + 2 * a + (R + C) * a * 0.06 + a * 0.5;
+    const pt = ps => ps.map(q => q[0].toFixed(1) + "," + q[1].toFixed(1)).join(" ");
+    let s = '<svg width="' + (x1 - x0).toFixed(0) + '" height="' + (y1 - y0).toFixed(0) + '" viewBox="' + [x0, y0, x1 - x0, y1 - y0].map(v => v.toFixed(1)).join(" ") + '" role="img" aria-label="つみき">';
+    // かべの すみ(おくの たての 線と、ゆかの 2本の 線)
+    s += '<g stroke="#3b3b3b" stroke-width="' + Math.max(1, a / 18).toFixed(2) + '" fill="none">' +
+      '<line x1="0" y1="' + a + '" x2="0" y2="' + (y0 + a * 0.2).toFixed(1) + '"/>' +
+      '<line x1="0" y1="' + a + '" x2="' + (-(R + 0.7) * a).toFixed(1) + '" y2="' + (a + (R + 0.7) * a / 2).toFixed(1) + '"/>' +
+      '<line x1="0" y1="' + a + '" x2="' + ((C + 0.7) * a).toFixed(1) + '" y2="' + (a + (C + 0.7) * a / 2).toFixed(1) + '"/></g>';
+    const sw = Math.max(0.8, a / 16).toFixed(2);
+    let n = 0;
+    const labels = [];
+    for (const q of cubes) {
+      const x = X(q.r, q.c), y = Y(q.r, q.c, q.z), cur = q.z === zc, top = q.h === q.z + 1;
+      let tf = "#c9ea8f";
+      if (cur && as >= 2) tf = top ? "#f6c343" : "#9fd8f7";
+      else if (cur && st.k === 1 && as >= 1) tf = "#f6c343";
+      const op = (zc >= 0 && q.z > zc && as >= 1) ? ' opacity="0.2"' : "";
+      s += '<g' + op + ' stroke="#2e4a1c" stroke-width="' + sw + '" stroke-linejoin="round">' +
+        '<polygon points="' + pt([[x - a, y + a / 2], [x, y + a], [x, y + 2 * a], [x - a, y + 1.5 * a]]) + '" fill="#8cc152"/>' +
+        '<polygon points="' + pt([[x, y + a], [x + a, y + a / 2], [x + a, y + 1.5 * a], [x, y + 2 * a]]) + '" fill="#6a9f3a"/>' +
+        '<polygon points="' + pt([[x, y], [x + a, y + a / 2], [x, y + a], [x - a, y + a / 2]]) + '" fill="' + tf + '"' +
+          (cur && st.t !== "tot" ? ' stroke="#ffffff" stroke-width="' + (a / 10).toFixed(2) + '"' : "") + '/></g>';
+      if (nums && cur && top) labels.push('<text x="' + x.toFixed(1) + '" y="' + (y + a / 2).toFixed(1) + '" font-size="' + (a * 0.62).toFixed(1) +
+        '" text-anchor="middle" dominant-baseline="central" font-family="sans-serif" font-weight="700" fill="#3d2a00">' + (++n) + '</text>');
+    }
+    return s + labels.join("") + "</svg>";
+  }
+  function tkBox(v, cls) { return '<span class="tk-box ' + cls + '">' + (v === null || v === "" ? "&nbsp;" : esc(String(v))) + "</span>"; }
+  function tkRowsHtml() {
+    const H = tkL.H, cur = tkSteps[tkSi];
+    const idx = (t, k) => tkSteps.findIndex(x => x.t === t && x.k === k);
+    const box = (t, k, v) => {
+      const i = idx(t, k);
+      if (i === tkSi) return tkShow ? tkBox(v, "now shown") : tkBox(tkTyped, "now");
+      return i < tkSi ? tkBox(v, "got") : tkBox(null, "empty");
+    };
+    const sums = []; tkL.counts.reduce((s, x, i) => (sums[i] = s + x), 0);
+    const upTo = cur && cur.t === "tot" ? (tkMiss >= 2 || tkShow ? H - 1 : tkMiss >= 1 ? Math.ceil(H / 2) : 0) : 0;
+    let h = "";
+    for (let k = 1; k <= H; k++) {
+      h += '<p class="tk-row' + (cur && cur.k === k ? " on" : "") + '"><span class="tk-lab">' + k + "だんめ</span>";
+      if (k === 1) h += box("c", 1, tkL.counts[0]);
+      else h += (idx("c", k - 1) < tkSi ? '<b class="tk-n">' + tkL.counts[k - 2] + "</b>" : tkBox(null, "empty")) +
+        " ＋ " + box("n", k, tkL.news[k - 1]) + " ＝ " + box("c", k, tkL.counts[k - 1]);
+      h += "こ" + (k <= upTo ? '<small class="tk-sum">ここまで ' + sums[k - 1] + "</small>" : "") + "</p>";
+    }
+    const all = idx("c", H) < tkSi;
+    h += '<p class="tk-row' + (cur && cur.t === "tot" ? " on" : "") + '"><span class="tk-lab">ぜんぶで</span>' +
+      (all ? '<span class="tk-list">' + tkL.counts.join(" ＋ ") + " ＝</span> " : "") + box("tot", 0, tkL.total) + "こ</p>";
+    return h;
+  }
+  function tkAsk(st) {
+    if (!st) return "";
+    if (st.t === "tot") return "つみきは ぜんぶで なんこ？";
+    if (st.t === "c" && st.k === 1) return "1だんめ（いちばん うえ）は なんこ？";
+    if (st.t === "n") return st.k + "だんめ： うえの だんより ふえた ブロックは なんこ？";
+    return st.k + "だんめは ぜんぶで なんこ？";
+  }
+  function tkTip(st) {
+    if (st.t === "tot") return tkMiss === 1 ? "うえの だんから じゅんばんに たしていこう" : "「ここまで」の かずに、のこりを たそう";
+    if (st.t === "c" && st.k === 1) return tkMiss === 1 ? "きいろの ブロックを かぞえよう" : "ばんごうを じゅんばんに かぞえよう";
+    if (st.t === "n") return tkMiss === 1 ? "うえの だんを うすく したよ。きいろが ふえた ブロック" : "きいろの ブロックに ばんごうを つけたよ";
+    return tkMiss === 1 ? "みずいろ（うえと おなじ ぶん）" + tkL.counts[st.k - 2] + "こ ＋ きいろ（ふえた ぶん）" + tkL.news[st.k - 1] + "こ"
+      : tkL.counts[st.k - 2] + " ＋ " + tkL.news[st.k - 1] + " ＝ ？";
+  }
+  function tkRender(msg, cls) {
+    $("tkWallet2").textContent = P().coins.toLocaleString();
+    $("tkBoard").innerHTML = tkSvg();
+    $("tkSide").innerHTML = '<div class="tk-left"><p class="kind">' + esc(tkAsk(tkSteps[tkSi])) + "</p>" +
+      '<div class="tk-rows" id="tkRows">' + tkRowsHtml() + "</div>" +
+      '<p class="zk-say ' + (cls || "") + '" id="tkSay">' + esc(msg || "") + "</p></div>" +
+      '<div class="zk-pad">' + ["1", "2", "3", "4", "5", "6", "7", "8", "9", "けす", "0", "OK"].map(k =>
+        '<button class="key' + (k === "けす" ? " del" : k === "OK" ? " ok" : "") + '" data-k="' + k + '">' + k + "</button>").join("") + "</div>";
+    Array.from($("tkSide").querySelectorAll(".key")).forEach(b => { b.onclick = () => tkKey(b.getAttribute("data-k")); });
+  }
+  function tkKey(k) {
+    if (tkLock) return;
+    if (k === "OK") { tkCheck(); return; }
+    if (k === "けす") tkTyped = tkTyped.slice(0, -1);
+    else if (tkTyped.length < 3) tkTyped += k;
+    const b = document.querySelector("#tkRows .tk-box.now");
+    if (b) b.innerHTML = tkTyped || "&nbsp;";
+  }
+  function tkCheck() {
+    if (!tkTyped) return;
+    const st = tkSteps[tkSi], ans = tkAns(st), myTok = tkTok;
+    if (Number(tkTyped) === ans) { sfxRight(); tkNext(); return; }
+    sfxOops(); tkMiss++; tkAnyMiss = true; tkTyped = "";
+    if (tkMiss >= 3) {                                // こたえを 見せて すすむ。減点は なし
+      tkShow = true; tkLock = true; tkRender("こたえは " + ans + "こ", "oops");
+      setTimeout(() => { if (tkTok === myTok) { tkShow = false; tkLock = false; tkNext(); } }, 1800);
+      return;
+    }
+    tkRender(tkTip(st), "oops");
+  }
+  function tkNext() {
+    const st = tkSteps[tkSi];
+    tkSi++; tkMiss = 0; tkTyped = "";
+    if (tkSi >= tkSteps.length) { tkFinish(); return; }
+    const nx = tkSteps[tkSi];
+    let msg = pickOk();
+    if (st.t === "c" && nx.t === "n") msg = st.k + "だんめは " + tkL.counts[st.k - 1] + "こ！ つぎは " + nx.k + "だんめ";
+    if (nx.t === "tot") msg = "さいごに ぜんぶ たそう";
+    tkRender(msg, "ok");
+  }
+  function tkFinish() {
+    tkTok++;
+    const p = P(), t = tkProg(), clean = !tkAnyMiss;
+    const r = t.hist[tkFig.id] || (t.hist[tkFig.id] = { n: 0, clean: 0 });
+    r.n++; if (clean) r.clean++;
+    t.rounds = (t.rounds || 0) + 1;
+    let up = "";
+    if (clean && tkFigI === (t.lvl || 0) && tkFigI < TK_FIGS.length - 1) { t.lvl = tkFigI + 1; up = "つぎは もっと たかい つみきに ちょうせん！"; }
+    let coins = 0;
+    if (tkPaid) { coins = TKCOINS; p.coins += coins; t.played = (t.played || 0) + 1; }
+    save();
+    kgResult("つみきは ぜんぶで " + tkL.total + "こ！", up || "うえの だんから じゅんばんに かぞえたね", coins, startTk, renderMHome, !!up);
+  }
+
+  // ---------------------------------------------------------------
   // WORLD: blocky scenery drawn as pixel art at start-up. All of it is
   // original artwork in a block-game idiom; nothing is copied from a game.
   // ---------------------------------------------------------------
@@ -4144,6 +4369,24 @@
       "KooooooooooooooK",
       "KKKKKKKKKKKKKKKK"
     ], { K: "#3a2a00", Y: "#f6c343", o: "#b77a0c", W: "#ffffff" });
+  ICONS.tsumiki = pixIcon([
+      "................",
+      ".....KKKKKK.....",
+      ".....KGGGGK.....",
+      ".....KGggGK.....",
+      ".....KggggK.....",
+      ".....KKKKKK.....",
+      "..KKKKKKKKKKKK..",
+      "..KGGGGKKGGGGK..",
+      "..KGggGKKGggGK..",
+      "..KggggKKggggK..",
+      "..KKKKKKKKKKKK..",
+      "KKKKKKKKKKKKKKKK",
+      "KGGGGKKGGGGKGGGK",
+      "KGggGKKGggGKGggK",
+      "KggggKKggggKgggK",
+      "KKKKKKKKKKKKKKKK"
+    ], { K: "#2e4a1c", G: "#c9ea8f", g: "#8cc152" });
   const SKY_ICONS = {
     day: pixIcon([
       "................",
@@ -4353,6 +4596,11 @@
         '<option value="' + i + '"' + ((mqProg().lvl || 0) === i ? " selected" : "") + '>' + (i + 1) + "：" + esc(st.name) + '</option>').join("") + '</select></div>' +
       '<p class="hint">今日 ' + (mqProg().played || 0) + '回（コインは1日' + MQ_DAILY + '回まで）・これまで ' + (mqProg().rounds || 0) + '回' +
         MQ_STAGES.map((st, i) => { const r = mqProg().hist[i]; return r && r.n ? "・段階" + (i + 1) + " 間違えずに解けた " + r.clean + "/" + r.n + "問" : ""; }).join("") + '</p>' +
+      '<p class="hint" style="margin-top:12px"><b>積み木</b>（積み木の数え方・「さんすう」の中。上の段から「上の段の数＋増えた数」で数える。ヒントなしで解けると次の図へ）</p>' +
+      '<div class="row"><label for="tkLvl">段階</label><select id="tkLvl">' + TK_FIGS.map((f, i) => { const L = tkInfo(f);
+        return '<option value="' + i + '"' + ((tkProg().lvl || 0) === i ? " selected" : "") + '>' + (i + 1) + "：" + L.H + "段・全部で" + L.total + "個" + '</option>'; }).join("") + '</select></div>' +
+      '<p class="hint">今日 ' + (tkProg().played || 0) + '回（コインは1日' + TK_DAILY + '回まで）・これまで ' + (tkProg().rounds || 0) + '回・ヒントなしで解けた図 ' +
+        Object.values(tkProg().hist).filter(r => r.clean).length + ' / ' + TK_FIGS.length + '</p>' +
       '<p class="hint">' + M_EVENTS.filter(evOn).map(ev => {
         const r = evRec(ev.id);
         return esc(evName(ev)) + "：" + (r.best === null ? "記録なし" : "最高 " + r.best + "秒") + "（" + r.done + "回" +
@@ -4375,6 +4623,7 @@
     $("cmDueSave").onclick = () => { const v = $("cmDueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues["card-meijin"] = v; save(); alert("カード名人のテスト日を " + v + " にしました"); closeParent(); renderPick(); } else alert("日付を選んでください"); };
     $("sgLvl").onchange = e => { const s = kgProg().sg; s.lvl = Number(e.target.value); s.streak = 0; s.good = 0; save(); };
     $("mqLvl").onchange = e => { mqProg().lvl = Number(e.target.value); save(); };
+    $("tkLvl").onchange = e => { tkProg().lvl = Number(e.target.value); save(); };
     Array.from(document.querySelectorAll(".zklvl")).forEach(sel => { sel.onchange = () => { zkProg()[ZK_TRACKS[sel.getAttribute("data-t")].lv] = Number(sel.value); save(); }; });
     $("lvlSel").onchange = e => { P().level = Number(e.target.value); save(); closeParent(); openParent(); };
     $("voiceSel").onchange = e => { state.voice = e.target.value === "1"; save(); };
@@ -4482,6 +4731,7 @@
     $("sgQuit").onclick = () => { sgTok++; renderKgHome(); };
     $("zkQuit").onclick = () => { zkTok++; renderMHome(); };
     $("mqQuit").onclick = () => { mqTok++; renderMHome(); };
+    $("tkQuit").onclick = () => { tkTok++; renderMHome(); };
     ["sgQ", "sgP"].forEach(id => $(id).addEventListener("click", e => { const el = e.target.closest(".sgc"); if (el) sgTap(el); }));
     $("zkBoard").addEventListener("pointerdown", zkDown);
     $("zkBoard").addEventListener("pointermove", zkMove);
