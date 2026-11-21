@@ -578,6 +578,35 @@
   }
 
   .cmcard { min-height: 200px; justify-content: center; transform-origin: 50% 50%; }
+  /* こたえる カード(かさ・九九) */
+  .kasa-opts { display: flex; flex-direction: column; gap: 10px; width: min(100%, 460px); }
+  .kasa-o { appearance: none; cursor: pointer; display: flex; align-items: center; gap: 16px; padding: 6px 14px; min-height: 62px; background: #fff;
+            border: 3px solid var(--stone-dark); box-shadow: 0 5px 0 var(--stone-dark); font-family: var(--font-en); font-weight: 700; font-size: clamp(28px, 5vw, 40px); color: var(--ink); }
+  .kasa-o b { flex: none; font-family: var(--font-ja); font-size: .62em; width: 1.6em; height: 1.6em; display: inline-flex; align-items: center; justify-content: center; background: #2f2f2f; color: #fff; }
+  .kasa-o span { flex: 1; text-align: center; }
+  .kasa-o:active { transform: translateY(4px); box-shadow: 0 1px 0 var(--stone-dark); }
+  .kasa-o.right { background: #dff5d6; border-color: var(--ok-dark); box-shadow: 0 5px 0 var(--ok-dark); }
+  .kasa-o.wrong { background: #ffe6d1; border-color: var(--oops-dark); box-shadow: 0 5px 0 var(--oops-dark); }
+  .kasa-big { font-family: var(--font-en); }
+  .kasa-order { display: flex; align-items: flex-start; justify-content: center; flex-wrap: wrap; gap: 4px 10px; margin: 0; font-family: var(--font-en); }
+  .kasa-it { display: inline-flex; flex-direction: column; align-items: center; }
+  .kasa-it b { font-size: clamp(22px, 4vw, 32px); }
+  .kasa-it small { font-family: var(--font-ja); font-size: 15px; font-weight: 800; color: var(--ink-soft); }
+  .kasa-op { font-size: clamp(22px, 4vw, 32px); font-weight: 800; }
+  .kuku-row { display: flex; align-items: center; justify-content: center; gap: 28px; width: 100%; flex-wrap: wrap; }
+  .kuku-left { display: flex; flex-direction: column; align-items: center; gap: 10px; }
+  .kuku-q { margin: 0; font-family: var(--font-en); font-weight: 700; font-size: clamp(44px, 8vw, 72px); line-height: 1.35; white-space: nowrap; }
+  .kuku-q ruby rt { font-family: var(--font-ja); font-size: .3em; }
+  .kuku-q .ansbox { font-size: 1em; min-width: 2.2ch; }
+  .kuku-pad { width: 240px; }
+  .kuku-a { font-family: var(--font-en); }
+  .kuku-y { text-align: center; font-weight: 800; }
+  /* さんすう の中に カードめいじん が ふえると 7こ になるので、よこむきでは すこし つめる */
+  @media (orientation: landscape) and (max-height: 860px) {
+    #mList { gap: 10px; }
+    #mList .pick { min-height: 64px; padding-top: 6px; padding-bottom: 6px; }
+    #mList .pick .ico { width: 52px; height: 52px; }
+  }
   .cmcard.flipping { animation: flipx .34s ease-in-out; }
   @keyframes flipx { 0% { transform: scaleX(1); } 50% { transform: scaleX(0); } 100% { transform: scaleX(1); } }
   @media (prefers-reduced-motion: reduce) { .cmcard.flipping { animation: none; } }
@@ -1906,6 +1935,16 @@
     ] }
   ];
 
+  // ---- 12月の カード名人(さんすう 2しゅるい・2026-11-21 追加)。card-meijin/cards_2026_12.py で作って チェックしてから、この1行を まるごと入れかえる。
+  // こたえを えらぶ(かさ)・数字で こたえる(九九)カードなので、めくりカードと ちがって 正しいかを見る。まちがえた カードは「まだ」に なって 先に出る
+  const CM2_DECKS = [{"id":"kasa1","name":"かさくらべ","glyph":"L","k":"kasa","cards":[{"id":"ka01","o":["9L5dL","9L1dL","9L4dL"]},{"id":"ka02","o":["7L6dL","6L7dL","87dL"]},{"id":"ka03","o":["100dL","11L","1L1dL"]},{"id":"ka04","o":["10dL","10L","13dL"]},{"id":"ka05","o":["1L","1dL","11dL"]},{"id":"ka06","o":["72dL","70L2dL","720dL"]},{"id":"ka07","o":["18L","188dL","10L8dL"]},{"id":"ka08","o":["208dL","28L","2L8dL"]},{"id":"ka09","o":["1L9dL","190dL","109L"]},{"id":"ka10","o":["2L7dL","270dL","20L"]},{"id":"ka11","o":["80L","8L9dL","890dL"]},{"id":"ka12","o":["50L5dL","50L","500dL"]},{"id":"ka13","o":["679dL","68L","68L9dL"]},{"id":"ka14","o":["16L6dL","10L6dL","163dL"]},{"id":"ka15","o":["1299dL","129L","12L9dL"]},{"id":"ka16","o":["270L1dL","2710dL","27L1dL"]},{"id":"ka17","o":["6274dL","627L6dL","62L9dL"]},{"id":"ka18","o":["23dL","2L2dL","220dL"]},{"id":"ka19","o":["60L8dL","68dL","6080dL"]},{"id":"ka20","o":["2L4dL","214dL","2L1dL"]},{"id":"ka21","o":["231dL","23L3dL","2L3dL"]},{"id":"ka22","o":["404dL","440dL","400L"]},{"id":"ka23","o":["800dL","800L","880dL"]},{"id":"ka24","o":["80dL","8L3dL","88dL"]},{"id":"ka25","o":["6L5dL","7L4dL","4L6dL"]},{"id":"ka26","o":["3L1dL","1L3dL","2L1dL"]},{"id":"ka27","o":["2L8dL","29dL","2L2dL"]},{"id":"ka28","o":["72L","7L2dL","72dL"]},{"id":"ka29","o":["65dL","60L","6L6dL"]},{"id":"ka30","o":["2L3dL","33dL","3L2dL"]},{"id":"ka31","o":["4L3dL","46dL","4L2dL"]},{"id":"ka32","o":["5L6dL","5L7dL","58dL"]},{"id":"ka33","o":["11dL","10L1dL","1L1dL"]},{"id":"ka34","o":["10L","110dL","101dL"]},{"id":"ka35","o":["600dL","60L","606L"]},{"id":"ka36","o":["103dL","201dL","213dL"]},{"id":"ka37","o":["157dL","175dL","177dL"]},{"id":"ka38","o":["96dL","69dL","99dL"]},{"id":"ka39","o":["10dL","9dL","11dL"]},{"id":"ka40","o":["8dL","7dL","3dL"]},{"id":"ka41","o":["4dL","6dL","9dL"]},{"id":"ka42","o":["17L","19L","14L"]},{"id":"ka43","o":["23L","36L","32L"]},{"id":"ka44","o":["40L","14L","44L"]},{"id":"ka45","o":["8L","9L","10L"]},{"id":"ka46","o":["5L","4L","9L"]},{"id":"ka47","o":["1L","3L","2L"]}]},{"id":"kuku2","name":"かけざん 九九","glyph":"×","k":"kuku","cards":[{"id":"k7-1","a":7,"b":1,"y":"しち いち が しち"},{"id":"k7-2","a":7,"b":2,"y":"しち に じゅうし"},{"id":"k7-3","a":7,"b":3,"y":"しち さん にじゅういち"},{"id":"k7-4","a":7,"b":4,"y":"しち し にじゅうはち"},{"id":"k7-5","a":7,"b":5,"y":"しち ご さんじゅうご"},{"id":"k7-6","a":7,"b":6,"y":"しち ろく しじゅうに"},{"id":"k7-7","a":7,"b":7,"y":"しち しち しじゅうく"},{"id":"k7-8","a":7,"b":8,"y":"しち は ごじゅうろく"},{"id":"k7-9","a":7,"b":9,"y":"しち く ろくじゅうさん"},{"id":"k8-1","a":8,"b":1,"y":"はち いち が はち"},{"id":"k8-2","a":8,"b":2,"y":"はち に じゅうろく"},{"id":"k8-3","a":8,"b":3,"y":"はち さん にじゅうし"},{"id":"k8-4","a":8,"b":4,"y":"はち し さんじゅうに"},{"id":"k8-5","a":8,"b":5,"y":"はち ご しじゅう"},{"id":"k8-6","a":8,"b":6,"y":"はち ろく しじゅうはち"},{"id":"k8-7","a":8,"b":7,"y":"はち しち ごじゅうろく"},{"id":"k8-8","a":8,"b":8,"y":"はっ ぱ ろくじゅうし"},{"id":"k8-9","a":8,"b":9,"y":"はっ く しちじゅうに"},{"id":"k9-1","a":9,"b":1,"y":"く いち が く"},{"id":"k9-2","a":9,"b":2,"y":"く に じゅうはち"},{"id":"k9-3","a":9,"b":3,"y":"く さん にじゅうしち"},{"id":"k9-4","a":9,"b":4,"y":"く し さんじゅうろく"},{"id":"k9-5","a":9,"b":5,"y":"く ご しじゅうご"},{"id":"k9-6","a":9,"b":6,"y":"く ろく ごじゅうし"},{"id":"k9-7","a":9,"b":7,"y":"く しち ろくじゅうさん"},{"id":"k9-8","a":9,"b":8,"y":"く は しちじゅうに"},{"id":"k9-9","a":9,"b":9,"y":"く く はちじゅういち"},{"id":"k0-1","a":0,"b":1},{"id":"k0-2","a":0,"b":2},{"id":"k0-3","a":0,"b":3},{"id":"k0-4","a":0,"b":4},{"id":"k0-5","a":0,"b":5},{"id":"k0-6","a":0,"b":6},{"id":"k0-7","a":0,"b":7},{"id":"k0-8","a":0,"b":8},{"id":"k0-9","a":0,"b":9},{"id":"k10-1","a":10,"b":1},{"id":"k10-2","a":10,"b":2},{"id":"k10-3","a":10,"b":3},{"id":"k10-4","a":10,"b":4},{"id":"k10-5","a":10,"b":5},{"id":"k10-6","a":10,"b":6},{"id":"k10-7","a":10,"b":7},{"id":"k10-8","a":10,"b":8},{"id":"k10-9","a":10,"b":9},{"id":"k20-1","a":20,"b":1},{"id":"k20-2","a":20,"b":2},{"id":"k20-3","a":20,"b":3},{"id":"k20-4","a":20,"b":4},{"id":"k20-5","a":20,"b":5},{"id":"k20-6","a":20,"b":6},{"id":"k20-7","a":20,"b":7},{"id":"k20-8","a":20,"b":8},{"id":"k20-9","a":20,"b":9},{"id":"k30-1","a":30,"b":1},{"id":"k30-2","a":30,"b":2},{"id":"k30-3","a":30,"b":3},{"id":"k30-4","a":30,"b":4},{"id":"k30-5","a":30,"b":5},{"id":"k30-6","a":30,"b":6},{"id":"k30-7","a":30,"b":7},{"id":"k30-8","a":30,"b":8},{"id":"k30-9","a":30,"b":9}]}];
+  // テストごとの セット。テストびが まだ きていない いちばん ちかい セットだけを出す(すぎた セットの きろくは のこる)。
+  // where: 入口を「こくご」「さんすう」の どちらに出すか。テストびは 親メニューで かえられる(state.dues[dueKey])
+  const CM_SETS = [
+    { id: "2026-10", due: CM_DUE, dueKey: "card-meijin", where: "kokugo", decks: CM_DECKS },
+    { id: "2026-12", due: "2026-12-15", dueKey: "card-meijin-2026-12", where: "sansu", decks: CM2_DECKS }   // 親: 正確な日は未定・12月なかば
+  ];
+
   const M_DAILY = 5;             // 1日にコインがもらえる回数(英語とは別枠)
   const M_BANK_MAX = 10;
   const MCOINS_DONE = 10;        // 終わらせたら
@@ -2680,8 +2719,8 @@
       '<span class="ttl">' + esc(ttl) + '</span><span class="sub">' + esc(sub) + '</span></span></button>';
     $("pickList").innerHTML =
       item("goEn", ICONS.book, "えいご", esub) +
-      item("goKg", ICONS.scroll, "こくご", (cmActive() ? "カードめいじん・" : "") + "かんじ・さがして タップ") +
-      item("goMa", ICONS.pick, "さんすう", "けいさん・かたち・むしくい・つみき");
+      item("goKg", ICONS.scroll, "こくご", (cmActive() && cmSet().where === "kokugo" ? "カードめいじん・" : "") + "かんじ・さがして タップ") +
+      item("goMa", ICONS.pick, "さんすう", (cmActive() && cmSet().where === "sansu" ? "カードめいじん・" : "") + "けいさん・かたち・むしくい・つみき");
     $("goEn").onclick = renderHome;
     $("goKg").onclick = renderKgHome;
     $("goMa").onclick = renderMHome;
@@ -2902,6 +2941,12 @@
       '<span class="ttl">つみきを かぞえよう</span><span class="sub">コインが もらえる のこり ' + tkLeft() + ' かい</span></span></button>');
     $("goMq").onclick = startMq;
     $("goTk").onclick = startTk;
+    if (cmActive() && cmSet().where === "sansu") {   // テストびまでは さんすう の いちばん上に カードめいじん
+      $("mList").insertAdjacentHTML("afterbegin", '<button class="pick" id="goCm"><span class="ico">' + ICONS.cards + '</span><span>' +
+        '<span class="ttl">カードめいじん</span><span class="sub">' + (cmDaysLeft() > 0 ? "テストまで あと " + cmDaysLeft() + " にち" : "テストは きょう!") +
+        "・コイン のこり " + cmLeft() + " かい</span></span></button>");
+      $("goCm").onclick = renderCmHome;
+    }
     Array.from($("mList").querySelectorAll(".pick[data-ev]")).forEach(b => {
       b.onclick = () => { const ev = M_EVENTS.find(e => e.id === b.getAttribute("data-ev")); if (ev) startMStage(ev); };
     });
@@ -2913,11 +2958,15 @@
   // marked right or wrong; the only record is how often each card was
   // turned over and which ones he said he does not know yet)
   // ---------------------------------------------------------------
-  function cmDue() { return (state.dues && state.dues["card-meijin"]) || CM_DUE; }
-  function cmDaysLeft() {
-    const d = new Date(cmDue() + "T00:00:00"), now = new Date();
+  function cmDaysTo(day) {
+    const d = new Date(day + "T00:00:00"), now = new Date();
     return Math.round((d - new Date(now.getFullYear(), now.getMonth(), now.getDate())) / 86400000);
   }
+  function cmSetDue(set) { return (state.dues && state.dues[set.dueKey]) || set.due; }
+  function cmSet() { return CM_SETS.find(x => cmDaysTo(cmSetDue(x)) >= 0) || CM_SETS[CM_SETS.length - 1]; }
+  function cmDecks() { return cmSet().decks; }
+  function cmDue() { return cmSetDue(cmSet()); }
+  function cmDaysLeft() { return cmDaysTo(cmDue()); }
   // テストびまでは「かんじ」の入口が カードめいじんに なる。すぎたら自動で かんじに もどる
   function cmActive() { return state.cmMode !== "off" && cmDaysLeft() >= 0; }
   function cmProg() {
@@ -2940,7 +2989,7 @@
   // the pile he has turned least lights up, so all of them get their turn
   function cmHot() {
     let best = null, bs = null;
-    for (const d of CM_DECKS) {
+    for (const d of cmDecks()) {
       const s = [cmRings(d), cmTotal(d) / d.cards.length];
       if (!best || s[0] < bs[0] || (s[0] === bs[0] && s[1] < bs[1] - 1e-9)) { best = d; bs = s; }
     }
@@ -3049,6 +3098,7 @@
     for (let i = 0; i < cmCards.length; i++) h += '<span class="pblock' + (i < cmI ? " done" : i === cmI ? " now" : "") + '"></span>';
     $("cmProgress").innerHTML = h;
     $("cmWallet2").textContent = P().coins.toLocaleString();
+    if (cmDeck.k === "kasa" || cmDeck.k === "kuku") { renderCmAsk(c); return; }
     const card = $("cmCard");
     card.className = "card cmcard k-" + cmDeck.k;
     card.innerHTML = '<p class="kind">' + rb(CM_ASK[cmDeck.k](c)) + '</p>' + cmFront(cmDeck, c);
@@ -3082,6 +3132,97 @@
       $("cmMada").onclick = () => cmMark(true);
     }, 360);
   }
+  // ---- こたえる カード(12月〜)。かさ: ア・イ・ウ から いちばん おおいのを えらぶ / 九九: 数字パッドで こたえる。
+  // こたえると 裏(こたえ)を見せる。かさは カードの裏と同じく 大きい じゅんに ならべて、L の入った かさに dL を そえる。
+  // 九九の「こたえを みる」は わからないときの にげみち(まちがえと同じで「まだ」に なる。音は ならさない)
+  let cmTyped = "", cmLock = false;
+  function cmDl(x) { const m = /^(?:(\d+)L)?(?:(\d+)dL)?$/.exec(x); return (+(m[1] || 0)) * 10 + (+(m[2] || 0)); }
+  function cmKasaTxt(x) { return esc(x).replace(/(\d)L(?=\d)/, "$1L "); }
+  function cmKasaAns(c) { const v = c.o.map(cmDl); return v.indexOf(Math.max(...v)); }
+  function cmKukuQ(c) {                              // 7〜9の段は カードと同じ よみかた(こたえの よみは 裏だけ)
+    if (!c.y) return c.a + " × " + c.b;
+    const t = c.y.split(" ");
+    return "<ruby>" + c.a + "<rt>" + esc(t[0]) + "</rt></ruby> × <ruby>" + c.b + "<rt>" + esc(t.slice(1, -1).join(" ")) + "</rt></ruby>";
+  }
+  function renderCmAsk(c) {
+    const card = $("cmCard");
+    cmTyped = ""; cmLock = false;
+    card.className = "card cmcard k-" + cmDeck.k;
+    $("cmCtl").innerHTML = "";
+    if (cmDeck.k === "kasa") {
+      card.innerHTML = '<p class="kind">いちばん おおいのは どれ？</p><div class="kasa-opts">' + c.o.map((x, i) =>
+        '<button class="kasa-o" data-i="' + i + '"><b>' + "アイウ"[i] + "</b><span>" + cmKasaTxt(x) + "</span></button>").join("") + "</div>";
+      Array.from(card.querySelectorAll(".kasa-o")).forEach(b => { b.onclick = () => cmAnswer(Number(b.getAttribute("data-i")) === cmKasaAns(c), b); });
+      return;
+    }
+    card.innerHTML = '<div class="kuku-row"><div class="kuku-left"><p class="kind">こたえは？</p>' +
+      '<p class="kuku-q">' + cmKukuQ(c) + ' ＝ <span class="ansbox" id="cmAns">&nbsp;</span></p>' +
+      '<button class="btn ghost small" id="cmPeek">こたえを みる</button></div>' +
+      '<div class="zk-pad kuku-pad">' + ["1", "2", "3", "4", "5", "6", "7", "8", "9", "けす", "0", ""].map(k =>
+        k === "" ? "<span></span>" : '<button class="key' + (k === "けす" ? " del" : "") + '" data-k="' + k + '">' + k + "</button>").join("") + "</div></div>";
+    Array.from(card.querySelectorAll(".key")).forEach(b => { b.onclick = () => cmKukuKey(b.getAttribute("data-k")); });
+    $("cmPeek").onclick = () => cmAnswer(false, null, true);
+  }
+  function cmKukuKey(k) {
+    if (cmLock) return;
+    const c = cmCards[cmI], ans = String(c.a * c.b);
+    if (k === "けす") cmTyped = cmTyped.slice(0, -1);
+    else if (cmTyped.length < 3) cmTyped += k;
+    $("cmAns").innerHTML = cmTyped || "&nbsp;";
+    if (cmTyped.length >= ans.length) cmAnswer(cmTyped === ans);   // けいさん と同じく、けた数が そろったら 見る
+  }
+  function cmAnsBack(c) {
+    if (cmDeck.k === "kasa") {
+      const v = c.o.map(cmDl), order = [0, 1, 2].sort((x, y) => v[y] - v[x]);
+      let h = '<p class="cm-ans">' + "アイウ"[order[0]] + ' <span class="kasa-big">' + cmKasaTxt(c.o[order[0]]) + '</span></p><p class="kasa-order">';
+      order.forEach((j, n) => {
+        if (n) h += '<span class="kasa-op">' + (v[order[n - 1]] === v[j] ? "＝" : "＞") + "</span>";
+        h += '<span class="kasa-it"><b>' + cmKasaTxt(c.o[j]) + "</b><small>" + (/L/.test(c.o[j].replace(/dL/g, "")) ? "（" + v[j] + "dL）" : "&nbsp;") + "</small></span>";
+      });
+      return h + '</p><p class="cm-mean">1L ＝ 10dL</p>';
+    }
+    return '<p class="cm-ans kuku-a">' + c.a + " × " + c.b + " ＝ " + (c.a * c.b) + "</p>" + (c.y ? '<p class="cm-mean kuku-y">' + esc(c.y) + "</p>" : "");
+  }
+  function cmAnswer(ok, btn, peek) {
+    if (cmLock) return;
+    cmLock = true;
+    const c = cmCards[cmI], r = cmRec(cmDeck), tok = cmTok;
+    r.n[c.id] = (r.n[c.id] || 0) + 1;
+    if (ok) delete r.mada[c.id]; else r.mada[c.id] = 1;
+    save();
+    if (ok) sfxRight(); else if (!peek) sfxOops();
+    if (cmDeck.k === "kasa") {
+      const right = cmKasaAns(c);
+      Array.from($("cmCard").querySelectorAll(".kasa-o")).forEach((b, i) => {
+        b.disabled = true;
+        if (i === right) b.classList.add("right"); else if (b === btn) b.classList.add("wrong");
+      });
+    } else if ($("cmAns")) $("cmAns").className = "ansbox " + (ok ? "ok" : "ng");
+    const blk = $("cmProgress").children[cmI];
+    if (blk) blk.className = "pblock done breaking";
+    setTimeout(() => {                                // うら(こたえ)を見せる
+      if (tok !== cmTok) return;
+      const card = $("cmCard");
+      card.classList.add("flipping");
+      setTimeout(() => {
+        if (tok !== cmTok) return;
+        card.innerHTML = '<p class="kind back">' + (ok ? esc(pickOk()) : "こたえ") + "</p>" + cmAnsBack(c);
+        card.classList.add("flipped");
+      }, 170);
+      setTimeout(() => {
+        if (tok !== cmTok) return;
+        card.classList.remove("flipping");
+        $("cmCtl").innerHTML = '<button class="btn next" id="cmNext">つぎへ</button>';
+        $("cmNext").onclick = cmNextCard;
+        if (ok) setTimeout(() => { if (tok === cmTok && $("cmNext")) cmNextCard(); }, cmDeck.k === "kasa" ? 2400 : 1500);
+      }, 360);
+    }, ok ? 300 : 800);
+  }
+  function cmNextCard() {
+    cmI++;
+    if (cmI < cmCards.length) renderCmCard(); else finishCm();
+  }
+
   // 「まだ」は つぎから 多めに出すための しるし。コインにも きろくにも ひびかない
   function cmMark(mada) {
     const c = cmCards[cmI], r = cmRec(cmDeck);
@@ -3103,9 +3244,9 @@
     save();
     show("cmresult");
     let html = '<h2 class="big-word" style="font-family:var(--font-ja);font-size:clamp(30px,8vw,52px)">' +
-      (gotRing ? "リング ゲット!" : "めくった!") + '</h2>';
+      (gotRing ? "リング ゲット!" : deck.k === "kasa" || deck.k === "kuku" ? "ぜんぶ こたえた!" : "めくった!") + '</h2>';
     if (gotRing) html += '<p class="rings big">' + cmRingIcons(rings) + '</p>' +
-      '<p class="hint" style="color:#fff;font-size:18px;text-shadow:2px 2px 0 #000">「' + esc(deck.name) + '」を ぜんぶ ' + rings + 'しゅう めくった!</p>';
+      '<p class="hint" style="color:#fff;font-size:18px;text-shadow:2px 2px 0 #000">「' + esc(deck.name) + '」を ぜんぶ ' + rings + 'しゅう ' + (deck.k === "kasa" || deck.k === "kuku" ? "こたえた" : "めくった") + '!</p>';
     if (coins) html += '<div class="gain"><span class="coin">&#165;</span>+' + coins + '</div>' +
       (cmPaid && deck.id === cmHotId ? '<p class="hint" style="color:#fff;font-size:15px;text-shadow:2px 2px 0 #000">おすすめの カードで +' + CMCOINS_PICK + '</p>' : '');
     else html += '<p class="hint" style="color:#fff;font-size:16px">きょうの コインは ここまで。めくってくれて ありがとう!</p>';
@@ -3136,7 +3277,7 @@
     $("cmDayRow").innerHTML = slots;
     $("cmDone").hidden = left > 0;
     $("cmDone").textContent = "きょうの コインは ここまで。でも まだ めくれるよ。";
-    $("cmList").innerHTML = CM_DECKS.map(d => {
+    $("cmList").innerHTML = cmDecks().map(d => {
       const rings = cmRings(d), glow = d === hot;
       return '<button class="pick' + (glow ? " glow" : "") + '" data-deck="' + d.id + '"><span class="ico"><b class="glyph">' + esc(d.glyph) + '</b></span><span>' +
         '<span class="ttl">' + esc(d.name) + '</span>' +
@@ -3144,7 +3285,7 @@
         (glow ? '<span class="tag">おすすめ +' + CMCOINS_PICK + '</span>' : '') + '</span></button>';
     }).join("");
     Array.from($("cmList").querySelectorAll(".pick")).forEach(b => {
-      b.onclick = () => { const d = CM_DECKS.find(x => x.id === b.getAttribute("data-deck")); if (d) startCm(d); };
+      b.onclick = () => { const d = cmDecks().find(x => x.id === b.getAttribute("data-deck")); if (d) startCm(d); };
     });
     show("cmhome");
   }
@@ -3182,7 +3323,7 @@
     const p = P(), q = quest(), n = learnedCount(), dl = daysLeft();
     $("kgWallet").textContent = p.coins.toLocaleString();
     const rows = [];
-    if (cmActive()) rows.push(["kgCm", ICONS.cards, "カードめいじん",
+    if (cmActive() && cmSet().where === "kokugo") rows.push(["kgCm", ICONS.cards, "カードめいじん",
       (cmDaysLeft() > 0 ? "テストまで あと " + cmDaysLeft() + " にち" : "テストは きょう!") + "・コイン のこり " + cmLeft() + " かい", renderCmHome]);
     rows.push(["kgKa", ICONS.scroll, q.name,
       "おぼえた " + n + " / " + q.items.length + (dl === null ? "" : dl > 0 ? "・テストまで あと " + dl + " にち" : dl === 0 ? "・テストは きょう!" : ""), renderKHome]);
@@ -4493,7 +4634,7 @@
     // 親メニューは子ども向けの名前ではなく、ふつうの漢字で出す
     const qName = q => q.name.replace(/^だい(\d+)かい かんじ$/, "第$1回 漢字");
     const cmName = { katachi: "形の数", okuri: "送りがな", bushu: "部首", jukugo: "熟語", kanyo: "慣用句",
-                     kisetsu: "季節の言葉", kotoba4: "言葉④", kotoba5: "言葉⑤", hito: "有名な人物名" };
+                     kisetsu: "季節の言葉", kotoba4: "言葉④", kotoba5: "言葉⑤", hito: "有名な人物名", kasa1: "かさ比べ", kuku2: "かけ算九九" };
     const evName = ev => ev.name.replace("のだん", "の段").replace("たしざん", "足し算").replace("ひきざん", "引き算");
     const whyJa = { "こうしんの まえ": "更新前", "よみこめなかった": "読み込めなかったデータ", "きのうまで": "前日まで",
                     "よみこむ まえ": "読み込み前", "もどす まえ": "復元前" };
@@ -4514,13 +4655,13 @@
       QUESTS.map(q => '<option value="' + q.id + '"' + (q.id === state.quest ? " selected" : "") + '>' + esc(qName(q)) + '</option>').join("") +
       '</select></div>' +
       '<div class="row"><label for="dueNew">漢字のテスト日</label><input id="dueNew" type="date" value="' + esc(questDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="dueSave">保存</button></div>' +
-      '<p class="hint" style="margin-top:12px"><b>カードめいじん</b>（テスト日までは「こくご」の中に出ます）</p>' +
+      '<p class="hint" style="margin-top:12px"><b>カードめいじん</b>（' + esc(cmSet().id.replace("-", "年") + "月") + 'のテスト。テスト日までは「' + (cmSet().where === "sansu" ? "さんすう" : "こくご") + '」の中に出ます）</p>' +
       '<div class="row"><label for="cmMode">表示</label><select id="cmMode"><option value="auto"' + (state.cmMode !== "off" ? " selected" : "") + '>テスト日まで出す</option><option value="off"' + (state.cmMode === "off" ? " selected" : "") + '>出さない</option></select></div>' +
       '<div class="row"><label for="cmDueNew">カード名人のテスト日</label><input id="cmDueNew" type="date" value="' + esc(cmDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="cmDueSave">保存</button></div>' +
-      '<p class="hint">' + CM_DECKS.map(d => {
-        const r = cmRec(d), turned = d.cards.filter(c => cmFlips(d, c) > 0).length, mada = d.cards.filter(c => r.mada[c.id]).length;
-        return esc(cmName[d.id] || d.name) + " " + turned + "/" + d.cards.length + (cmRings(d) ? "（" + cmRings(d) + "周）" : "") + (mada ? "・「まだ」" + mada + "枚" : "");
-      }).join(" / ") + '（めくった枚数／全枚数）</p>' +
+      '<p class="hint">' + cmDecks().map(d => {
+        const r = cmRec(d), turned = d.cards.filter(c => cmFlips(d, c) > 0).length, mada = d.cards.filter(c => r.mada[c.id]).length, ans = d.k === "kasa" || d.k === "kuku";
+        return esc(cmName[d.id] || d.name) + " " + turned + "/" + d.cards.length + (cmRings(d) ? "（" + cmRings(d) + "周）" : "") + (mada ? (ans ? "・最後に間違えた" : "・「まだ」") + mada + "枚" : "");
+      }).join(" / ") + '（' + (cmDecks().some(d => d.k === "kasa" || d.k === "kuku") ? "答えた" : "めくった") + '枚数／全枚数）</p>' +
       '<p class="hint" style="margin-top:12px"><b>さがしてタップ</b>（書き抜きの練習・「こくご」の中）</p>' +
       '<div class="row"><label for="sgLvl">段階</label><select id="sgLvl">' +
       ["0：3回タップ（手がかり→同じ言葉→答え）", "1：答えだけ（同じ文の中）", "2：答えだけ（次の文まで）", "3：答えだけ（離れた所・名前を答える）"].map((t, i) =>
@@ -4620,7 +4761,7 @@
     $("questSel").onchange = e => { state.quest = e.target.value; save(); closeParent(); renderPick(); };
     $("dueSave").onclick = () => { const v = $("dueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues[state.quest] = v; P().today.kcap = null; save(); alert("漢字のテスト日を " + v + " にしました"); } else alert("日付を選んでください"); };
     $("cmMode").onchange = e => { state.cmMode = e.target.value; save(); closeParent(); renderPick(); };
-    $("cmDueSave").onclick = () => { const v = $("cmDueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues["card-meijin"] = v; save(); alert("カード名人のテスト日を " + v + " にしました"); closeParent(); renderPick(); } else alert("日付を選んでください"); };
+    $("cmDueSave").onclick = () => { const v = $("cmDueNew").value; if (/^\d{4}-\d{2}-\d{2}$/.test(v)) { state.dues[cmSet().dueKey] = v; save(); alert("カード名人のテスト日を " + v + " にしました"); closeParent(); renderPick(); } else alert("日付を選んでください"); };
     $("sgLvl").onchange = e => { const s = kgProg().sg; s.lvl = Number(e.target.value); s.streak = 0; s.good = 0; save(); };
     $("mqLvl").onchange = e => { mqProg().lvl = Number(e.target.value); save(); };
     $("tkLvl").onchange = e => { tkProg().lvl = Number(e.target.value); save(); };
@@ -4726,7 +4867,7 @@
     $("kQuit").onclick = () => { try { speechSynthesis.cancel(); } catch (e) {} renderKHome(); };
     $("mBack").onclick = renderPick;
     $("mQuit").onclick = quitMStage;
-    $("cmBack").onclick = renderKgHome;
+    $("cmBack").onclick = () => { if (cmSet().where === "sansu") renderMHome(); else renderKgHome(); };
     $("kgBack").onclick = renderPick;
     $("sgQuit").onclick = () => { sgTok++; renderKgHome(); };
     $("zkQuit").onclick = () => { zkTok++; renderMHome(); };
