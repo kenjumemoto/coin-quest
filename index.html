@@ -1947,7 +1947,7 @@
   // where: 入口を「こくご」「さんすう」の どちらに出すか(たばに w が あれば そちらが さき)。テストびは 親メニューで かえられる(state.dues[dueKey])
   const CM_SETS = [
     { id: "2026-10", due: CM_DUE, dueKey: "card-meijin", where: "kokugo", decks: CM_DECKS },
-    { id: "2026-12", due: "2026-12-15", dueKey: "card-meijin-2026-12", where: "sansu", decks: CM2_DECKS.concat(CM2K_DECKS) }   // 親: 正確な日は未定・12月なかば
+    { id: "2026-12", due: "2027-01-09", dueKey: "card-meijin-2027-01-09", where: "sansu", decks: CM2_DECKS.concat(CM2K_DECKS) }   // 親: テストは 2027-01-09(11/21に わかった)。仮の 12/15 を親メニューで保存していても効かないよう dueKey も かえた
   ];
 
   const M_DAILY = 5;             // 1日にコインがもらえる回数(英語とは別枠)
@@ -4671,7 +4671,7 @@
       QUESTS.map(q => '<option value="' + q.id + '"' + (q.id === state.quest ? " selected" : "") + '>' + esc(qName(q)) + '</option>').join("") +
       '</select></div>' +
       '<div class="row"><label for="dueNew">漢字のテスト日</label><input id="dueNew" type="date" value="' + esc(questDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="dueSave">保存</button></div>' +
-      '<p class="hint" style="margin-top:12px"><b>カードめいじん</b>（' + esc(cmSet().id.replace("-", "年") + "月") + 'のテスト。テスト日までは「' + ["sansu", "kokugo"].filter(w => cmAllDecks().some(d => cmWhereOf(d) === w)).map(w => w === "sansu" ? "さんすう" : "こくご").join("」と「") + '」の中に出ます）</p>' +
+      '<p class="hint" style="margin-top:12px"><b>カードめいじん</b>（' + esc(cmDue().replace(/^(\d+)-0?(\d+)-0?(\d+)$/, "$1年$2月$3日")) + 'のテスト。テスト日までは「' + ["sansu", "kokugo"].filter(w => cmAllDecks().some(d => cmWhereOf(d) === w)).map(w => w === "sansu" ? "さんすう" : "こくご").join("」と「") + '」の中に出ます）</p>' +
       '<div class="row"><label for="cmMode">表示</label><select id="cmMode"><option value="auto"' + (state.cmMode !== "off" ? " selected" : "") + '>テスト日まで出す</option><option value="off"' + (state.cmMode === "off" ? " selected" : "") + '>出さない</option></select></div>' +
       '<div class="row"><label for="cmDueNew">カード名人のテスト日</label><input id="cmDueNew" type="date" value="' + esc(cmDue()) + '" style="font-size:16px;padding:4px"><button class="btn small ghost" id="cmDueSave">保存</button></div>' +
       '<p class="hint">' + cmAllDecks().map(d => {
